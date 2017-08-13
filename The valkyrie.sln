@@ -5,6 +5,8 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "The valkyrie", "The valkyrie\The valkyrie.vcxproj", "{DEA2919B-38D2-4C10-9829-3DE622398489}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Valkyrie tests", "Valkyrie tests\Valkyrie tests.vcxproj", "{C0DF4626-773B-45FF-9CC6-F7D362CE6477}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -21,6 +23,14 @@ Global
 		{DEA2919B-38D2-4C10-9829-3DE622398489}.Release|x64.Build.0 = Release|x64
 		{DEA2919B-38D2-4C10-9829-3DE622398489}.Release|x86.ActiveCfg = Release|Win32
 		{DEA2919B-38D2-4C10-9829-3DE622398489}.Release|x86.Build.0 = Release|Win32
+		{C0DF4626-773B-45FF-9CC6-F7D362CE6477}.Debug|x64.ActiveCfg = Debug|x64
+		{C0DF4626-773B-45FF-9CC6-F7D362CE6477}.Debug|x64.Build.0 = Debug|x64
+		{C0DF4626-773B-45FF-9CC6-F7D362CE6477}.Debug|x86.ActiveCfg = Debug|Win32
+		{C0DF4626-773B-45FF-9CC6-F7D362CE6477}.Debug|x86.Build.0 = Debug|Win32
+		{C0DF4626-773B-45FF-9CC6-F7D362CE6477}.Release|x64.ActiveCfg = Release|x64
+		{C0DF4626-773B-45FF-9CC6-F7D362CE6477}.Release|x64.Build.0 = Release|x64
+		{C0DF4626-773B-45FF-9CC6-F7D362CE6477}.Release|x86.ActiveCfg = Release|Win32
+		{C0DF4626-773B-45FF-9CC6-F7D362CE6477}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
