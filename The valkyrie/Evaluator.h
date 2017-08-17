@@ -3,20 +3,20 @@
 
 namespace ChessEvaluator
 {
-	struct Evaluation
+	struct ChessEvaluation
 	{
 		bool gameHasEnded;
 		bool victoryPossible;
 		short int endState;//-1 means loss, 0 tie, 1 victory
 		double value;
-		bool operator>(Evaluation & right);
-		bool operator<(Evaluation & right);
-		bool operator=(Evaluation & right);
+		bool operator>(ChessEvaluation & right);
+		bool operator<(ChessEvaluation & right);
+		bool operator=(ChessEvaluation & right);
 	};
 	class ChessEvaluator
 	{
 	public:
 		ChessEvaluator();
-		Evaluation evaluate(const ChessBoard::Board &board);
+		ChessEvaluation evaluate(const ChessBoard::Board &board);
 	};
 }

@@ -14,7 +14,7 @@ struct Move
 
 class JudgeDredd
 {
-    class Player1;
+    class Valkyrie;
     class Player2;
 
     enum rank{empty, pownW, pownB, knightW, knightB, bishopW, bishopB, towerW, towerB, queenW, queenB, kingW, kingB};
@@ -32,7 +32,7 @@ class JudgeDredd
     float maxTime;
     Move lastMove;
     bool isWhiteP1;
-    Player1* player1;
+    Valkyrie* player1;
     Player2* player2;
 
     JudgeDredd(bool isWhite, int time); //odpala 2 constructory naszych klas

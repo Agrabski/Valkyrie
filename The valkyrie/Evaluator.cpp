@@ -1,10 +1,14 @@
-#include "ChessEvaluator.h"
+#include "Evaluator.h"
 
-ChessEvaluator::Evaluation ChessEvaluator::ChessEvaluator::evaluate(const ChessBoard::Board & board)
+ChessEvaluator::ChessEvaluator::ChessEvaluator()
 {
-	return Evaluation();
 }
-bool ChessEvaluator::Evaluation::operator>(Evaluation & right)
+
+ChessEvaluator::ChessEvaluation ChessEvaluator::ChessEvaluator::evaluate(const ChessBoard::Board & board)
+{
+	return ChessEvaluation();
+}
+bool ChessEvaluator::ChessEvaluation::operator>(ChessEvaluation & right)
 {
 	if (gameHasEnded && endState == 1)
 		return true;
@@ -21,7 +25,7 @@ bool ChessEvaluator::Evaluation::operator>(Evaluation & right)
 	return value > right.value;
 }
 
-bool ChessEvaluator::Evaluation::operator<(Evaluation & right)
+bool ChessEvaluator::ChessEvaluation::operator<(ChessEvaluation & right)
 {
 	if (gameHasEnded && endState == 1)
 		return false;
@@ -38,7 +42,7 @@ bool ChessEvaluator::Evaluation::operator<(Evaluation & right)
 	return value < right.value;
 }
 
-bool ChessEvaluator::Evaluation::operator=(Evaluation & right)
+bool ChessEvaluator::ChessEvaluation::operator=(ChessEvaluation & right)
 {
 	return false;
 }

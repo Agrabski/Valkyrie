@@ -5,17 +5,17 @@
 #include "Player1.h"
 
 
-JudgeDredd::Player1::Player1(bool amIWhite)
+JudgeDredd::Valkyrie::Valkyrie(bool amIWhite)
 {
 	this->amIWhite = amIWhite;
 }
 
-JudgeDredd::Player1::~Player1()
+JudgeDredd::Valkyrie::~Valkyrie()
 {
 
 }
 
-Move JudgeDredd::Player1::makeMove(Move lastMove)
+Move JudgeDredd::Valkyrie::makeMove(Move lastMove)
 {
 	ChessBoard::InternalMove tmp(lastMove);
 	currBoardState->ChangeState(tmp);
@@ -23,11 +23,11 @@ Move JudgeDredd::Player1::makeMove(Move lastMove)
 	return tmp.ConvertToExternal(amIWhite);
 }
 
-ChessEvaluator::Evaluation JudgeDredd::Player1::Play(ChessBoard::Board *currentBoard, short int currentRecursion, short int maxRecursion, ChessBoard::InternalMove * chosenMove, bool isWhite)
+ChessEvaluator::ChessEvaluation JudgeDredd::Valkyrie::Play(ChessBoard::Board *currentBoard, short int currentRecursion, short int maxRecursion, ChessBoard::InternalMove * chosenMove, bool isWhite)
 {
 	if (currentRecursion == maxRecursion)
 		return evaluator.evaluate(*currentBoard);
-	ChessEvaluator::Evaluation Best, newBest;
+	ChessEvaluator::ChessEvaluation Best, newBest;
 	ChessBoard::InternalMove bestMove, newbestMove;
 	bool exceptionFlag = false;
 	ChessBoard::Board *temporary(currentBoard);
