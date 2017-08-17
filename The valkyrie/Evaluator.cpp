@@ -44,5 +44,24 @@ bool ChessEvaluator::ChessEvaluation::operator<(ChessEvaluation & right)
 
 bool ChessEvaluator::ChessEvaluation::operator=(ChessEvaluation & right)
 {
+	throw std::runtime_error("Class not allowed");
+	return false;
+}
+
+bool Evaluation::operator>(Evaluation & right)
+{
+	throw std::runtime_error("Class not allowed");
+	return false;
+}
+
+bool Evaluation::operator<(Evaluation & right)
+{
+	throw std::runtime_error("Class not allowed");
+	return false;
+}
+
+bool Evaluation::operator=(Evaluation & right)
+{
+	throw std::runtime_error("Class not allowed");
 	return false;
 }

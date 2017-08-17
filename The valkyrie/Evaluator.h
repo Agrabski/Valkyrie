@@ -1,6 +1,24 @@
 #pragma once
 #include "chessboard.h"
 
+class AbstractBoard
+{
+
+};
+
+struct Evaluation
+{
+	bool operator>(Evaluation & right);
+	bool operator<(Evaluation & right);
+	bool operator=(Evaluation & right);
+};
+
+class Evaluator
+{
+public:
+	Evaluation virtual evaluate(const AbstractBoard &board) = 0;
+};
+
 namespace ChessEvaluator
 {
 	struct ChessEvaluation
