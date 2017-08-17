@@ -4,6 +4,7 @@
 #include "chessboard.h"
 #include "judgeDredd.h"
 #include <vector>
+#include "ChessEvaluator.h"
 #define PROGRAM_NAME "valkyrie"
 #pragma once
 class JudgeDredd::Player1
@@ -15,21 +16,10 @@ class JudgeDredd::Player1
     ~Player1();
     struct Move makeMove(struct Move lastMove);
 	private:
-		ChessBoard::Board currBoardState;
+		ChessBoard::Board *currBoardState=new ChessBoard::Board();
 		bool amIWhite;
-		struct Evaluation
-		{
-			bool gameHasEnded;
-			bool victoryPossible;
-			short int endState;//-1 means loss, 0 tie, 1 victory
-			double value;
-			bool operator>(Evaluation & right);
-			bool operator<(Evaluation & right);
-			bool operator=(Evaluation & right);
-
-		};
-		Evaluation Play(ChessBoard::Board currentBoard, short int currentRecursion, short int maxRecursion, ChessBoard::InternalMove *chosenMove, bool isWhite);
-		Evaluation Evaluate(ChessBoard::Board currBoard);
+		ChessEvaluator::Evaluation Play(ChessBoard::Board *currentBoard, short int currentRecursion, short int maxRecursion, ChessBoard::InternalMove *chosenMove, bool isWhite);
+		ChessEvaluator::ChessEvaluator evaluator;
 };
 
 #endif // PLAYER1_H_INCLUDED

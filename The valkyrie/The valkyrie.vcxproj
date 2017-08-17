@@ -111,6 +111,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ChessBoard.cpp" />
+    <ClCompile Include="ChessEvaluator.cpp" />
     <ClCompile Include="judgeDredd.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Player1.cpp" />
@@ -118,6 +119,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="chessboard.h" />
+    <ClInclude Include="ChessEvaluator.h" />
     <ClInclude Include="judgeDredd.h" />
     <ClInclude Include="Player1.h" />
     <ClInclude Include="Player2.h" />

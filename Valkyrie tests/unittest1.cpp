@@ -118,6 +118,7 @@ namespace Valkyrietests
 			try
 			{
 				board.ChangeState(ChessBoard::InternalMove({ 0,1 }, { 0,2 }, ChessBoard::Standard));
+				Assert::Fail();
 			}
 			catch (ChessBoard::INVALID_MOVE)
 			{
@@ -126,6 +127,7 @@ namespace Valkyrietests
 			try
 			{
 				board.ChangeState(ChessBoard::InternalMove({ 0,1 }, { 2,5 }, ChessBoard::Standard));
+				Assert::Fail();
 			}
 			catch (ChessBoard::INVALID_MOVE)
 			{
