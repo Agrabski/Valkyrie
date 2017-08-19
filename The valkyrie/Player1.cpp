@@ -31,10 +31,10 @@ ChessEvaluator::ChessEvaluation JudgeDredd::Valkyrie::Play(ChessBoard::Board *cu
 	ChessBoard::InternalMove bestMove, newbestMove;
 	bool exceptionFlag = false;
 	ChessBoard::Board *temporary(currentBoard);
-	temporary->moveIterator.Reset(isWhite);
-	for (; *temporary->moveIterator != nullptr; ++(temporary->moveIterator))
+	temporary->moveIterator->Reset(isWhite);
+	for (; **(temporary->moveIterator) != nullptr; ++(temporary->moveIterator))
 	{
-		newbestMove = **temporary->moveIterator;
+		newbestMove = ***temporary->moveIterator;
 		
 		try
 		{
@@ -52,7 +52,7 @@ ChessEvaluator::ChessEvaluation JudgeDredd::Valkyrie::Play(ChessBoard::Board *cu
 				Best = newBest;
 				bestMove = newbestMove;
 			}
-			temporary->Revert(isWhite);
+			temporary->Revert();
 		}
 		else
 			exceptionFlag = false;

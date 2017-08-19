@@ -1,8 +1,7 @@
 #include "stdafx.h"
 #include "CppUnitTest.h"
 #include "..\The valkyrie\chessboard.h"
-#include "..\The valkyrie\Player1.h"
-
+#include "..\The valkyrie\Evaluator.cpp"
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 #define MAKE_MOVE(x1,y1,x2,y2)board.ChangeState( ChessBoard::InternalMove({x1-1,y1-1},{x2-1,y2-1},ChessBoard::Standard));
@@ -93,7 +92,7 @@ namespace Valkyrietests
 			{
 				MOVE(7, 0, 7, 5);
 			}
-			catch (ChessBoard::INVALID_MOVE)
+			catch (ChessBoard::MOVE_BLOCKED)
 			{
 				Assert::IsTrue(true);
 			}
@@ -117,7 +116,7 @@ namespace Valkyrietests
 			ChessBoard::Board board;
 			try
 			{
-				board.ChangeState(ChessBoard::InternalMove({ 0,1 }, { 0,2 }, ChessBoard::Standard));
+				board.ChangeState(ChessBoard::InternalMove({ 1,0 }, { 1,3 }, ChessBoard::Standard));
 				Assert::Fail();
 			}
 			catch (ChessBoard::INVALID_MOVE)
@@ -126,7 +125,7 @@ namespace Valkyrietests
 			}
 			try
 			{
-				board.ChangeState(ChessBoard::InternalMove({ 0,1 }, { 2,5 }, ChessBoard::Standard));
+				board.ChangeState(ChessBoard::InternalMove({ 1,0 }, { 2,5 }, ChessBoard::Standard));
 				Assert::Fail();
 			}
 			catch (ChessBoard::INVALID_MOVE)
@@ -141,8 +140,8 @@ namespace Valkyrietests
 			ChessBoard::Board archetype;
 			board.ChangeState(ChessBoard::InternalMove({ 2,1 }, { 2,3 }, ChessBoard::Standard));
 			archetype.ChangeState(ChessBoard::InternalMove({ 2,1 }, { 2,3 }, ChessBoard::Standard));
-			board.ChangeState(ChessBoard::InternalMove({ 0,6 }, { 0,7 }, ChessBoard::Standard));
-			archetype.ChangeState(ChessBoard::InternalMove({ 0,6 }, { 0,7 }, ChessBoard::Standard));
+			board.ChangeState(ChessBoard::InternalMove({ 0,6 }, { 0,5 }, ChessBoard::Standard));
+			archetype.ChangeState(ChessBoard::InternalMove({ 0,6 }, { 0,5 }, ChessBoard::Standard));
 			try
 			{
 				board.ChangeState(ChessBoard::InternalMove({ 2,0 }, { 2,2 }, ChessBoard::Standard));

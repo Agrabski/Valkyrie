@@ -13,6 +13,10 @@
 
 namespace ChessBoard
 {
+	const std::pair<short, short> Board::KnightMovementArray[8] = { { -2,-1 },{ -2,1 },{ -1,2 },{ 1,2 },{ 2,1 },{ 2,-1 },{1,-2 },{ -1,-2 } };
+
+	const std::pair<short, short> Board::QueenMovementArray[8] = { std::pair<short, short>(-1,0),std::pair<short, short>(-1,1),std::pair<short, short>(0,1),std::pair<short, short>(1,1),std::pair<short, short>(1,0),std::pair<short, short>(1,-1),std::pair<short, short>(0,-1),std::pair<short, short>(-1,-1) };
+
 	int sign(int x)
 	{
 		if (x > 0)
@@ -26,7 +30,7 @@ namespace ChessBoard
 
 	bool Board::addBoard()
 	{
-		for each (std::pair<Board, int> var in prevBoard)
+		for each (std::pair<Board, int> var in *prevBoard)
 		{
 			if (var.first == *this)
 			{
@@ -34,8 +38,8 @@ namespace ChessBoard
 				return var.second < 3;
 			}
 		}
-		prevBoard.insert(prevBoard.end(), std::pair<Board, int>(*this, 1));
-		prevBoard.back().first.prevBoard.~vector();
+		prevBoard->emplace_back(std::pair<Board, int>(*this, 1));
+		prevBoard->back().first.ClearData();
 		return true;
 	}
 
@@ -43,6 +47,14 @@ namespace ChessBoard
 	{
 		// TODO: insert return statement here
 		return *this;
+	}
+
+	void Board::ClearStack()
+	{
+		while (!MoveStack->empty())
+		{
+			MoveStack->pop();
+		}
 	}
 
 	void ChessBoard::Board::PaintTheMap()
@@ -190,12 +202,15 @@ namespace ChessBoard
 			throw KING_IN_DANGER(blackCheck, whiteCheck);
 	}
 
-	void ChessBoard::Board::Revert(bool isWhite)
+	void ChessBoard::Board::Revert()
 	{
+		InternalMove lastMove = MoveStack->top().first;
+		Rank beaten = MoveStack->top().second;
+		MoveStack->pop();
 		if (lastMove.movetype == Standard)
 		{
 			fields[lastMove.from.first][lastMove.from.second].rank = fields[lastMove.to.first][lastMove.to.second].rank;
-			fields[lastMove.to.first][lastMove.to.second].rank = Beaten;
+			fields[lastMove.to.first][lastMove.to.second].rank = beaten;
 			PaintTheMap();
 			return;
 		}
@@ -206,7 +221,7 @@ namespace ChessBoard
 		case(PromotionTower):
 		case(PromotionQueen):
 			fields[lastMove.from.first][lastMove.from.second].rank.type = Pawn;
-			fields[lastMove.to.first][lastMove.to.second].rank = Beaten;
+			fields[lastMove.to.first][lastMove.to.second].rank = beaten;
 			return;
 		case(RochadeLeft):
 			if (!nextMoveIsWhite)
@@ -231,14 +246,21 @@ namespace ChessBoard
 		nextMoveIsWhite = !nextMoveIsWhite;
 	}
 
+	void Board::ClearData()
+	{
+		delete MoveStack;
+		delete moveIterator;
+		delete prevBoard;
+	}
+
 	void ChessBoard::Board::removeBoard(Board board)
 	{
-		for (std::vector<std::pair<Board, int>>::iterator i = prevBoard.begin(); i != prevBoard.end(); ++i)
+		for (std::vector<std::pair<Board, int>>::iterator i = prevBoard->begin(); i != prevBoard->end(); ++i)
 		{
 			if (i->first == board)
 			{
 				if (i->second == 1)
-					prevBoard.erase(i);
+					prevBoard->erase(i);
 				else
 					i->second--;
 				return;
@@ -248,10 +270,16 @@ namespace ChessBoard
 
 	void ChessBoard::Board::ChangeState(ChessBoard::InternalMove lastMove)
 	{
-		Rank currentlyMoved = fields[lastMove.from.first][lastMove.from.second].rank;
-		if (currentlyMoved.isWhite != nextMoveIsWhite&&lastMove.from != std::pair<short, short>(-1,-1))
-			throw WRONG_COLOR();
-		std::pair<short, short> relativeMove = { lastMove.to.first - lastMove.from.first,lastMove.to.second - lastMove.from.second };
+		Rank currentlyMoved = { Empty,false };
+		std::pair<short, short> relativeMove;
+		if (lastMove.from != std::pair<short, short>(-1, -1))
+		{
+			currentlyMoved = fields[lastMove.from.first][lastMove.from.second].rank;
+			if (currentlyMoved.isWhite != nextMoveIsWhite)
+				throw WRONG_COLOR();
+			relativeMove = { lastMove.to.first - lastMove.from.first,lastMove.to.second - lastMove.from.second };
+		}
+		std::pair<InternalMove, Rank>tmp = std::pair<InternalMove, Rank>();
 
 		//TODO:check move legitimacy
 		switch (lastMove.movetype)
@@ -312,13 +340,14 @@ namespace ChessBoard
 			default:
 				break;
 			}
+			break;
 			case(ChessBoard::Tower):
 			{
 				if (relativeMove.first == 0)
 				{
 					for (int i = 1; abs(lastMove.from.second + i*sign(relativeMove.second)) < abs(lastMove.to.second); i++)
 						if (fields[lastMove.from.first][lastMove.from.second + i*sign(relativeMove.second)].rank.type != Empty)
-							throw INVALID_MOVE();
+							throw MOVE_BLOCKED();
 				}
 				else
 				{
@@ -332,23 +361,57 @@ namespace ChessBoard
 						throw INVALID_MOVE();
 				}
 			}
+			break;
 			case(ChessBoard::Bishop):
 			{
 				if ((fields[lastMove.to.first][lastMove.to.second].rank.type != Empty&&fields[lastMove.to.first][lastMove.to.second].rank.isWhite == currentlyMoved.isWhite))
-					throw INVALID_MOVE();
+					throw MOVE_BLOCKED();
 				if (abs(relativeMove.first) != abs(relativeMove.second))
 					throw INVALID_MOVE();
-				for (int i = 1; abs(lastMove.from.second + i*sign(relativeMove.second)) < abs(lastMove.to.second); i++)
+				for (int i = 1; (lastMove.from.second + i*sign(relativeMove.second)) < (lastMove.to.second) && (lastMove.from.second + i*sign(relativeMove.second)) > 0; i++)
 					if (fields[lastMove.from.first + i*sign(relativeMove.first)][lastMove.from.second + i*sign(relativeMove.second)].rank.type != Empty)
+						throw MOVE_BLOCKED();
+			}
+			break;
+			case(ChessBoard::Queen):
+			{
+				if ((fields[lastMove.to.first][lastMove.to.second].rank.type != Empty&&fields[lastMove.to.first][lastMove.to.second].rank.isWhite == currentlyMoved.isWhite))
+					throw MOVE_BLOCKED();
+				if (abs(relativeMove.first) != abs(relativeMove.second) && relativeMove.first != 0 && relativeMove.second != 0)
+					throw INVALID_MOVE();
+				for (int i = 1; lastMove.from.first + sign(relativeMove.first)*i != lastMove.to.first&&lastMove.from.second + sign(relativeMove.second)*i != lastMove.to.second; i++)
+					if (fields[lastMove.from.first + sign(relativeMove.first)*i][lastMove.from.second + sign(relativeMove.second)*i].rank.type != Empty)
+						throw MOVE_BLOCKED();
+			}
+			break;
+			case(Knight):
+			{
+				int direction = 0;
+				for (; direction < 8; ++direction)
+				{
+					if (KnightMovementArray[direction] == relativeMove)
+						break;
+				}
+				if (KnightMovementArray[direction] != relativeMove)
+					throw INVALID_MOVE();
+				if (fields[lastMove.to.first][lastMove.to.second].rank.type != Empty&&fields[lastMove.to.first][lastMove.to.second].rank.isWhite != nextMoveIsWhite)
+					throw MOVE_BLOCKED();
+			}
+			break;
+			case(King):
+			{
+				if (!(relativeMove.first >= -1 && relativeMove.first <= 1))
+					if (!(relativeMove.second >= -1 && relativeMove.second <= 1))
 						throw INVALID_MOVE();
 			}
+			break;
 			}
 			fields[lastMove.from.first][lastMove.from.second].rank.type = Empty;
 			fields[lastMove.to.first][lastMove.to.second].rank = currentlyMoved;
 			break;
 		case(PromotionQueen):
 		{
-			if ((currentlyMoved.isWhite && lastMove.to.second != 6)|| (!currentlyMoved.isWhite && lastMove.to.second != 1) ||currentlyMoved.type!=Pawn)
+			if ((currentlyMoved.isWhite && lastMove.to.second != 6) || (!currentlyMoved.isWhite && lastMove.to.second != 1) || currentlyMoved.type != Pawn)
 				throw INVALID_MOVE();
 			if (relativeMove.first == 1 || relativeMove.first == -1)
 				if (fields[lastMove.to.first][lastMove.to.second].rank.type == Empty || (fields[lastMove.to.first][lastMove.to.second].rank.type != Empty&&fields[lastMove.to.first][lastMove.to.second].rank.isWhite == currentlyMoved.isWhite))
@@ -356,8 +419,8 @@ namespace ChessBoard
 		}
 		fields[lastMove.to.first][lastMove.to.second].rank = { Queen,currentlyMoved.isWhite };
 		fields[lastMove.from.first][lastMove.from.second].rank.type = Empty;
-		this->Beaten = fields[lastMove.to.first][lastMove.to.second].rank;
-			break;
+		tmp.second = fields[lastMove.to.first][lastMove.to.second].rank;
+		break;
 		case(PromotionBishop):
 		{
 			if ((currentlyMoved.isWhite && lastMove.to.second != 6) || (!currentlyMoved.isWhite && lastMove.to.second != 1) || currentlyMoved.type != Pawn)
@@ -366,10 +429,10 @@ namespace ChessBoard
 				if (fields[lastMove.to.first][lastMove.to.second].rank.type == Empty || (fields[lastMove.to.first][lastMove.to.second].rank.type != Empty&&fields[lastMove.to.first][lastMove.to.second].rank.isWhite == currentlyMoved.isWhite))
 					throw INVALID_MOVE();
 		}
-			fields[lastMove.to.first][lastMove.to.second].rank = { Bishop,currentlyMoved.isWhite };
-			fields[lastMove.from.first][lastMove.from.second].rank.type = Empty;
-			this->Beaten = fields[lastMove.to.first][lastMove.to.second].rank;
-			break;
+		fields[lastMove.to.first][lastMove.to.second].rank = { Bishop,currentlyMoved.isWhite };
+		fields[lastMove.from.first][lastMove.from.second].rank.type = Empty;
+		tmp.second = fields[lastMove.to.first][lastMove.to.second].rank;
+		break;
 		case(PromotionKnight):
 		{
 			if ((currentlyMoved.isWhite && lastMove.to.second != 6) || (!currentlyMoved.isWhite && lastMove.to.second != 1) || currentlyMoved.type != Pawn)
@@ -378,10 +441,10 @@ namespace ChessBoard
 				if (fields[lastMove.to.first][lastMove.to.second].rank.type == Empty || (fields[lastMove.to.first][lastMove.to.second].rank.type != Empty&&fields[lastMove.to.first][lastMove.to.second].rank.isWhite == currentlyMoved.isWhite))
 					throw INVALID_MOVE();
 		}
-			fields[lastMove.to.first][lastMove.to.second].rank = { Knight,currentlyMoved.isWhite };
-			fields[lastMove.from.first][lastMove.from.second].rank.type = Empty;
-			this->Beaten = fields[lastMove.to.first][lastMove.to.second].rank;
-			break;
+		fields[lastMove.to.first][lastMove.to.second].rank = { Knight,currentlyMoved.isWhite };
+		fields[lastMove.from.first][lastMove.from.second].rank.type = Empty;
+		tmp.second = fields[lastMove.to.first][lastMove.to.second].rank;
+		break;
 		case(PromotionTower):
 		{
 			if ((currentlyMoved.isWhite && lastMove.to.second != 6) || (!currentlyMoved.isWhite && lastMove.to.second != 1) || currentlyMoved.type != Pawn)
@@ -390,10 +453,10 @@ namespace ChessBoard
 				if (fields[lastMove.to.first][lastMove.to.second].rank.type == Empty || (fields[lastMove.to.first][lastMove.to.second].rank.type != Empty&&fields[lastMove.to.first][lastMove.to.second].rank.isWhite == currentlyMoved.isWhite))
 					throw INVALID_MOVE();
 		}
-			fields[lastMove.to.first][lastMove.to.second].rank = { Tower,currentlyMoved.isWhite };
-			fields[lastMove.from.first][lastMove.from.second].rank.type = Empty;
-			this->Beaten = fields[lastMove.to.first][lastMove.to.second].rank;
-			break;
+		fields[lastMove.to.first][lastMove.to.second].rank = { Tower,currentlyMoved.isWhite };
+		fields[lastMove.from.first][lastMove.from.second].rank.type = Empty;
+		tmp.second = fields[lastMove.to.first][lastMove.to.second].rank;
+		break;
 		case(RochadeLeft):
 			//TODO handle move
 			break;
@@ -432,12 +495,20 @@ namespace ChessBoard
 			throw std::runtime_error(PROGRAM_NAME + std::string(" ERROR:Move was corrupted (invalid internal move type)"));
 			break;
 		}
-		this->lastMove = lastMove;
+		tmp.first = lastMove;
+		MoveStack->push(tmp);
 		nextMoveIsWhite = !nextMoveIsWhite;
-		if (!addBoard())
+		if (currentlyMoved.type != Pawn&&tmp.second.type != Empty)
 		{
-			Revert(currentlyMoved.isWhite);
-			throw THREEFOLD_REPETITON();
+			if (!addBoard())
+			{
+				Revert();
+				throw THREEFOLD_REPETITON();
+			}
+		}
+		else
+		{
+			prevBoard->clear();
 		}
 		try
 		{
@@ -447,7 +518,7 @@ namespace ChessBoard
 		{
 			if ((err.isWhite && currentlyMoved.isWhite) || (err.isBlack && !currentlyMoved.isWhite))
 			{
-				this->Revert(currentlyMoved.isWhite);
+				this->Revert();
 				throw err;
 			}
 		}

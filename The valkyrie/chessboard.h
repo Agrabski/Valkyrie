@@ -4,6 +4,7 @@
 #include <vector>
 #include "judgeDredd.h"
 #include <math.h>
+#include <stack>
 
 namespace ChessBoard
 {
@@ -42,7 +43,7 @@ namespace ChessBoard
 	};
 	struct Board
 	{
-		Board() :moveIterator(this)
+		Board()
 		{
 			for (int y = 0; y < 8; y++)
 				for (int x = 0; x < 8; x++)
@@ -64,17 +65,23 @@ namespace ChessBoard
 			fields[3][7].rank = { Queen,false };
 			fields[4][0].rank = { King,true };
 			fields[4][7].rank = { King,false };
+			MoveStack = new std::stack<std::pair<InternalMove, Rank>>();
+			moveIterator = new Moves(this);
+			prevBoard = new std::vector<std::pair<Board, int>>();
 		}
-		const std::pair<short, short> QueenMovementArray[8] = { { -1,0 },{ -1,1 },{ 0,1 },{ 1,1 },{ 1,0 },{ 1,-1 },{ 0,-1 },{ -1,-1 } };
-		const std::pair<short, short> KnightMovementArray[8] = { { -2,-1 },{ -2,1 },{ -1,2 },{ 1,2 },{ 2,1 },{ 2,-1 },{ -2,1 },{ -2,-1 } };
+
+		static const std::pair<short, short> QueenMovementArray[8];
+		static const std::pair<short, short> KnightMovementArray[8];
 		void ChangeState(InternalMove lastMove);
 		bool operator==(Board& right);
 		void PaintTheMap(InternalMove lastMove);
 		void PaintTheMap();
-		void Revert(bool isWhite);
+		void Revert();
+		void ClearData();
 		void removeBoard(Board board);
 		Field fields[8][8];
-		std::vector<std::pair<Board, int>> prevBoard;
+		std::vector<std::pair<Board, int>> *prevBoard;
+		std::stack<std::pair<InternalMove, Rank>> *MoveStack;
 		bool nextMoveIsWhite = true;
 		bool leftWhite = true;
 		bool rightWhite = true;
@@ -98,13 +105,12 @@ namespace ChessBoard
 			short moveIterator = 0;
 			Board * parent;
 		};
-		Moves moveIterator;
+		Moves *moveIterator;
 		Board& operator=(const Board & toCopy);
+		void ClearStack();
 	private:
 		//returns true if game is not over
 		bool addBoard();
-		InternalMove lastMove;
-		Rank Beaten;
 	};
 
 	class INVALID_MOVE : std::exception
