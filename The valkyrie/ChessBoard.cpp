@@ -268,6 +268,12 @@ namespace ChessBoard
 		}
 	}
 
+	Board::~Board()
+	{
+		ClearData();
+		delete[] fields;
+	}
+
 	void ChessBoard::Board::ChangeState(ChessBoard::InternalMove lastMove)
 	{
 		Rank currentlyMoved = { Empty,false };

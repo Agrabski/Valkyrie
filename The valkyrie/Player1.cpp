@@ -12,7 +12,7 @@ JudgeDredd::Valkyrie::Valkyrie(bool amIWhite)
 
 JudgeDredd::Valkyrie::~Valkyrie()
 {
-
+	delete currBoardState;
 }
 
 Move JudgeDredd::Valkyrie::makeMove(Move lastMove)

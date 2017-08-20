@@ -69,7 +69,7 @@ namespace ChessBoard
 			moveIterator = new Moves(this);
 			prevBoard = new std::vector<std::pair<Board, int>>();
 		}
-
+		~Board();
 		static const std::pair<short, short> QueenMovementArray[8];
 		static const std::pair<short, short> KnightMovementArray[8];
 		void ChangeState(InternalMove lastMove);

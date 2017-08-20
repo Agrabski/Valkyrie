@@ -6,8 +6,11 @@ ChessEvaluator::ChessEvaluator::ChessEvaluator()
 
 ChessEvaluator::ChessEvaluation ChessEvaluator::ChessEvaluator::evaluate(const ChessBoard::Board & board)
 {
-	return ChessEvaluation();
+	ChessEvaluation tmp = ChessEvaluation();
+	
+	return tmp;
 }
+
 bool ChessEvaluator::ChessEvaluation::operator>(ChessEvaluation & right)
 {
 	if (gameHasEnded && endState == 1)
