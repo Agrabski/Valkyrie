@@ -35,16 +35,25 @@ namespace ChessBoard
 		bool isWhite;
 		bool const operator!=(const Rank& right);
 	};
+
 	struct Field
 	{
 		Rank rank;
 		int coveredByWhite = 0;
 		int coveredByBlack = 0;
+		bool operator!=(const Field &right);
+		bool operator==(const Field &right);
+		bool operator>(const Field &right);
+		bool operator<(const Field &right);
 	};
+
 	struct Board
 	{
 		Board()
 		{
+			fields.resize(8);
+			for (int i = 0; i < 8; i++)
+				fields[i].resize(8);
 			for (int y = 0; y < 8; y++)
 				for (int x = 0; x < 8; x++)
 					fields[x][y].rank = { Empty, false };
@@ -66,8 +75,7 @@ namespace ChessBoard
 			fields[4][0].rank = { King,true };
 			fields[4][7].rank = { King,false };
 			MoveStack = new std::stack<std::pair<InternalMove, Rank>>();
-			moveIterator = new Moves(this);
-			prevBoard = new std::vector<std::pair<Board, int>>();
+			prevBoard = new std::vector<std::pair<std::vector<std::vector<Field>>, int>>();
 		}
 		~Board();
 		static const std::pair<short, short> QueenMovementArray[8];
@@ -78,9 +86,15 @@ namespace ChessBoard
 		void PaintTheMap();
 		void Revert();
 		void ClearData();
-		void removeBoard(Board board);
-		Field fields[8][8];
-		std::vector<std::pair<Board, int>> *prevBoard;
+		void removeBoard(std::vector<std::vector<Field>> board);
+		std::vector<std::vector<Field>>fields;
+		
+		//huihiuhiu;
+		
+		std::vector<std::pair<std::vector<std::vector<Field>>,int>> * prevBoard;
+		
+		
+		
 		std::stack<std::pair<InternalMove, Rank>> *MoveStack;
 		bool nextMoveIsWhite = true;
 		bool leftWhite = true;
@@ -91,7 +105,8 @@ namespace ChessBoard
 		{
 			Moves(Board *Parent)
 			{
-				this->parent = parent;
+				this->parent = Parent;
+				state = nullptr;
 			}
 			Moves();
 			Moves& operator++();
@@ -103,9 +118,8 @@ namespace ChessBoard
 			bool isWhite;
 			short direction = 0;
 			short moveIterator = 0;
-			Board * parent;
+			const Board * parent;
 		};
-		Moves *moveIterator;
 		Board& operator=(const Board & toCopy);
 		void ClearStack();
 	private:

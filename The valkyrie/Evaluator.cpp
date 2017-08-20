@@ -47,7 +47,6 @@ bool ChessEvaluator::ChessEvaluation::operator<(ChessEvaluation & right)
 
 bool ChessEvaluator::ChessEvaluation::operator=(ChessEvaluation & right)
 {
-	throw std::runtime_error("Class not allowed");
-	return false;
+	return value == right.value&&gameHasEnded == right.gameHasEnded&&victoryPossible == right.victoryPossible;
 }
 

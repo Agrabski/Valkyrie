@@ -2,6 +2,7 @@
 #include "CppUnitTest.h"
 #include "..\The valkyrie\chessboard.h"
 #include "..\The valkyrie\Evaluator.cpp"
+#include "..\The valkyrie\Player1.h"
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 #define MAKE_MOVE(x1,y1,x2,y2)board.ChangeState( ChessBoard::InternalMove({x1-1,y1-1},{x2-1,y2-1},ChessBoard::Standard));
@@ -32,8 +33,6 @@ namespace Valkyrietests
 
 		TEST_METHOD(PawnBeatingEmptyField)
 		{
-			//Assert::ExpectException<ChessBoard::INVALID_MOVE>()
-			// TODO: Your test code here
 			try
 			{
 				ChessBoard::Board board;
@@ -199,4 +198,14 @@ namespace Valkyrietests
 
 	};
 
+	TEST_CLASS(OptymalisationTests)
+	{
+		friend JudgeDredd::Valkyrie;
+		TEST_METHOD(RecursionLevel1)
+		{
+			JudgeDredd::Valkyrie *player = new JudgeDredd::Valkyrie(true,1);
+			Move tmp;
+			player->makeMove(tmp);
+		}
+	};
 }

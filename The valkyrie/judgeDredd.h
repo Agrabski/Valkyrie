@@ -14,6 +14,7 @@ struct Move
 
 class JudgeDredd
 {
+public:
     class Valkyrie;
     class Player2;
 

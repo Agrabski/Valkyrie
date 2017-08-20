@@ -8,6 +8,13 @@
 JudgeDredd::Valkyrie::Valkyrie(bool amIWhite)
 {
 	this->amIWhite = amIWhite;
+	firstMove = amIWhite;
+}
+
+JudgeDredd::Valkyrie::Valkyrie(bool amIwhite, int recursion)
+{
+	amIWhite = amIwhite;
+	recursionDepth = recursion;
 }
 
 JudgeDredd::Valkyrie::~Valkyrie()
@@ -17,10 +24,17 @@ JudgeDredd::Valkyrie::~Valkyrie()
 
 Move JudgeDredd::Valkyrie::makeMove(Move lastMove)
 {
-	ChessBoard::InternalMove tmp(lastMove);
-	currBoardState->ChangeState(tmp);
-	Play(currBoardState, 0, 6, &tmp, amIWhite);
-	return tmp.ConvertToExternal(amIWhite);
+	ChessBoard::InternalMove *buffer=new ChessBoard::InternalMove();
+	if (!firstMove)
+	{
+		ChessBoard::InternalMove tmp(lastMove);
+		firstMove = false;
+		currBoardState->ChangeState(tmp);
+	}
+	Play(currBoardState, 0, recursionDepth, buffer, amIWhite);
+	Move tmp = buffer->ConvertToExternal(amIWhite);
+	delete buffer;
+	return tmp;
 }
 
 ChessEvaluator::ChessEvaluation JudgeDredd::Valkyrie::Play(ChessBoard::Board *currentBoard, short int currentRecursion, short int maxRecursion, ChessBoard::InternalMove * chosenMove, bool isWhite)
@@ -29,35 +43,35 @@ ChessEvaluator::ChessEvaluation JudgeDredd::Valkyrie::Play(ChessBoard::Board *cu
 		return evaluator.evaluate(*currentBoard);
 	ChessEvaluator::ChessEvaluation Best, newBest;
 	ChessBoard::InternalMove bestMove, newbestMove;
-	bool exceptionFlag = false;
+	bool firstFlag = true;
 	ChessBoard::Board *temporary(currentBoard);
-	temporary->moveIterator->Reset(isWhite);
-	for (; **(temporary->moveIterator) != nullptr; ++(temporary->moveIterator))
+	ChessBoard::Board::Moves moveIterator(temporary);
+	moveIterator.Reset(isWhite);
+	++(moveIterator);
+	for (; *moveIterator != nullptr; ++moveIterator)
 	{
-		newbestMove = ***temporary->moveIterator;
+		newbestMove = **moveIterator;
 		
 		try
 		{
 			temporary->ChangeState(newbestMove);
-		}
-		catch (ChessBoard::INVALID_MOVE)
-		{
-			exceptionFlag = true;
-		}
-		if (!exceptionFlag)
-		{
 			newBest = Play(temporary, currentRecursion + 1, maxRecursion, nullptr, !isWhite);
-			if (newBest > Best)
+			if (firstFlag || newBest > Best)
 			{
 				Best = newBest;
 				bestMove = newbestMove;
+				firstFlag = false;
 			}
 			temporary->Revert();
 		}
-		else
-			exceptionFlag = false;
+		catch (ChessBoard::INVALID_MOVE)
+		{
+
+		}
+		catch(ChessBoard::WRONG_COLOR)
+		{ }
 	}
-
-
+	if (chosenMove != nullptr)
+		*chosenMove = bestMove;
 	return Best;
 }

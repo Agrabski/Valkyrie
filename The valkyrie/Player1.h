@@ -14,9 +14,12 @@ class JudgeDredd::Valkyrie
 
     public:
     Valkyrie(bool amIWhite);
+	Valkyrie(bool amIwhite, int recursion);
     ~Valkyrie();
     struct Move makeMove(struct Move lastMove);
 	private:
+		int recursionDepth=1;
+		bool firstMove;
 		ChessBoard::Board *currBoardState=new ChessBoard::Board();
 		bool amIWhite;
 		ChessEvaluator::ChessEvaluation Play(ChessBoard::Board *currentBoard, short int currentRecursion, short int maxRecursion, ChessBoard::InternalMove *chosenMove, bool isWhite);
