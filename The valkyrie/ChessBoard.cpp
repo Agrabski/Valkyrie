@@ -30,10 +30,10 @@ namespace ChessBoard
 
 	bool Board::addBoard()
 	{
-		bool flag = true;
 		for(int i=0;i<prevBoard->size();i++)
 		{
-			for(int x=0;x<8;x++)
+			bool flag = true;
+			for(int x=0;x<8&&flag;x++)
 				for(int y=0;y<8;y++)
 					if ((*prevBoard)[i].first[x][y] != fields[x][y])
 					{
@@ -211,6 +211,7 @@ namespace ChessBoard
 
 	void ChessBoard::Board::Revert()
 	{
+		removeBoard(fields);
 		InternalMove lastMove = MoveStack->top().first;
 		Rank beaten = MoveStack->top().second;
 		MoveStack->pop();
@@ -247,6 +248,21 @@ namespace ChessBoard
 			}
 			break;
 		case(RochadeRight):
+			if (!nextMoveIsWhite)
+			{
+				fields[7][0].rank = { Tower, true };
+				fields[4][0].rank = { King,true };
+				fields[6][0].rank = { Empty,true };
+				fields[5][0].rank = { Empty,true };
+				leftWhite = true;
+				rightWhite = true;
+			}
+			else
+			{
+				leftBlack = true;
+				rightBlack = true;
+			}
+			break;
 		default:
 			throw std::runtime_error(PROGRAM_NAME + std::string(" ERROR:Storred move type was corrupted (invalid internal move type)"));
 		}
@@ -264,7 +280,7 @@ namespace ChessBoard
 		for (std::vector<std::pair<std::vector<std::vector<Field>>, int>>::iterator i = prevBoard->begin(); i != prevBoard->end(); ++i)
 		{
 			bool flag = true;
-			for (int x = 0; x < 8; x++)
+			for (int x = 0; x < 8&&flag; x++)
 				for (int y = 0; y < 8; y++)
 					if (i->first[x][y] != fields[x][y])
 					{
@@ -544,17 +560,10 @@ namespace ChessBoard
 		tmp.first = lastMove;
 		MoveStack->push(tmp);
 		nextMoveIsWhite = !nextMoveIsWhite;
-		if (currentlyMoved.type != Pawn&&tmp.second.type == Empty)
+		if (!addBoard())
 		{
-			if (!addBoard())
-			{
-				Revert();
-				throw THREEFOLD_REPETITON();
-			}
-		}
-		else
-		{
-			prevBoard->clear();
+			Revert();
+			throw THREEFOLD_REPETITON();
 		}
 		try
 		{
@@ -710,7 +719,7 @@ namespace ChessBoard
 			}
 		}
 
-		if ((currentRank.first == 0 && currentRank.second == 8))
+		if ((currentRank.first == 8 || currentRank.second == 8))
 		{
 			state = nullptr;
 			return *this;
@@ -1294,12 +1303,18 @@ namespace ChessBoard
 
 	bool const Rank::operator!=(Rank const & right)
 	{
-		return this->type != right.type || (this->isWhite != right.isWhite);
+		if (type != right.type)
+			return true;
+		if (type == Empty)
+			return false;
+		if (isWhite != right.isWhite)
+			return true;
+		return false;
 	}
 
 	bool Field::operator!=(const Field & right)
 	{
-		return false;
+		return rank!=right.rank;
 	}
 
 	bool Field::operator==(const Field & right)

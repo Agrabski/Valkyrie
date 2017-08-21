@@ -200,10 +200,44 @@ namespace Valkyrietests
 
 	TEST_CLASS(OptymalisationTests)
 	{
-		friend JudgeDredd::Valkyrie;
 		TEST_METHOD(RecursionLevel1)
 		{
 			JudgeDredd::Valkyrie *player = new JudgeDredd::Valkyrie(true,1);
+			Move tmp;
+			player->makeMove(tmp);
+		}
+
+		TEST_METHOD(RecursionLevel2)
+		{
+			JudgeDredd::Valkyrie *player = new JudgeDredd::Valkyrie(true, 2);
+			Move tmp;
+			player->makeMove(tmp);
+		}
+
+		TEST_METHOD(RecursionLevel3)
+		{
+			JudgeDredd::Valkyrie *player = new JudgeDredd::Valkyrie(true, 3);
+			Move tmp;
+			player->makeMove(tmp);
+		}
+
+		TEST_METHOD(RecursionLevel4)
+		{
+			JudgeDredd::Valkyrie *player = new JudgeDredd::Valkyrie(true, 4);
+			Move tmp;
+			player->makeMove(tmp);
+		}
+
+		TEST_METHOD(RecursionLevel5)
+		{
+			JudgeDredd::Valkyrie *player = new JudgeDredd::Valkyrie(true, 5);
+			Move tmp;
+			player->makeMove(tmp);
+		}
+
+		TEST_METHOD(RecursionLevel6)
+		{
+			JudgeDredd::Valkyrie *player = new JudgeDredd::Valkyrie(true, 6);
 			Move tmp;
 			player->makeMove(tmp);
 		}

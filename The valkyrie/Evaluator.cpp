@@ -50,3 +50,11 @@ bool ChessEvaluator::ChessEvaluation::operator=(ChessEvaluation & right)
 	return value == right.value&&gameHasEnded == right.gameHasEnded&&victoryPossible == right.victoryPossible;
 }
 
+ChessEvaluator::ChessEvaluation::ChessEvaluation()
+{
+	value = rand();
+	endState = 0;
+	victoryPossible = true;
+	gameHasEnded = false;
+}
+

@@ -70,6 +70,8 @@ ChessEvaluator::ChessEvaluation JudgeDredd::Valkyrie::Play(ChessBoard::Board *cu
 		}
 		catch(ChessBoard::WRONG_COLOR)
 		{ }
+		catch(ChessBoard::THREEFOLD_REPETITON)
+		{ }
 	}
 	if (chosenMove != nullptr)
 		*chosenMove = bestMove;
