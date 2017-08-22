@@ -32,19 +32,24 @@ Move JudgeDredd::Valkyrie::makeMove(Move lastMove)
 		currBoardState->ChangeState(tmp);
 	}
 	Play(currBoardState, 0, recursionDepth, buffer, amIWhite);
+	currBoardState->ChangeState(*buffer);
 	Move tmp = buffer->ConvertToExternal(amIWhite);
 	delete buffer;
 	return tmp;
 }
 
-ChessEvaluator::ChessEvaluation JudgeDredd::Valkyrie::Play(ChessBoard::Board *currentBoard, short int currentRecursion, short int maxRecursion, ChessBoard::InternalMove * chosenMove, bool isWhite)
+ChessEvaluator::ChessEvaluation JudgeDredd::Valkyrie::Play(const ChessBoard::Board *currentBoard, short int currentRecursion, short int maxRecursion, ChessBoard::InternalMove * chosenMove, bool isWhite)
 {
-	if (currentRecursion == maxRecursion)
+	std::cout << currentRecursion << std::endl;
+	if (currentRecursion == maxRecursion) 
+	{
 		return evaluator.evaluate(*currentBoard);
+
+	}
 	ChessEvaluator::ChessEvaluation Best, newBest;
 	ChessBoard::InternalMove bestMove, newbestMove;
 	bool firstFlag = true;
-	ChessBoard::Board *temporary(currentBoard);
+	ChessBoard::Board *temporary=new ChessBoard::Board(currentBoard);
 	ChessBoard::Board::Moves moveIterator(temporary);
 	moveIterator.Reset(isWhite);
 	++(moveIterator);
@@ -71,6 +76,8 @@ ChessEvaluator::ChessEvaluation JudgeDredd::Valkyrie::Play(ChessBoard::Board *cu
 		catch(ChessBoard::WRONG_COLOR)
 		{ }
 		catch(ChessBoard::THREEFOLD_REPETITON)
+		{ }
+		catch(ChessBoard::MOVE_BLOCKED)
 		{ }
 	}
 	if (chosenMove != nullptr)

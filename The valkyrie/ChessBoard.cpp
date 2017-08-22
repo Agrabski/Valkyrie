@@ -211,6 +211,7 @@ namespace ChessBoard
 
 	void ChessBoard::Board::Revert()
 	{
+		nextMoveIsWhite = !nextMoveIsWhite;
 		removeBoard(fields);
 		InternalMove lastMove = MoveStack->top().first;
 		Rank beaten = MoveStack->top().second;
@@ -266,7 +267,6 @@ namespace ChessBoard
 		default:
 			throw std::runtime_error(PROGRAM_NAME + std::string(" ERROR:Storred move type was corrupted (invalid internal move type)"));
 		}
-		nextMoveIsWhite = !nextMoveIsWhite;
 	}
 
 	void Board::ClearData()
@@ -301,6 +301,26 @@ namespace ChessBoard
 	Board::~Board()
 	{
 		ClearData();
+	}
+
+	Board::Board(const Board * toCopy)
+	{
+		fields.resize(8);
+		for (int i = 0; i < 8; i++)
+			fields[i].resize(8);
+
+		for (int x = 0; x < 8; x++)
+			for (int y = 0; y < 8; y++)
+				fields[x][y] = toCopy->fields[x][y];
+
+		prevBoard = new std::vector<std::pair<std::vector<std::vector<Field>>, int>>(*toCopy->prevBoard);
+		MoveStack = new std::stack<std::pair<InternalMove, Rank>>(*toCopy->MoveStack);
+		nextMoveIsWhite = toCopy->nextMoveIsWhite;
+		leftWhite = toCopy->leftWhite;
+		rightWhite = toCopy->rightWhite;
+		leftBlack = toCopy->leftBlack;
+		rightBlack = toCopy->rightBlack;
+		this->nextMoveIsWhite = toCopy->nextMoveIsWhite;
 	}
 
 	void ChessBoard::Board::ChangeState(ChessBoard::InternalMove lastMove)
@@ -674,7 +694,7 @@ namespace ChessBoard
 #pragma endregion
 
 #pragma region SAFETY_MACROS
-#define IN_RANGE(x) (0<x&&x<8)
+#define IN_RANGE(x) (0<=x&&x<8)
 #pragma endregion
 
 	Board::Moves::Moves()
@@ -769,20 +789,12 @@ namespace ChessBoard
 							direction++;
 							return *this;
 						}
-					//this move is impossible, increment current rank and continue going through the board
+					//this move is impossible, increment direction
 					else
 					{
-						if (currentRank.first < 7)
-						{
-							currentRank.first++;
-							return ++(*this);
-						}
-						else
-						{
-							currentRank.first = 0;
-							currentRank.second++;
-							return ++(*this);
-						}
+						moveIterator = 0;
+						direction++;
+						return ++*this;
 					}
 				}
 				else
@@ -822,17 +834,9 @@ namespace ChessBoard
 					//this move is impossible, increment current rank and continue going through the board
 					else
 					{
-						if (currentRank.first < 7)
-						{
-							currentRank.first++;
-							return ++(*this);
-						}
-						else
-						{
-							currentRank.first = 0;
-							currentRank.second++;
-							return ++(*this);
-						}
+						moveIterator = 0;
+						direction++;
+						return ++*this;
 					}
 
 				}
@@ -858,7 +862,7 @@ namespace ChessBoard
 							return ++(*this);
 						}
 					case(1):
-						if (currentRank.second == 2)
+						if (currentRank.second == 1)
 						{
 							if (parent->fields[currentRank.first][currentRank.second + 2].rank.type == Empty)
 							{
@@ -973,17 +977,9 @@ namespace ChessBoard
 					//this move is impossible, increment current rank and continue going through the board
 					else
 					{
-						if (currentRank.first < 7)
-						{
-							currentRank.first++;
-							return ++(*this);
-						}
-						else
-						{
-							currentRank.first = 0;
-							currentRank.second++;
-							return ++(*this);
-						}
+						moveIterator = 0;
+						direction++;
+						return ++*this;
 					}
 				}
 				else
@@ -1023,17 +1019,9 @@ namespace ChessBoard
 					//this move is impossible, increment current rank and continue going through the board
 					else
 					{
-						if (currentRank.first < 7)
-						{
-							currentRank.first++;
-							return ++(*this);
-						}
-						else
-						{
-							currentRank.first = 0;
-							currentRank.second++;
-							return ++(*this);
-						}
+						moveIterator = 0;
+						direction++;
+						return ++*this;
 					}
 
 				}
@@ -1197,50 +1185,6 @@ namespace ChessBoard
 					return ++(*this);
 				}
 			}
-			//switch (direction)
-			//{
-			//case(0):
-			//	COMPLETE_MOVE_MACRO(-2, -1);
-			//	break;
-			//case(1):
-			//	COMPLETE_MOVE_MACRO(-2, 1);
-			//	break;
-			//case(2):
-			//	COMPLETE_MOVE_MACRO(1, 2);
-			//	break;
-			//case(3):
-			//	COMPLETE_MOVE_MACRO(-1, 2);
-			//	break;
-			//case(4):
-			//	COMPLETE_MOVE_MACRO(2, -1);
-			//	break;
-			//case(5):
-			//	COMPLETE_MOVE_MACRO(2, 1);
-			//	break;
-			//case(6):
-			//	COMPLETE_MOVE_MACRO(-1, -2);
-			//	break;
-			//case(7):
-			//	COMPLETE_MOVE_MACRO(1, -2);
-			//	break;
-			//default:
-			//	{
-			//		direction = 0;
-			//		moveIterator = 0;
-			//		if (currentRank.first < 7)
-			//		{
-			//			currentRank.first++;
-			//			return ++(*this);
-			//		}
-			//		else
-			//		{
-			//			currentRank.first = 0;
-			//			currentRank.second++;
-			//			return ++(*this);
-			//		}
-			//	}
-
-			//}
 			direction++;
 			return *this;
 		}

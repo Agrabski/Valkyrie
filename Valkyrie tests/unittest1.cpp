@@ -151,6 +151,29 @@ namespace Valkyrietests
 			}
 			Assert::IsTrue(archetype == board);
 		}
+
+		TEST_METHOD(iteratorTest)
+		{
+			int count = 0;
+			ChessBoard::Board board;
+			ChessBoard::Board::Moves iterator(&board);
+			iterator.Reset(true);
+			for (++iterator; *iterator != nullptr; ++iterator)
+			{
+				try
+				{
+					board.ChangeState(**iterator);
+					count++;
+					board.Revert();
+				}
+				catch(ChessBoard::INVALID_MOVE)
+				{ }
+				catch(ChessBoard::WRONG_COLOR)
+				{ }
+			}
+
+			Assert::IsTrue(count == 20);
+		}
 	};
 
 	TEST_CLASS(RealGame)
@@ -238,6 +261,41 @@ namespace Valkyrietests
 		TEST_METHOD(RecursionLevel6)
 		{
 			JudgeDredd::Valkyrie *player = new JudgeDredd::Valkyrie(true, 6);
+			Move tmp;
+			player->makeMove(tmp);
+		}
+
+		TEST_METHOD(RecursionLevel7)
+		{
+			JudgeDredd::Valkyrie *player = new JudgeDredd::Valkyrie(true, 7);
+			Move tmp;
+			player->makeMove(tmp);
+		}
+
+		TEST_METHOD(RecursionLevel8)
+		{
+			JudgeDredd::Valkyrie *player = new JudgeDredd::Valkyrie(true, 8);
+			Move tmp;
+			player->makeMove(tmp);
+		}
+
+		TEST_METHOD(RecursionLevel9)
+		{
+			JudgeDredd::Valkyrie *player = new JudgeDredd::Valkyrie(true, 9);
+			Move tmp;
+			player->makeMove(tmp);
+		}
+
+		TEST_METHOD(RecursionLevel10)
+		{
+			JudgeDredd::Valkyrie *player = new JudgeDredd::Valkyrie(true, 10);
+			Move tmp;
+			player->makeMove(tmp);
+		}
+
+		TEST_METHOD(RecursionLevel11)
+		{
+			JudgeDredd::Valkyrie *player = new JudgeDredd::Valkyrie(true, 11);
 			Move tmp;
 			player->makeMove(tmp);
 		}

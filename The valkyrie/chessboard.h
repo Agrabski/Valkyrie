@@ -78,6 +78,7 @@ namespace ChessBoard
 			prevBoard = new std::vector<std::pair<std::vector<std::vector<Field>>, int>>();
 		}
 		~Board();
+		Board(const Board*toCopy);
 		static const std::pair<short, short> QueenMovementArray[8];
 		static const std::pair<short, short> KnightMovementArray[8];
 		void ChangeState(InternalMove lastMove);
