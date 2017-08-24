@@ -31,26 +31,29 @@ Move JudgeDredd::Valkyrie::makeMove(Move lastMove)
 		firstMove = false;
 		currBoardState->ChangeState(tmp);
 	}
-	Play(currBoardState, 0, recursionDepth, buffer, amIWhite);
+	std::vector<ChessBoard::Board>*boardArray = new std::vector<ChessBoard::Board>(recursionDepth+1);
+	(*boardArray)[0] = *currBoardState;
+	Play(boardArray, 0, recursionDepth, buffer, amIWhite);
 	currBoardState->ChangeState(*buffer);
 	Move tmp = buffer->ConvertToExternal(amIWhite);
 	delete buffer;
+	delete boardArray;
 	return tmp;
 }
 
-ChessEvaluator::ChessEvaluation JudgeDredd::Valkyrie::Play(const ChessBoard::Board *currentBoard, short int currentRecursion, short int maxRecursion, ChessBoard::InternalMove * chosenMove, bool isWhite)
+ChessEvaluator::ChessEvaluation JudgeDredd::Valkyrie::Play(std::vector< ChessBoard::Board> *boardVector, short int currentRecursion, short int maxRecursion, ChessBoard::InternalMove * chosenMove, bool isWhite)
 {
 	std::cout << currentRecursion << std::endl;
 	if (currentRecursion == maxRecursion) 
 	{
-		return evaluator.evaluate(*currentBoard);
+		return evaluator.evaluate((*boardVector)[currentRecursion]);
 
 	}
 	ChessEvaluator::ChessEvaluation Best, newBest;
 	ChessBoard::InternalMove bestMove, newbestMove;
 	bool firstFlag = true;
-	ChessBoard::Board *temporary=new ChessBoard::Board(currentBoard);
-	ChessBoard::Board::Moves moveIterator(temporary);
+	(*boardVector)[currentRecursion + 1] = ((*boardVector)[currentRecursion]);
+	ChessBoard::Board::Moves moveIterator(&(*boardVector)[currentRecursion+1]);
 	moveIterator.Reset(isWhite);
 	++(moveIterator);
 	for (; *moveIterator != nullptr; ++moveIterator)
@@ -59,15 +62,15 @@ ChessEvaluator::ChessEvaluation JudgeDredd::Valkyrie::Play(const ChessBoard::Boa
 		
 		try
 		{
-			temporary->ChangeState(newbestMove);
-			newBest = Play(temporary, currentRecursion + 1, maxRecursion, nullptr, !isWhite);
+			(*boardVector)[currentRecursion + 1].ChangeState(newbestMove);
+			newBest = Play(boardVector, currentRecursion + 1, maxRecursion, nullptr, !isWhite);
 			if (firstFlag || newBest > Best)
 			{
 				Best = newBest;
 				bestMove = newbestMove;
 				firstFlag = false;
 			}
-			temporary->Revert();
+			(*boardVector)[currentRecursion + 1].Revert();
 		}
 		catch (ChessBoard::INVALID_MOVE)
 		{

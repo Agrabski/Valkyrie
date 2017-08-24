@@ -52,7 +52,27 @@ namespace ChessBoard
 
 	Board & Board::operator=(const Board & toCopy)
 	{
-		// TODO: insert return statement here
+		if (this == &toCopy)
+			return *this;
+		ClearData();
+		if(fields.size()!=8)
+			fields.resize(8);
+		for (int i = 0; i < 8; i++)
+			if (fields[i].size() != 8)
+				fields[i].resize(8);
+
+		for (int x = 0; x < 8; x++)
+			for (int y = 0; y < 8; y++)
+				fields[x][y] = toCopy.fields[x][y];
+
+		prevBoard = new std::vector<std::pair<std::vector<std::vector<Field>>, int>>(*toCopy.prevBoard);
+		MoveStack = new std::stack<std::pair<InternalMove, Rank>>(*toCopy.MoveStack);
+		nextMoveIsWhite = toCopy.nextMoveIsWhite;
+		leftWhite = toCopy.leftWhite;
+		rightWhite = toCopy.rightWhite;
+		leftBlack = toCopy.leftBlack;
+		rightBlack = toCopy.rightBlack;
+		this->nextMoveIsWhite = toCopy.nextMoveIsWhite;
 		return *this;
 	}
 

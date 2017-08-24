@@ -22,7 +22,7 @@ class JudgeDredd::Valkyrie
 		bool firstMove;
 		ChessBoard::Board *currBoardState=new ChessBoard::Board();
 		bool amIWhite;
-		ChessEvaluator::ChessEvaluation Play(const ChessBoard::Board *currentBoard, short int currentRecursion, short int maxRecursion, ChessBoard::InternalMove *chosenMove, bool isWhite);
+		ChessEvaluator::ChessEvaluation Play(std::vector< ChessBoard::Board> *boardVector, short int currentRecursion, short int maxRecursion, ChessBoard::InternalMove *chosenMove, bool isWhite);
 		ChessEvaluator::ChessEvaluator evaluator;
 };
 
