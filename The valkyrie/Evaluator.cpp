@@ -7,6 +7,12 @@ ChessEvaluator::ChessEvaluator::ChessEvaluator()
 ChessEvaluator::ChessEvaluation ChessEvaluator::ChessEvaluator::evaluate(const ChessBoard::Board & board)
 {
 	ChessEvaluation tmp = ChessEvaluation();
+	for(short x=0;x<8;x++)
+		for (short y = 0; y < 8; y++)
+		{
+			tmp.value += board.fields[x][y].rank.type*(board.fields[x][y].coveredByWhite + 1);
+			tmp.value -= board.fields[x][y].rank.type*(board.fields[x][y].coveredByBlack + 1);
+		}
 	
 	return tmp;
 }
@@ -52,7 +58,7 @@ bool ChessEvaluator::ChessEvaluation::operator=(ChessEvaluation & right)
 
 ChessEvaluator::ChessEvaluation::ChessEvaluation()
 {
-	value = rand();
+	value = 0;
 	endState = 0;
 	victoryPossible = true;
 	gameHasEnded = false;

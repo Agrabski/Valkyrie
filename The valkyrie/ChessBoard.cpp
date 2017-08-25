@@ -264,6 +264,10 @@ namespace ChessBoard
 			}
 			else
 			{
+				fields[0][7].rank = { Tower, true };
+				fields[4][7].rank = { King,true };
+				fields[2][7].rank = { Empty,true };
+				fields[3][7].rank = { Empty,true };
 				leftBlack = true;
 				rightBlack = true;
 			}
@@ -280,6 +284,10 @@ namespace ChessBoard
 			}
 			else
 			{
+				fields[0][7].rank = { Tower, true };
+				fields[4][7].rank = { King,true };
+				fields[2][7].rank = { Empty,true };
+				fields[3][7].rank = { Empty,true };
 				leftBlack = true;
 				rightBlack = true;
 			}

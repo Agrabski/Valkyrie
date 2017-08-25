@@ -33,7 +33,7 @@ Move JudgeDredd::Valkyrie::makeMove(Move lastMove)
 	}
 	std::vector<ChessBoard::Board>*boardArray = new std::vector<ChessBoard::Board>(recursionDepth+1);
 	(*boardArray)[0] = *currBoardState;
-	Play(boardArray, 0, recursionDepth, buffer, amIWhite);
+	Play(boardArray, 0, recursionDepth, buffer, amIWhite, nullptr);
 	currBoardState->ChangeState(*buffer);
 	Move tmp = buffer->ConvertToExternal(amIWhite);
 	delete buffer;
@@ -41,11 +41,17 @@ Move JudgeDredd::Valkyrie::makeMove(Move lastMove)
 	return tmp;
 }
 
-ChessEvaluator::ChessEvaluation JudgeDredd::Valkyrie::Play(std::vector< ChessBoard::Board> *boardVector, short int currentRecursion, short int maxRecursion, ChessBoard::InternalMove * chosenMove, bool isWhite)
+ChessEvaluator::ChessEvaluation JudgeDredd::Valkyrie::Play(std::vector< ChessBoard::Board> *boardVector, short int currentRecursion, short int maxRecursion, ChessBoard::InternalMove * chosenMove, bool isWhite, ChessEvaluator::ChessEvaluation *currBest)
 {
-	std::cout << currentRecursion << std::endl;
+#ifdef DEBUG
+	std::cout << currentRecursion<<(currentRecursion!=maxRecursion?"----":"");
+#endif // DEBUG
 	if (currentRecursion == maxRecursion) 
 	{
+#ifdef DEBUG
+		std::cout << std::endl;
+#endif // DEBUG
+
 		return evaluator.evaluate((*boardVector)[currentRecursion]);
 
 	}
@@ -63,8 +69,8 @@ ChessEvaluator::ChessEvaluation JudgeDredd::Valkyrie::Play(std::vector< ChessBoa
 		try
 		{
 			(*boardVector)[currentRecursion + 1].ChangeState(newbestMove);
-			newBest = Play(boardVector, currentRecursion + 1, maxRecursion, nullptr, !isWhite);
-			if (firstFlag || newBest > Best)
+			newBest = Play(boardVector, currentRecursion + 1, maxRecursion, nullptr, !isWhite,(firstFlag?nullptr:&Best));
+			if (firstFlag || (isWhite ? newBest > Best:newBest<Best))
 			{
 				Best = newBest;
 				bestMove = newbestMove;
@@ -85,5 +91,11 @@ ChessEvaluator::ChessEvaluation JudgeDredd::Valkyrie::Play(std::vector< ChessBoa
 	}
 	if (chosenMove != nullptr)
 		*chosenMove = bestMove;
+#ifdef DEBUG
+	if (firstFlag)
+		std::cout << std::endl;
+#endif // DEBUG
+
 	return Best;
 }
+

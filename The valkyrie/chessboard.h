@@ -47,8 +47,9 @@ namespace ChessBoard
 		bool operator<(const Field &right);
 	};
 
-	struct Board
+	class Board
 	{
+	public:
 		Board()
 		{
 			fields.resize(8);
@@ -79,29 +80,10 @@ namespace ChessBoard
 		}
 		~Board();
 		Board(const Board*toCopy);
-		static const std::pair<short, short> QueenMovementArray[8];
-		static const std::pair<short, short> KnightMovementArray[8];
 		void ChangeState(InternalMove lastMove);
 		bool operator==(Board& right);
-		void PaintTheMap(InternalMove lastMove);
-		void PaintTheMap();
 		void Revert();
-		void ClearData();
-		void removeBoard(std::vector<std::vector<Field>> board);
 		std::vector<std::vector<Field>>fields;
-		
-		//huihiuhiu;
-		
-		std::vector<std::pair<std::vector<std::vector<Field>>,int>> * prevBoard;
-		
-		
-		
-		std::stack<std::pair<InternalMove, Rank>> *MoveStack;
-		bool nextMoveIsWhite = true;
-		bool leftWhite = true;
-		bool rightWhite = true;
-		bool leftBlack = true;
-		bool rightBlack = true;
 		struct Moves
 		{
 			Moves(Board *Parent)
@@ -122,10 +104,25 @@ namespace ChessBoard
 			const Board * parent;
 		};
 		Board& operator=(const Board & toCopy);
-		void ClearStack();
+
 	private:
 		//returns true if game is not over
 		bool addBoard();
+		void ClearData();
+		void removeBoard(std::vector<std::vector<Field>> board);
+		void PaintTheMap(InternalMove lastMove);
+		void PaintTheMap();
+		bool nextMoveIsWhite = true;
+		bool leftWhite = true;
+		bool rightWhite = true;
+		bool leftBlack = true;
+		bool rightBlack = true;
+		void ClearStack();
+		std::vector<std::pair<std::vector<std::vector<Field>>,int>> * prevBoard;
+		std::stack<std::pair<InternalMove, Rank>> *MoveStack;
+		static const std::pair<short, short> QueenMovementArray[8];
+		static const std::pair<short, short> KnightMovementArray[8];
+
 	};
 
 	class INVALID_MOVE : std::exception
