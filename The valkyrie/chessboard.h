@@ -104,6 +104,8 @@ namespace ChessBoard
 			const Board * parent;
 		};
 		Board& operator=(const Board & toCopy);
+		bool IsBlackChecked();
+		bool IsWhiteChecked();
 
 	private:
 		//returns true if game is not over
@@ -117,6 +119,8 @@ namespace ChessBoard
 		bool rightWhite = true;
 		bool leftBlack = true;
 		bool rightBlack = true;
+		bool blackCheck = false;
+		bool whiteCheck = false;
 		void ClearStack();
 		std::vector<std::pair<std::vector<std::vector<Field>>,int>> * prevBoard;
 		std::stack<std::pair<InternalMove, Rank>> *MoveStack;

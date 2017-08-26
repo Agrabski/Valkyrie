@@ -76,6 +76,16 @@ namespace ChessBoard
 		return *this;
 	}
 
+	bool Board::IsBlackChecked()
+	{
+		return blackCheck;
+	}
+
+	bool Board::IsWhiteChecked()
+	{
+		return whiteCheck;
+	}
+
 	void Board::ClearStack()
 	{
 		while (!MoveStack->empty())

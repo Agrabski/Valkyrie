@@ -60,6 +60,7 @@ ChessEvaluator::ChessEvaluation JudgeDredd::Valkyrie::Play(std::vector< ChessBoa
 	bool firstFlag = true;
 	(*boardVector)[currentRecursion + 1] = ((*boardVector)[currentRecursion]);
 	ChessBoard::Board::Moves moveIterator(&(*boardVector)[currentRecursion+1]);
+
 	moveIterator.Reset(isWhite);
 	++(moveIterator);
 	for (; *moveIterator != nullptr; ++moveIterator)
@@ -89,13 +90,20 @@ ChessEvaluator::ChessEvaluation JudgeDredd::Valkyrie::Play(std::vector< ChessBoa
 		catch(ChessBoard::MOVE_BLOCKED)
 		{ }
 	}
+
 	if (chosenMove != nullptr)
 		*chosenMove = bestMove;
+
 #ifdef DEBUG
 	if (firstFlag)
 		std::cout << std::endl;
 #endif // DEBUG
 
+	if (firstFlag)
+	{
+		Best.gameHasEnded = true;
+		Best.endState = (*boardVector)[currentRecursion + 1].IsWhiteChecked() ? -1 : (*boardVector)[currentRecursion + 1].IsBlackChecked() ? 1 : 0;
+	}
 	return Best;
 }
 
