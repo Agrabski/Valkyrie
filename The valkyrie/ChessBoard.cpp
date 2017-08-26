@@ -98,6 +98,12 @@ namespace ChessBoard
 	{
 		bool blackCheck = false;
 		bool whiteCheck = false;
+		for(int x=0;x<8;x++)
+			for (int y = 0; y < 8; y++)
+			{
+				fields[x][y].coveredByBlack = 0;
+				fields[x][y].coveredByWhite = 0;
+			}
 		for (int x = 0; x < 8; ++x)
 		{
 			for (int y = 0; y < 8; ++y)
@@ -633,6 +639,11 @@ namespace ChessBoard
 			{
 				this->Revert();
 				throw err;
+			}
+			else
+			{
+				blackCheck = err.isBlack;
+				whiteCheck = err.isWhite;
 			}
 		}
 	}

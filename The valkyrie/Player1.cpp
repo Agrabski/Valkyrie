@@ -3,7 +3,8 @@
 #include <string>
 #include <sstream>
 #include "Player1.h"
-
+#define DEBUG
+#define CUT
 
 JudgeDredd::Valkyrie::Valkyrie(bool amIWhite)
 {
@@ -33,7 +34,15 @@ Move JudgeDredd::Valkyrie::makeMove(Move lastMove)
 	}
 	std::vector<ChessBoard::Board>*boardArray = new std::vector<ChessBoard::Board>(recursionDepth+1);
 	(*boardArray)[0] = *currBoardState;
+#ifdef DEBUG
+	int evaluation = Play(boardArray, 0, recursionDepth, buffer, amIWhite, nullptr).value;
+	std::cout << evaluation;
+#endif // DEBUG
+#ifndef DEBUG
 	Play(boardArray, 0, recursionDepth, buffer, amIWhite, nullptr);
+
+#endif // !DEBUG
+
 	currBoardState->ChangeState(*buffer);
 	Move tmp = buffer->ConvertToExternal(amIWhite);
 	delete buffer;
@@ -70,14 +79,25 @@ ChessEvaluator::ChessEvaluation JudgeDredd::Valkyrie::Play(std::vector< ChessBoa
 		try
 		{
 			(*boardVector)[currentRecursion + 1].ChangeState(newbestMove);
-			newBest = Play(boardVector, currentRecursion + 1, maxRecursion, nullptr, !isWhite,(firstFlag?nullptr:&Best));
-			if (firstFlag || (isWhite ? newBest > Best:newBest<Best))
+			newBest = Play(boardVector, currentRecursion + 1, maxRecursion, nullptr, !isWhite, (firstFlag ? nullptr : &Best));
+			if (firstFlag || (isWhite ? newBest > Best:newBest < Best))
 			{
 				Best = newBest;
 				bestMove = newbestMove;
 				firstFlag = false;
 			}
 			(*boardVector)[currentRecursion + 1].Revert();
+#ifdef CUT
+
+			if (currBest != nullptr && ((!isWhite && Best < *currBest) ||(isWhite&& Best > *currBest)))
+			{
+#ifdef DEBUG
+				std::cout << "!!!TREE CUT!!!";
+#endif // DEBUG
+
+				return Best;
+			}
+#endif //CUT
 		}
 		catch (ChessBoard::INVALID_MOVE)
 		{

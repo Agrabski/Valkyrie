@@ -12,7 +12,7 @@ namespace ChessEvaluator
 		double value;
 		bool operator>(ChessEvaluation & right);
 		bool operator<(ChessEvaluation & right);
-		bool operator=(ChessEvaluation & right);
+		bool operator==(ChessEvaluation & right);
 		ChessEvaluation();
 	};
 	class ChessEvaluator

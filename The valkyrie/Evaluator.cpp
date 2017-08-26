@@ -51,7 +51,7 @@ bool ChessEvaluator::ChessEvaluation::operator<(ChessEvaluation & right)
 	return value < right.value;
 }
 
-bool ChessEvaluator::ChessEvaluation::operator=(ChessEvaluation & right)
+bool ChessEvaluator::ChessEvaluation::operator==(ChessEvaluation & right)
 {
 	return value == right.value&&gameHasEnded == right.gameHasEnded&&victoryPossible == right.victoryPossible;
 }

@@ -20,7 +20,7 @@ class JudgeDredd::Valkyrie
     struct Move makeMove(struct Move lastMove);
 
 	private:
-		int recursionDepth=5;
+		int recursionDepth=4;
 		bool firstMove;
 		ChessBoard::Board *currBoardState=new ChessBoard::Board();
 		bool amIWhite;
