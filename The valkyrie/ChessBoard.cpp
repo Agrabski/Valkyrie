@@ -311,6 +311,18 @@ namespace ChessBoard
 		default:
 			throw std::runtime_error(PROGRAM_NAME + std::string(" ERROR:Storred move type was corrupted (invalid internal move type)"));
 		}
+		blackCheck = false;
+		whiteCheck = false;
+		try
+		{
+			PaintTheMap();
+		}
+		catch (KING_IN_DANGER& err)
+		{
+			blackCheck = err.isBlack;
+			whiteCheck = err.isWhite;
+		}
+
 	}
 
 	void Board::ClearData()
