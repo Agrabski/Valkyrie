@@ -13,47 +13,79 @@ ChessEvaluator::ChessEvaluation ChessEvaluator::ChessEvaluator::evaluate(const C
 			tmp.value += board.fields[x][y].rank.type*(board.fields[x][y].coveredByWhite + 1);
 			tmp.value -= board.fields[x][y].rank.type*(board.fields[x][y].coveredByBlack + 1);
 		}
-	
+	tmp.isNull = false;
 	return tmp;
 }
 
 bool ChessEvaluator::ChessEvaluation::operator>(ChessEvaluation & right)
 {
-	if (gameHasEnded && endState == 1)
-		return true;
-	if (right.gameHasEnded && right.endState == 1)
+	//null saveguards
+	if ((isNull && !right.isNull)||(isNull&&right.isNull))
 		return false;
-	if (gameHasEnded && endState == 0 && ((right.gameHasEnded&&right.endState == -1) || !right.victoryPossible))
+	if (!isNull&&right.isNull)
 		return true;
-	if (right.gameHasEnded && right.endState == 0 && ((gameHasEnded&&endState == -1) || !victoryPossible))
-		return false;
-	if (victoryPossible && !right.victoryPossible)
+
+	//endstate
+	if (gameHasEnded || right.gameHasEnded)
+	{
+		if (gameHasEnded && right.gameHasEnded)
+			return endState > right.endState;
+		if (gameHasEnded)
+		{
+			if (endState == 1)
+				return true;
+			if (endState == -1)
+				return false;
+			if (right.victoryPossible)
+				return false;
+			return true;
+		}
+		else
+		{
+			if (right.endState == 1)
+				return true;
+			if (right.endState == -1)
+				return false;
+			if (victoryPossible)
+				return false;
+			return true;
+		}
+	}
+	if (victoryPossible == right.victoryPossible)
+		return value > right.value;
+	if (victoryPossible)
 		return true;
-	if (!victoryPossible && right.victoryPossible)
-		return false;
-	return value > right.value;
+	return false;
 }
 
 bool ChessEvaluator::ChessEvaluation::operator<(ChessEvaluation & right)
 {
-	if (gameHasEnded && endState == 1)
-		return false;
-	if (right.gameHasEnded && right.endState == 1)
-		return true;
-	if (gameHasEnded && endState == 0 && ((right.gameHasEnded&&right.endState == -1) || !right.victoryPossible))
-		return false;
-	if (right.gameHasEnded && right.endState == 0 && ((gameHasEnded&&endState == -1) || !victoryPossible))
-		return true;
-	if (victoryPossible && !right.victoryPossible)
-		return false;
-	if (!victoryPossible && right.victoryPossible)
-		return true;
-	return value < right.value;
+	return!(*this > right);
 }
 
 bool ChessEvaluator::ChessEvaluation::operator==(ChessEvaluation & right)
 {
 	return value == right.value&&gameHasEnded == right.gameHasEnded&&victoryPossible == right.victoryPossible;
+}
+
+bool ChessEvaluator::ChessEvaluation::operator>=(ChessEvaluation & right)
+{
+	return *this > right || *this == right;
+}
+
+bool ChessEvaluator::ChessEvaluation::operator<=(ChessEvaluation & right)
+{
+	return *this < right || *this == right;
+}
+
+ChessEvaluator::ChessEvaluation & ChessEvaluator::ChessEvaluation::operator=(ChessEvaluation & tocopy)
+{
+	this->isNull = false;
+	value = tocopy.value;
+	this->endState = tocopy.endState;
+	gameHasEnded = tocopy.gameHasEnded;
+	victoryPossible = tocopy.victoryPossible;
+	return*this;
 }
 
 ChessEvaluator::ChessEvaluation::ChessEvaluation()
