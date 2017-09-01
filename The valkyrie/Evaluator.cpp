@@ -14,6 +14,7 @@ ChessEvaluator::ChessEvaluation ChessEvaluator::ChessEvaluator::evaluate(const C
 			tmp.value -= board.fields[x][y].rank.type*(board.fields[x][y].coveredByBlack + 1);
 		}
 	tmp.isNull = false;
+	tmp.gameHasEnded = false;
 	return tmp;
 }
 
@@ -47,8 +48,8 @@ bool ChessEvaluator::ChessEvaluation::operator>(ChessEvaluation & right)
 			if (right.endState == -1)
 				return false;
 			if (victoryPossible)
-				return false;
-			return true;
+				return true;
+			return false;
 		}
 	}
 	if (victoryPossible == right.victoryPossible)
@@ -80,6 +81,8 @@ bool ChessEvaluator::ChessEvaluation::operator<=(ChessEvaluation & right)
 
 ChessEvaluator::ChessEvaluation & ChessEvaluator::ChessEvaluation::operator=(ChessEvaluation & tocopy)
 {
+	if (tocopy.isNull)
+		return *this;
 	this->isNull = false;
 	value = tocopy.value;
 	this->endState = tocopy.endState;

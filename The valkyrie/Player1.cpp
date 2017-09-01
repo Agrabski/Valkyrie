@@ -69,7 +69,7 @@ ChessEvaluator::ChessEvaluation JudgeDredd::Valkyrie::Play(std::vector< ChessBoa
 
 	ChessEvaluator::ChessEvaluation Best, newBest;
 	ChessBoard::InternalMove bestMove, newbestMove;
-	bool firstFlag = true;
+	bool StealmateFlag = true;
 	(*boardVector)[currentRecursion + 1] = ((*boardVector)[currentRecursion]);
 	ChessBoard::Board::Moves moveIterator(&(*boardVector)[currentRecursion+1]);
 
@@ -89,7 +89,9 @@ ChessEvaluator::ChessEvaluation JudgeDredd::Valkyrie::Play(std::vector< ChessBoa
 				newBest = Play(boardVector, currentRecursion + 1, maxRecursion, nullptr, !isWhite, alpha, beta);
 
 
-				(*boardVector)[currentRecursion + 1].Revert();
+				(*boardVector)[currentRecursion + 1].Revert();			
+				StealmateFlag = false;
+
 			}
 			catch (ChessBoard::THREEFOLD_REPETITON)
 			{
@@ -106,7 +108,6 @@ ChessEvaluator::ChessEvaluation JudgeDredd::Valkyrie::Play(std::vector< ChessBoa
 
 			if (!newBest.isNull&&(newBest > alpha))
 			{
-				firstFlag = false;
 				alpha = (Best = newBest);
 				bestMove = newbestMove;
 				if (chosenMove != nullptr)
@@ -117,7 +118,7 @@ ChessEvaluator::ChessEvaluation JudgeDredd::Valkyrie::Play(std::vector< ChessBoa
 			if (!beta.isNull && !alpha.isNull&&beta <= alpha)
 			{
 #ifdef DEBUG
-				std::cout << "!!!TREE CUT!!!";
+				std::cout << "!!!TREE CUT!!!("<<currentRecursion<<")\n";
 #endif // DEBUG
 				break;
 			}
@@ -136,7 +137,7 @@ ChessEvaluator::ChessEvaluation JudgeDredd::Valkyrie::Play(std::vector< ChessBoa
 				newbestMove = **moveIterator;
 				(*boardVector)[currentRecursion + 1].ChangeState(newbestMove);
 				newBest = Play(boardVector, currentRecursion + 1, maxRecursion, nullptr, !isWhite, alpha, beta);
-
+				StealmateFlag = false;
 
 				(*boardVector)[currentRecursion + 1].Revert();
 			}
@@ -154,9 +155,9 @@ ChessEvaluator::ChessEvaluation JudgeDredd::Valkyrie::Play(std::vector< ChessBoa
 
 			}
 
-			if (!newBest.isNull&&(beta.isNull||newBest < beta))
+			if (!newBest.isNull&&(beta.gameHasEnded||!newBest.gameHasEnded)&&(beta.isNull||((beta.gameHasEnded&&!newBest.gameHasEnded)||newBest < beta)))
 			{
-				firstFlag = false;
+
 				beta = (Best = newBest);
 				bestMove = newbestMove;
 				if (chosenMove != nullptr)
@@ -167,7 +168,7 @@ ChessEvaluator::ChessEvaluation JudgeDredd::Valkyrie::Play(std::vector< ChessBoa
 			if (!beta.isNull && !alpha.isNull&&beta <= alpha)
 			{
 #ifdef DEBUG
-				std::cout << "!!!TREE CUT!!!";
+				std::cout << "!!!TREE CUT!!!(" << currentRecursion << ")\n";
 #endif // DEBUG
 				break;
 			}
@@ -176,7 +177,7 @@ ChessEvaluator::ChessEvaluation JudgeDredd::Valkyrie::Play(std::vector< ChessBoa
 		}
 	}
 
-	if (firstFlag)
+	if (StealmateFlag)
 	{
 		Best.isNull = false;
 		Best.gameHasEnded = true;
