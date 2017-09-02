@@ -223,79 +223,80 @@ namespace Valkyrietests
 
 	TEST_CLASS(OptymalisationTests)
 	{
+		ChessEvaluator::ChessEvaluator tmp;
 		TEST_METHOD(RecursionLevel1)
 		{
-			JudgeDredd::Valkyrie *player = new JudgeDredd::Valkyrie(true,1);
+			JudgeDredd::Valkyrie *player = new JudgeDredd::Valkyrie(true,tmp,1);
 			Move tmp;
 			player->makeMove(tmp);
 		}
 
 		TEST_METHOD(RecursionLevel2)
 		{
-			JudgeDredd::Valkyrie *player = new JudgeDredd::Valkyrie(true, 2);
+			JudgeDredd::Valkyrie *player = new JudgeDredd::Valkyrie(true,tmp, 2);
 			Move tmp;
 			player->makeMove(tmp);
 		}
 
 		TEST_METHOD(RecursionLevel3)
 		{
-			JudgeDredd::Valkyrie *player = new JudgeDredd::Valkyrie(true, 3);
+			JudgeDredd::Valkyrie *player = new JudgeDredd::Valkyrie(true,tmp, 3);
 			Move tmp;
 			player->makeMove(tmp);
 		}
 
 		TEST_METHOD(RecursionLevel4)
 		{
-			JudgeDredd::Valkyrie *player = new JudgeDredd::Valkyrie(true, 4);
+			JudgeDredd::Valkyrie *player = new JudgeDredd::Valkyrie(true,tmp, 4);
 			Move tmp;
 			player->makeMove(tmp);
 		}
 
 		TEST_METHOD(RecursionLevel5)
 		{
-			JudgeDredd::Valkyrie *player = new JudgeDredd::Valkyrie(true, 5);
+			JudgeDredd::Valkyrie *player = new JudgeDredd::Valkyrie(true,tmp, 5);
 			Move tmp;
 			player->makeMove(tmp);
 		}
 
 		TEST_METHOD(RecursionLevel6)
 		{
-			JudgeDredd::Valkyrie *player = new JudgeDredd::Valkyrie(true, 6);
+			JudgeDredd::Valkyrie *player = new JudgeDredd::Valkyrie(true,tmp, 6);
 			Move tmp;
 			player->makeMove(tmp);
 		}
 
 		TEST_METHOD(RecursionLevel7)
 		{
-			JudgeDredd::Valkyrie *player = new JudgeDredd::Valkyrie(true, 7);
+			JudgeDredd::Valkyrie *player = new JudgeDredd::Valkyrie(true,tmp, 7);
 			Move tmp;
 			player->makeMove(tmp);
 		}
 
 		TEST_METHOD(RecursionLevel8)
 		{
-			JudgeDredd::Valkyrie *player = new JudgeDredd::Valkyrie(true, 8);
+			JudgeDredd::Valkyrie *player = new JudgeDredd::Valkyrie(true,tmp, 8);
 			Move tmp;
 			player->makeMove(tmp);
 		}
 
 		TEST_METHOD(RecursionLevel9)
 		{
-			JudgeDredd::Valkyrie *player = new JudgeDredd::Valkyrie(true, 9);
+			JudgeDredd::Valkyrie *player = new JudgeDredd::Valkyrie(true,tmp, 9);
 			Move tmp;
 			player->makeMove(tmp);
 		}
 
 		TEST_METHOD(RecursionLevel10)
 		{
-			JudgeDredd::Valkyrie *player = new JudgeDredd::Valkyrie(true, 10);
+			JudgeDredd::Valkyrie *player = new JudgeDredd::Valkyrie(true,tmp, 10);
 			Move tmp;
 			player->makeMove(tmp);
 		}
 
 		TEST_METHOD(RecursionLevel11)
 		{
-			JudgeDredd::Valkyrie *player = new JudgeDredd::Valkyrie(true, 11);
+			JudgeDredd::Valkyrie *player = new JudgeDredd::Valkyrie(true,tmp, 11);
 			Move tmp;
 			player->makeMove(tmp);
 		}

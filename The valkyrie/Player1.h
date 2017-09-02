@@ -1,6 +1,5 @@
 #ifndef PLAYER1_H_INCLUDED
 #define PLAYER1_H_INCLUDED
-#define DEBUG
 
 #include "chessboard.h"
 #include "judgeDredd.h"
@@ -15,7 +14,7 @@ class JudgeDredd::Valkyrie
 
     public:
     Valkyrie(bool amIWhite);
-	Valkyrie(bool amIwhite, int recursion);
+	Valkyrie(bool amIwhite, ChessEvaluator::ChessEvaluator evaluator = {.1f,.1f,.1f,.1f}, int recursion = 4);
     ~Valkyrie();
     struct Move makeMove(struct Move lastMove);
 
@@ -24,8 +23,20 @@ class JudgeDredd::Valkyrie
 		bool firstMove;
 		ChessBoard::Board *currBoardState=new ChessBoard::Board();
 		bool amIWhite;
-		ChessEvaluator::ChessEvaluation Play(std::vector< ChessBoard::Board> *boardVector, short int currentRecursion, short int maxRecursion, ChessBoard::InternalMove *chosenMove, bool isWhite,ChessEvaluator::ChessEvaluation alpha, ChessEvaluator::ChessEvaluation beta);
+		ChessEvaluator::ChessEvaluation Play(std::vector< ChessBoard::Board> *boardVector, short int currentRecursion, short int maxRecursion, ChessBoard::InternalMove *chosenMove, bool isWhite,ChessEvaluator::ChessEvaluation alpha, ChessEvaluator::ChessEvaluation beta) const;
 		ChessEvaluator::ChessEvaluator evaluator;
 };
-
+class GAME_ENDED :std::exception
+{
+public:
+	GAME_ENDED(bool tie, bool white, bool black)
+	{
+		this->tie = tie;
+		this->blackWon = black;
+		this->whiteWon = white;
+	}
+	bool tie;
+	bool whiteWon;
+	bool blackWon;
+};
 #endif // PLAYER1_H_INCLUDED

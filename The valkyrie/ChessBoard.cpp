@@ -76,12 +76,12 @@ namespace ChessBoard
 		return *this;
 	}
 
-	bool Board::IsBlackChecked()
+	bool Board::IsBlackChecked() const
 	{
 		return blackCheck;
 	}
 
-	bool Board::IsWhiteChecked()
+	bool Board::IsWhiteChecked() const
 	{
 		return whiteCheck;
 	}
@@ -327,6 +327,8 @@ namespace ChessBoard
 
 	void Board::ClearData()
 	{
+		ClearStack();
+		prevBoard->clear();
 		delete MoveStack;
 		delete prevBoard;
 	}
@@ -758,6 +760,12 @@ namespace ChessBoard
 #define IN_RANGE(x) (0<=x&&x<8)
 #pragma endregion
 
+	Board::Moves::~Moves()
+	{
+		if(state!=nullptr)
+			delete state;
+	}
+
 	Board::Moves::Moves()
 	{
 		delete state;
@@ -791,12 +799,25 @@ namespace ChessBoard
 			return *this;
 		if (parent->fields[currentRank.first][currentRank.second].rank.type == Empty || parent->fields[currentRank.first][currentRank.second].rank.isWhite != this->isWhite)
 		{
-			for (; currentRank.second < 8 && (parent->fields[currentRank.first][currentRank.second].rank.type == Empty || parent->fields[currentRank.first][currentRank.second].rank.isWhite != this->isWhite); currentRank.second++)
+			//for (; currentRank.second < 8 && (parent->fields[currentRank.first][currentRank.second].rank.type == Empty || parent->fields[currentRank.first][currentRank.second].rank.isWhite != this->isWhite); currentRank.second++)
+			//{
+			//	for (; currentRank.first < 8 && (parent->fields[currentRank.first][currentRank.second].rank.type == Empty || parent->fields[currentRank.first][currentRank.second].rank.isWhite != this->isWhite); currentRank.first++)
+			//	{ }
+			//	if (currentRank.first == 8)
+			//		currentRank.first = 0;
+			//}
+
+			while (currentRank.second < 8 && (parent->fields[currentRank.first][currentRank.second].rank.type == Empty || parent->fields[currentRank.first][currentRank.second].rank.isWhite != this->isWhite))
 			{
-				for (; currentRank.first < 8 && (parent->fields[currentRank.first][currentRank.second].rank.type == Empty || parent->fields[currentRank.first][currentRank.second].rank.isWhite != this->isWhite); currentRank.first++)
-				{ }
+				while (currentRank.first < 8 && (parent->fields[currentRank.first][currentRank.second].rank.type == Empty || parent->fields[currentRank.first][currentRank.second].rank.isWhite != this->isWhite))
+				{
+				currentRank.first++;
+				}
 				if (currentRank.first == 8)
+				{
 					currentRank.first = 0;
+					currentRank.second++;
+				}
 			}
 		}
 
@@ -925,7 +946,7 @@ namespace ChessBoard
 					case(1):
 						if (currentRank.second == 1)
 						{
-							if (parent->fields[currentRank.first][currentRank.second + 2].rank.type == Empty)
+							if (parent->fields[currentRank.first][currentRank.second + 2].rank.type == Empty&&parent->fields[currentRank.first][currentRank.second + 1].rank.type == Empty)
 							{
 								state = new InternalMove(currentRank, std::pair<short, short>(currentRank.first, currentRank.second + 2), Standard);
 								moveIterator++;
@@ -971,7 +992,7 @@ namespace ChessBoard
 					case(1):
 						if (currentRank.second == 6)
 						{
-							if (parent->fields[currentRank.first][currentRank.second - 2].rank.type == Empty)
+							if (parent->fields[currentRank.first][currentRank.second - 2].rank.type == Empty&&parent->fields[currentRank.first][currentRank.second - 1].rank.type == Empty)
 							{
 								state = new InternalMove(currentRank, std::pair<short, short>(currentRank.first, currentRank.second - 2), Standard);
 								moveIterator++;

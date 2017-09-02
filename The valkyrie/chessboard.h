@@ -91,6 +91,7 @@ namespace ChessBoard
 				this->parent = Parent;
 				state = nullptr;
 			}
+			~Moves();
 			Moves();
 			Moves& operator++();
 			const InternalMove* operator*();
@@ -104,8 +105,8 @@ namespace ChessBoard
 			const Board * parent;
 		};
 		Board& operator=(const Board & toCopy);
-		bool IsBlackChecked();
-		bool IsWhiteChecked();
+		bool IsBlackChecked() const;
+		bool IsWhiteChecked() const;
 
 	private:
 		//returns true if game is not over

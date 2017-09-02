@@ -22,7 +22,12 @@ namespace ChessEvaluator
 	class ChessEvaluator
 	{
 	public:
+		float friendlyValue=0.1f;
+		float enemyValue=0.1f;
+		float friendlyCheck=0.1f;
+		float enemyCheck=0.1f;
 		ChessEvaluator();
-		ChessEvaluation evaluate(const ChessBoard::Board &board);
+		ChessEvaluator(float a,float b,float c, float d);
+		ChessEvaluation evaluate(const ChessBoard::Board &board) const;
 	};
 }

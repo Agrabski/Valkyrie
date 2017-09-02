@@ -3,7 +3,6 @@
 #include <string>
 #include <sstream>
 #include "Player1.h"
-#define DEBUG
 #define CUT
 
 JudgeDredd::Valkyrie::Valkyrie(bool amIWhite)
@@ -12,10 +11,12 @@ JudgeDredd::Valkyrie::Valkyrie(bool amIWhite)
 	firstMove = amIWhite;
 }
 
-JudgeDredd::Valkyrie::Valkyrie(bool amIwhite, int recursion)
+JudgeDredd::Valkyrie::Valkyrie(bool amIwhite, ChessEvaluator::ChessEvaluator evaluator, int recursion)
 {
 	amIWhite = amIwhite;
+	firstMove = amIWhite;
 	recursionDepth = recursion;
+	this->evaluator = evaluator;
 }
 
 JudgeDredd::Valkyrie::~Valkyrie()
@@ -29,29 +30,25 @@ Move JudgeDredd::Valkyrie::makeMove(Move lastMove)
 	if (!firstMove)
 	{
 		ChessBoard::InternalMove tmp(lastMove);
-		firstMove = false;
 		currBoardState->ChangeState(tmp);
 	}
+	firstMove = false;
 	ChessEvaluator::ChessEvaluation alpha, beta;
-	std::vector<ChessBoard::Board>*boardArray = new std::vector<ChessBoard::Board>(recursionDepth+1);
-	(*boardArray)[0] = *currBoardState;
+	std::vector<ChessBoard::Board>boardArray(recursionDepth+1);
+	boardArray[0] = *currBoardState;
+	alpha = Play(&boardArray, 0, recursionDepth, buffer, amIWhite, alpha, beta);
 #ifdef DEBUG
-	int evaluation = Play(boardArray, 0, recursionDepth, buffer, amIWhite,alpha,beta).value;
-	std::cout << evaluation;
+	std::cout << alpha.value;
 #endif // DEBUG
-#ifndef DEBUG
-	Play(boardArray, 0, recursionDepth, buffer, amIWhite, &alpha, &beta);
-
-#endif // !DEBUG
-
 	currBoardState->ChangeState(*buffer);
+
 	Move tmp = buffer->ConvertToExternal(amIWhite);
 	delete buffer;
-	delete boardArray;
+	boardArray.clear();
 	return tmp;
 }
 
-ChessEvaluator::ChessEvaluation JudgeDredd::Valkyrie::Play(std::vector< ChessBoard::Board> *boardVector, short int currentRecursion, short int maxRecursion, ChessBoard::InternalMove *chosenMove, bool isWhite, ChessEvaluator::ChessEvaluation alpha, ChessEvaluator::ChessEvaluation beta)
+ChessEvaluator::ChessEvaluation JudgeDredd::Valkyrie::Play(std::vector< ChessBoard::Board> *boardVector, short int currentRecursion, short int maxRecursion, ChessBoard::InternalMove *chosenMove, bool isWhite, ChessEvaluator::ChessEvaluation alpha, ChessEvaluator::ChessEvaluation beta) const
 {
 #ifdef DEBUG
 	std::cout << currentRecursion<<(currentRecursion!=maxRecursion?"----":"");
@@ -68,7 +65,8 @@ ChessEvaluator::ChessEvaluation JudgeDredd::Valkyrie::Play(std::vector< ChessBoa
 
 
 	ChessEvaluator::ChessEvaluation Best, newBest;
-	ChessBoard::InternalMove bestMove, newbestMove;
+	ChessBoard::InternalMove bestMove;
+	ChessBoard::InternalMove const * newbestMove=nullptr;
 	bool StealmateFlag = true;
 	(*boardVector)[currentRecursion + 1] = ((*boardVector)[currentRecursion]);
 	ChessBoard::Board::Moves moveIterator(&(*boardVector)[currentRecursion+1]);
@@ -84,8 +82,8 @@ ChessEvaluator::ChessEvaluation JudgeDredd::Valkyrie::Play(std::vector< ChessBoa
 			try
 			{
 				newBest.isNull = true;
-				newbestMove = **moveIterator;
-				(*boardVector)[currentRecursion + 1].ChangeState(newbestMove);
+				newbestMove = *moveIterator;
+				(*boardVector)[currentRecursion + 1].ChangeState(*newbestMove);
 				newBest = Play(boardVector, currentRecursion + 1, maxRecursion, nullptr, !isWhite, alpha, beta);
 
 
@@ -106,10 +104,10 @@ ChessEvaluator::ChessEvaluation JudgeDredd::Valkyrie::Play(std::vector< ChessBoa
 
 			}
 
-			if (!newBest.isNull&&(newBest > alpha))
+			if (newbestMove!=nullptr&&!newBest.isNull&&(newBest > alpha))
 			{
 				alpha = (Best = newBest);
-				bestMove = newbestMove;
+				bestMove = *newbestMove;
 				if (chosenMove != nullptr)
 					*chosenMove = bestMove;
 			}
@@ -134,8 +132,8 @@ ChessEvaluator::ChessEvaluation JudgeDredd::Valkyrie::Play(std::vector< ChessBoa
 			try
 			{
 				newBest.isNull = true;
-				newbestMove = **moveIterator;
-				(*boardVector)[currentRecursion + 1].ChangeState(newbestMove);
+				newbestMove = *moveIterator;
+				(*boardVector)[currentRecursion + 1].ChangeState(*newbestMove);
 				newBest = Play(boardVector, currentRecursion + 1, maxRecursion, nullptr, !isWhite, alpha, beta);
 				StealmateFlag = false;
 
@@ -155,11 +153,11 @@ ChessEvaluator::ChessEvaluation JudgeDredd::Valkyrie::Play(std::vector< ChessBoa
 
 			}
 
-			if (!newBest.isNull&&(beta.gameHasEnded||!newBest.gameHasEnded)&&(beta.isNull||((beta.gameHasEnded&&!newBest.gameHasEnded)||newBest < beta)))
+			if (newbestMove != nullptr && !newBest.isNull&&(beta.isNull||beta.gameHasEnded||!newBest.gameHasEnded)&&(beta.isNull||((beta.gameHasEnded&&!newBest.gameHasEnded)||newBest < beta)))
 			{
 
 				beta = (Best = newBest);
-				bestMove = newbestMove;
+				bestMove = *newbestMove;
 				if (chosenMove != nullptr)
 					*chosenMove = bestMove;
 			}
@@ -182,9 +180,12 @@ ChessEvaluator::ChessEvaluation JudgeDredd::Valkyrie::Play(std::vector< ChessBoa
 		Best.isNull = false;
 		Best.gameHasEnded = true;
 		Best.endState = (*boardVector)[currentRecursion + 1].IsWhiteChecked() ? -1 : (*boardVector)[currentRecursion + 1].IsBlackChecked() ? 1 : 0;
+		if (currentRecursion == 0)
+			throw GAME_ENDED(!((*boardVector)[1].IsWhiteChecked() && (*boardVector)[1].IsBlackChecked()), (*boardVector)[1].IsWhiteChecked(), (*boardVector)[1].IsBlackChecked());
+		return Best;
 	}
 
-	return Best;
+	return isWhite?alpha:beta;
 
 }
 

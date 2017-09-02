@@ -49,8 +49,8 @@ JudgeDredd::JudgeDredd(bool isWhite, int givenTime)
     lastMove.from={-1, -1};
     lastMove.to={-1, -1};
     lastMove.type={'?'};
-    player1=new JudgeDredd::Valkyrie(isWhiteP1);
-    player2=new JudgeDredd::Player2(!isWhiteP1);
+//    player1=new JudgeDredd::Valkyrie(isWhiteP1);
+  //  player2=new JudgeDredd::Player2(!isWhiteP1);
 
 
 }
@@ -101,8 +101,8 @@ void JudgeDredd::resetBoard()
 
     delete player1;
     delete player2;
-    player1=new Valkyrie(isWhiteP1);
-    player2=new Player2(!isWhiteP1);
+//    player1=new Valkyrie(isWhiteP1);
+  //  player2=new Player2(!isWhiteP1);
 }
 
 bool JudgeDredd::move()

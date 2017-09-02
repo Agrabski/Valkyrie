@@ -4,15 +4,28 @@ ChessEvaluator::ChessEvaluator::ChessEvaluator()
 {
 }
 
-ChessEvaluator::ChessEvaluation ChessEvaluator::ChessEvaluator::evaluate(const ChessBoard::Board & board)
+ChessEvaluator::ChessEvaluator::ChessEvaluator(float a, float b, float c, float d)
+{
+	friendlyValue = a;
+	enemyValue = b;
+	friendlyCheck = c;
+	enemyCheck = d;
+}
+
+ChessEvaluator::ChessEvaluation ChessEvaluator::ChessEvaluator::evaluate(const ChessBoard::Board & board) const
 {
 	ChessEvaluation tmp = ChessEvaluation();
 	for(short x=0;x<8;x++)
 		for (short y = 0; y < 8; y++)
 		{
-			tmp.value += board.fields[x][y].rank.type*(board.fields[x][y].coveredByWhite + 1);
-			tmp.value -= board.fields[x][y].rank.type*(board.fields[x][y].coveredByBlack + 1);
+			tmp.value += board.fields[x][y].rank.type*(board.fields[x][y].coveredByWhite + 1)*friendlyValue;
+			tmp.value -= board.fields[x][y].rank.type*(board.fields[x][y].coveredByBlack + 1)*enemyValue;
 		}
+	if (board.IsBlackChecked())
+		tmp.value += friendlyCheck;
+	else
+		if (board.IsWhiteChecked())
+			tmp.value -= enemyCheck;
 	tmp.isNull = false;
 	tmp.gameHasEnded = false;
 	return tmp;
@@ -61,7 +74,7 @@ bool ChessEvaluator::ChessEvaluation::operator>(ChessEvaluation & right)
 
 bool ChessEvaluator::ChessEvaluation::operator<(ChessEvaluation & right)
 {
-	return!(*this > right);
+	return !(*this > right);
 }
 
 bool ChessEvaluator::ChessEvaluation::operator==(ChessEvaluation & right)
