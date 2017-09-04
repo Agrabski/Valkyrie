@@ -174,6 +174,40 @@ namespace Valkyrietests
 
 			Assert::IsTrue(count == 20);
 		}
+
+		TEST_METHOD(error)
+		{
+			ChessBoard::Board board;
+			MOVE(1, 0, 2, 2);
+			MOVE(6, 7, 5, 5);
+			MOVE(5, 1, 5, 3);
+			MOVE(1, 7, 0, 5);
+			MOVE(6, 0, 5, 2);
+			MOVE(7, 6, 7, 4);
+			MOVE(5, 2, 3, 3);
+			MOVE(6, 6, 6, 4);
+			MOVE(5, 3, 6, 4);
+			MOVE(7, 4, 7, 3);
+			MOVE(6, 4, 6, 5);
+			ChessBoard::Board::Moves iterator(&board);
+			iterator.Reset(false);
+			++iterator;
+			for (; *iterator != nullptr; ++iterator)
+			{
+				try
+				{
+					board.ChangeState(**iterator);
+					board.Revert();
+				}
+				catch(ChessBoard::KING_IN_DANGER)
+				{ }
+				catch(ChessBoard::INVALID_MOVE)
+				{ }
+				catch(std::exception)
+				{ }
+			}
+
+		}
 	};
 
 	TEST_CLASS(RealGame)

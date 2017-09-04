@@ -75,8 +75,8 @@ namespace ChessBoard
 			fields[3][7].rank = { Queen,false };
 			fields[4][0].rank = { King,true };
 			fields[4][7].rank = { King,false };
-			MoveStack = new std::stack<std::pair<InternalMove, Rank>>();
-			prevBoard = new std::vector<std::pair<std::vector<std::vector<Field>>, int>>();
+			MoveStack = std::stack<std::pair<InternalMove, Rank>>();
+			prevBoard = std::vector<std::pair<std::vector<std::vector<Field>>, int>>();
 		}
 		~Board();
 		Board(const Board*toCopy);
@@ -89,16 +89,15 @@ namespace ChessBoard
 			Moves(Board *Parent)
 			{
 				this->parent = Parent;
-				state = nullptr;
 			}
 			~Moves();
 			Moves();
 			Moves& operator++();
-			const InternalMove* operator*();
+			const InternalMove& operator*();
 			void Reset(bool isWhite);
 		private:
 			std::pair<short, short>currentRank;
-			InternalMove * state;
+			InternalMove  state;
 			bool isWhite;
 			short direction = 0;
 			short moveIterator = 0;
@@ -123,8 +122,8 @@ namespace ChessBoard
 		bool blackCheck = false;
 		bool whiteCheck = false;
 		void ClearStack();
-		std::vector<std::pair<std::vector<std::vector<Field>>,int>> * prevBoard;
-		std::stack<std::pair<InternalMove, Rank>> *MoveStack;
+		std::vector<std::pair<std::vector<std::vector<Field>>,int>>  prevBoard;
+		std::stack<std::pair<InternalMove, Rank>> MoveStack;
 		static const std::pair<short, short> QueenMovementArray[8];
 		static const std::pair<short, short> KnightMovementArray[8];
 

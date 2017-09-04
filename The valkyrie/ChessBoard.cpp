@@ -30,23 +30,23 @@ namespace ChessBoard
 
 	bool Board::addBoard()
 	{
-		for(int i=0;i<prevBoard->size();i++)
+		for(int i=0;i<prevBoard.size();i++)
 		{
 			bool flag = true;
 			for(int x=0;x<8&&flag;x++)
 				for(int y=0;y<8;y++)
-					if ((*prevBoard)[i].first[x][y] != fields[x][y])
+					if ((prevBoard)[i].first[x][y] != fields[x][y])
 					{
 						flag = false;
 						break;
 					}
 			if (flag)
 			{
-				(*prevBoard)[i].second++;
-				return (*prevBoard)[i].second < 3;
+				(prevBoard)[i].second++;
+				return (prevBoard)[i].second < 3;
 			}
 		}
-		prevBoard->emplace_back(std::pair<std::vector<std::vector<Field>>, int>(fields, 1));
+		prevBoard.emplace_back(std::pair<std::vector<std::vector<Field>>, int>(fields, 1));
 		return true;
 	}
 
@@ -65,14 +65,18 @@ namespace ChessBoard
 			for (int y = 0; y < 8; y++)
 				fields[x][y] = toCopy.fields[x][y];
 
-		prevBoard = new std::vector<std::pair<std::vector<std::vector<Field>>, int>>(*toCopy.prevBoard);
-		MoveStack = new std::stack<std::pair<InternalMove, Rank>>(*toCopy.MoveStack);
+		prevBoard.resize(toCopy.prevBoard.size());
+		for (int i = 0; i < toCopy.prevBoard.size(); i++)
+		{
+			prevBoard[i] = toCopy.prevBoard[i];
+		}
+		//prevBoard = std::vector<std::pair<std::vector<std::vector<Field>>, int>>(toCopy.prevBoard);
+		MoveStack = std::stack<std::pair<InternalMove, Rank>>(toCopy.MoveStack);
 		nextMoveIsWhite = toCopy.nextMoveIsWhite;
 		leftWhite = toCopy.leftWhite;
 		rightWhite = toCopy.rightWhite;
 		leftBlack = toCopy.leftBlack;
 		rightBlack = toCopy.rightBlack;
-		this->nextMoveIsWhite = toCopy.nextMoveIsWhite;
 		return *this;
 	}
 
@@ -88,9 +92,9 @@ namespace ChessBoard
 
 	void Board::ClearStack()
 	{
-		while (!MoveStack->empty())
+		while (!MoveStack.empty())
 		{
-			MoveStack->pop();
+			MoveStack.pop();
 		}
 	}
 
@@ -249,9 +253,9 @@ namespace ChessBoard
 	{
 		nextMoveIsWhite = !nextMoveIsWhite;
 		removeBoard(fields);
-		InternalMove lastMove = MoveStack->top().first;
-		Rank beaten = MoveStack->top().second;
-		MoveStack->pop();
+		InternalMove lastMove = MoveStack.top().first;
+		Rank beaten = MoveStack.top().second;
+		MoveStack.pop();
 		if (lastMove.movetype == Standard)
 		{
 			fields[lastMove.from.first][lastMove.from.second].rank = fields[lastMove.to.first][lastMove.to.second].rank;
@@ -269,7 +273,7 @@ namespace ChessBoard
 			fields[lastMove.to.first][lastMove.to.second].rank = beaten;
 			return;
 		case(RochadeLeft):
-			if (!nextMoveIsWhite)
+			if (nextMoveIsWhite)
 			{
 				fields[0][0].rank = { Tower, true };
 				fields[4][0].rank = { King,true };
@@ -289,7 +293,7 @@ namespace ChessBoard
 			}
 			break;
 		case(RochadeRight):
-			if (!nextMoveIsWhite)
+			if (nextMoveIsWhite)
 			{
 				fields[7][0].rank = { Tower, true };
 				fields[4][0].rank = { King,true };
@@ -328,14 +332,13 @@ namespace ChessBoard
 	void Board::ClearData()
 	{
 		ClearStack();
-		prevBoard->clear();
-		delete MoveStack;
-		delete prevBoard;
+		prevBoard.clear();
+		prevBoard.resize(0);
 	}
 
 	void ChessBoard::Board::removeBoard(std::vector<std::vector<Field>> board)
 	{
-		for (std::vector<std::pair<std::vector<std::vector<Field>>, int>>::iterator i = prevBoard->begin(); i != prevBoard->end(); ++i)
+		for (std::vector<std::pair<std::vector<std::vector<Field>>, int>>::iterator i = prevBoard.begin(); i != prevBoard.end(); ++i)
 		{
 			bool flag = true;
 			for (int x = 0; x < 8&&flag; x++)
@@ -348,7 +351,10 @@ namespace ChessBoard
 			if (flag)
 			{
 				if (i->second == 1)
-					prevBoard->erase(i);
+				{
+					prevBoard.erase(i);
+					prevBoard.shrink_to_fit();
+				}
 				else
 					i->second--;
 				return;
@@ -371,8 +377,8 @@ namespace ChessBoard
 			for (int y = 0; y < 8; y++)
 				fields[x][y] = toCopy->fields[x][y];
 
-		prevBoard = new std::vector<std::pair<std::vector<std::vector<Field>>, int>>(*toCopy->prevBoard);
-		MoveStack = new std::stack<std::pair<InternalMove, Rank>>(*toCopy->MoveStack);
+		prevBoard = std::vector<std::pair<std::vector<std::vector<Field>>, int>>(toCopy->prevBoard);
+		MoveStack = std::stack<std::pair<InternalMove, Rank>>(toCopy->MoveStack);
 		nextMoveIsWhite = toCopy->nextMoveIsWhite;
 		leftWhite = toCopy->leftWhite;
 		rightWhite = toCopy->rightWhite;
@@ -383,6 +389,7 @@ namespace ChessBoard
 
 	void ChessBoard::Board::ChangeState(ChessBoard::InternalMove lastMove)
 	{
+		std::pair<InternalMove, Rank>tmp = std::pair<InternalMove, Rank>();
 		Rank currentlyMoved = { Empty,false };
 		std::pair<short, short> relativeMove;
 		if (lastMove.from != std::pair<short, short>(-1, -1))
@@ -391,8 +398,10 @@ namespace ChessBoard
 			if (currentlyMoved.isWhite != nextMoveIsWhite)
 				throw WRONG_COLOR();
 			relativeMove = { lastMove.to.first - lastMove.from.first,lastMove.to.second - lastMove.from.second };
+			tmp.second= fields[lastMove.to.first][lastMove.to.second].rank;
 		}
-		std::pair<InternalMove, Rank>tmp = std::pair<InternalMove, Rank>();
+
+		
 
 		//TODO:check move legitimacy
 		switch (lastMove.movetype)
@@ -446,7 +455,7 @@ namespace ChessBoard
 					//Beating
 					else
 					{
-						if (fields[lastMove.to.first][lastMove.to.second].rank.type == Empty || (fields[lastMove.to.first][lastMove.to.second].rank.type != Empty&&fields[lastMove.to.first][lastMove.to.second].rank.isWhite))
+						if (fields[lastMove.to.first][lastMove.to.second].rank.type == Empty || (fields[lastMove.to.first][lastMove.to.second].rank.type != Empty&&!fields[lastMove.to.first][lastMove.to.second].rank.isWhite))
 							throw INVALID_MOVE();
 					}
 				}
@@ -636,11 +645,10 @@ namespace ChessBoard
 			break;
 		}
 		tmp.first = lastMove;
-		MoveStack->push(tmp);
+		MoveStack.push(tmp);
 		nextMoveIsWhite = !nextMoveIsWhite;
 		if (!addBoard())
 		{
-			Revert();
 			throw THREEFOLD_REPETITON();
 		}
 		try
@@ -752,7 +760,7 @@ namespace ChessBoard
 
 #pragma region MOVE_MACROS
 #define MOVE_CHECK_MACRO(x,y) ((currentRank.first + x<8&&currentRank.first + x>0&&currentRank.second + y<8&&currentRank.second + y>0&&(parent->fields[currentRank.first + x][currentRank.second + y].rank.type == Empty || parent->fields[currentRank.first + x][currentRank.second + y].rank.isWhite != isWhite)))
-#define MOVE_MACRO(x,y) 	state=new InternalMove(currentRank, std::pair<short, short>(currentRank.first +x, currentRank.second +y), Standard);
+#define MOVE_MACRO(x,y) 	state=InternalMove(currentRank, std::pair<short, short>(currentRank.first +x, currentRank.second +y), Standard);
 #define COMPLETE_MOVE_MACRO(x,y) if(MOVE_CHECK_MACRO(x,y)) {MOVE_MACRO(x,y)} else { direction++; moveIterator = 0; return ++(*this);}
 #pragma endregion
 
@@ -762,30 +770,27 @@ namespace ChessBoard
 
 	Board::Moves::~Moves()
 	{
-		if(state!=nullptr)
-			delete state;
+
 	}
 
 	Board::Moves::Moves()
 	{
-		delete state;
-		state = nullptr;
+
 	}
 
 	ChessBoard::Board::Moves & ChessBoard::Board::Moves::operator++()
 	{
-		delete state;
-		state = nullptr;
+		state.from = std::pair<short, short>(8, 0);
 		if (currentRank == std::pair<short, short>(-1, -1))
 		{
 			switch (moveIterator)
 			{
 			case(0):
-				state = new InternalMove({ -1,-1 }, { -1,-1 }, RochadeLeft);
+				state = InternalMove({ -1,-1 }, { -1,-1 }, RochadeLeft);
 				moveIterator++;
 				return*this;
 			case(1):
-				state = new InternalMove({ -1,-1 }, { -1,-1 }, RochadeLeft);
+				state = InternalMove({ -1,-1 }, { -1,-1 }, RochadeLeft);
 				moveIterator++;
 				return*this;
 			default:
@@ -823,7 +828,7 @@ namespace ChessBoard
 
 		if ((currentRank.first == 8 || currentRank.second == 8))
 		{
-			state = nullptr;
+			state = InternalMove({ 8,0 }, { -1,-1 }, RochadeLeft);
 			return *this;
 		}
 
@@ -839,23 +844,23 @@ namespace ChessBoard
 				if (this->isWhite)
 				{
 					//check if this move is possible
-					if (currentRank.first - 1 > 0 && (!parent->fields[currentRank.first - 1][currentRank.second + 1].rank.isWhite || parent->fields[currentRank.first - 1][currentRank.second + 1].rank.type == Empty))
+					if (currentRank.first - 1 > 0&&IN_RANGE(currentRank.second + 1) && (!parent->fields[currentRank.first - 1][currentRank.second + 1].rank.isWhite || parent->fields[currentRank.first - 1][currentRank.second + 1].rank.type == Empty))
 						if (currentRank.second == 7)
 						{
 							//this pawn will be promoted, check the promotions
 							switch (moveIterator)
 							{
 							case(0):
-								state = new InternalMove(currentRank, std::pair<short, short>(currentRank.first - 1, currentRank.second + 1), PromotionBishop);
+								state = InternalMove(currentRank, std::pair<short, short>(currentRank.first - 1, currentRank.second + 1), PromotionBishop);
 								break;
 							case(1):
-								state = new InternalMove(currentRank, std::pair<short, short>(currentRank.first - 1, currentRank.second + 1), PromotionKnight);
+								state = InternalMove(currentRank, std::pair<short, short>(currentRank.first - 1, currentRank.second + 1), PromotionKnight);
 								break;
 							case(2):
-								state = new InternalMove(currentRank, std::pair<short, short>(currentRank.first - 1, currentRank.second + 1), PromotionQueen);
+								state = InternalMove(currentRank, std::pair<short, short>(currentRank.first - 1, currentRank.second + 1), PromotionQueen);
 								break;
 							case(3):
-								state = new InternalMove(currentRank, std::pair<short, short>(currentRank.first - 1, currentRank.second + 1), PromotionTower);
+								state = InternalMove(currentRank, std::pair<short, short>(currentRank.first - 1, currentRank.second + 1), PromotionTower);
 								break;
 							default:
 								direction++;
@@ -867,7 +872,7 @@ namespace ChessBoard
 						}
 						else
 						{
-							state = new InternalMove(currentRank, std::pair<short, short>(currentRank.first - 1, currentRank.second + 1), Standard);
+							state = InternalMove(currentRank, std::pair<short, short>(currentRank.first - 1, currentRank.second + 1), Standard);
 							direction++;
 							return *this;
 						}
@@ -881,23 +886,23 @@ namespace ChessBoard
 				}
 				else
 				{
-					if (currentRank.first - 1 > 0 && (!parent->fields[currentRank.first - 1][currentRank.second - 1].rank.isWhite || parent->fields[currentRank.first - 1][currentRank.second - 1].rank.type == Empty))
+					if (currentRank.first - 1 > 0 &&IN_RANGE(currentRank.second - 1)&& (parent->fields[currentRank.first - 1][currentRank.second - 1].rank.isWhite || parent->fields[currentRank.first - 1][currentRank.second - 1].rank.type == Empty))
 						if (currentRank.second == 7)
 						{
 							//this pawn will be promoted, check the promotions
 							switch (moveIterator)
 							{
 							case(0):
-								state = new InternalMove(currentRank, std::pair<short, short>(currentRank.first - 1, currentRank.second - 1), PromotionBishop);
+								state = InternalMove(currentRank, std::pair<short, short>(currentRank.first - 1, currentRank.second - 1), PromotionBishop);
 								break;
 							case(1):
-								state = new InternalMove(currentRank, std::pair<short, short>(currentRank.first - 1, currentRank.second - 1), PromotionKnight);
+								state = InternalMove(currentRank, std::pair<short, short>(currentRank.first - 1, currentRank.second - 1), PromotionKnight);
 								break;
 							case(2):
-								state = new InternalMove(currentRank, std::pair<short, short>(currentRank.first - 1, currentRank.second - 1), PromotionQueen);
+								state = InternalMove(currentRank, std::pair<short, short>(currentRank.first - 1, currentRank.second - 1), PromotionQueen);
 								break;
 							case(3):
-								state = new InternalMove(currentRank, std::pair<short, short>(currentRank.first - 1, currentRank.second - 1), PromotionTower);
+								state = InternalMove(currentRank, std::pair<short, short>(currentRank.first - 1, currentRank.second - 1), PromotionTower);
 								break;
 							default:
 								direction++;
@@ -909,7 +914,7 @@ namespace ChessBoard
 						}
 						else
 						{
-							state = new InternalMove(currentRank, std::pair<short, short>(currentRank.first - 1, currentRank.second - 1), Standard);
+							state = InternalMove(currentRank, std::pair<short, short>(currentRank.first - 1, currentRank.second - 1), Standard);
 							direction++;
 							return *this;
 						}
@@ -931,9 +936,9 @@ namespace ChessBoard
 					switch (moveIterator)
 					{
 					case(0):
-						if (parent->fields[currentRank.first][currentRank.second + 1].rank.type == Empty)
+						if (IN_RANGE(currentRank.second + 1)&&parent->fields[currentRank.first][currentRank.second + 1].rank.type == Empty)
 						{
-							state = new InternalMove(currentRank, std::pair<short, short>(currentRank.first, currentRank.second + 1), Standard);
+							state = InternalMove(currentRank, std::pair<short, short>(currentRank.first, currentRank.second + 1), Standard);
 							moveIterator++;
 							return *this;
 						}
@@ -946,9 +951,9 @@ namespace ChessBoard
 					case(1):
 						if (currentRank.second == 1)
 						{
-							if (parent->fields[currentRank.first][currentRank.second + 2].rank.type == Empty&&parent->fields[currentRank.first][currentRank.second + 1].rank.type == Empty)
+							if (IN_RANGE(currentRank.second + 2)&&parent->fields[currentRank.first][currentRank.second + 2].rank.type == Empty&&parent->fields[currentRank.first][currentRank.second + 1].rank.type == Empty)
 							{
-								state = new InternalMove(currentRank, std::pair<short, short>(currentRank.first, currentRank.second + 2), Standard);
+								state = InternalMove(currentRank, std::pair<short, short>(currentRank.first, currentRank.second + 2), Standard);
 								moveIterator++;
 								return *this;
 							}
@@ -977,9 +982,9 @@ namespace ChessBoard
 					switch (moveIterator)
 					{
 					case(0):
-						if (parent->fields[currentRank.first][currentRank.second - 1].rank.type == Empty)
+						if (IN_RANGE(currentRank.second - 1)&&parent->fields[currentRank.first][currentRank.second - 1].rank.type == Empty)
 						{
-							state = new InternalMove(currentRank, std::pair<short, short>(currentRank.first, currentRank.second - 1), Standard);
+							state = InternalMove(currentRank, std::pair<short, short>(currentRank.first, currentRank.second - 1), Standard);
 							moveIterator++;
 							return *this;
 						}
@@ -994,7 +999,7 @@ namespace ChessBoard
 						{
 							if (parent->fields[currentRank.first][currentRank.second - 2].rank.type == Empty&&parent->fields[currentRank.first][currentRank.second - 1].rank.type == Empty)
 							{
-								state = new InternalMove(currentRank, std::pair<short, short>(currentRank.first, currentRank.second - 2), Standard);
+								state = InternalMove(currentRank, std::pair<short, short>(currentRank.first, currentRank.second - 2), Standard);
 								moveIterator++;
 								return *this;
 							}
@@ -1024,23 +1029,23 @@ namespace ChessBoard
 				if (this->isWhite)
 				{
 					//check if this move is possible
-					if (IN_RANGE( currentRank.first + 1) && (!parent->fields[currentRank.first + 1][currentRank.second + 1].rank.isWhite || parent->fields[currentRank.first + 1][currentRank.second + 1].rank.type == Empty))
+					if (IN_RANGE( currentRank.first + 1)&& IN_RANGE(currentRank.second + 1) && (!parent->fields[currentRank.first + 1][currentRank.second + 1].rank.isWhite || parent->fields[currentRank.first + 1][currentRank.second + 1].rank.type == Empty))
 						if (currentRank.second == 7)
 						{
 							//this pawn will be promoted, check the promotions
 							switch (moveIterator)
 							{
 							case(0):
-								state = new InternalMove(currentRank, std::pair<short, short>(currentRank.first + 1, currentRank.second + 1), PromotionBishop);
+								state = InternalMove(currentRank, std::pair<short, short>(currentRank.first + 1, currentRank.second + 1), PromotionBishop);
 								break;
 							case(1):
-								state = new InternalMove(currentRank, std::pair<short, short>(currentRank.first + 1, currentRank.second + 1), PromotionKnight);
+								state = InternalMove(currentRank, std::pair<short, short>(currentRank.first + 1, currentRank.second + 1), PromotionKnight);
 								break;
 							case(2):
-								state = new InternalMove(currentRank, std::pair<short, short>(currentRank.first + 1, currentRank.second + 1), PromotionQueen);
+								state = InternalMove(currentRank, std::pair<short, short>(currentRank.first + 1, currentRank.second + 1), PromotionQueen);
 								break;
 							case(3):
-								state = new InternalMove(currentRank, std::pair<short, short>(currentRank.first + 1, currentRank.second + 1), PromotionTower);
+								state = InternalMove(currentRank, std::pair<short, short>(currentRank.first + 1, currentRank.second + 1), PromotionTower);
 								break;
 							default:
 								direction++;
@@ -1052,7 +1057,7 @@ namespace ChessBoard
 						}
 						else
 						{
-							state = new InternalMove(currentRank, std::pair<short, short>(currentRank.first + 1, currentRank.second + 1), Standard);
+							state = InternalMove(currentRank, std::pair<short, short>(currentRank.first + 1, currentRank.second + 1), Standard);
 							direction++;
 							return *this;
 						}
@@ -1066,23 +1071,23 @@ namespace ChessBoard
 				}
 				else
 				{
-					if (IN_RANGE(currentRank.first + 1) && (!parent->fields[currentRank.first + 1][currentRank.second - 1].rank.isWhite || parent->fields[currentRank.first + 1][currentRank.second - 1].rank.type == Empty))
+					if (IN_RANGE(currentRank.first + 1)&&IN_RANGE(currentRank.second - 1) && (parent->fields[currentRank.first + 1][currentRank.second - 1].rank.isWhite || parent->fields[currentRank.first + 1][currentRank.second - 1].rank.type == Empty))
 						if (currentRank.second == 7)
 						{
 							//this pawn will be promoted, check the promotions
 							switch (moveIterator)
 							{
 							case(0):
-								state = new InternalMove(currentRank, std::pair<short, short>(currentRank.first + 1, currentRank.second - 1), PromotionBishop);
+								state = InternalMove(currentRank, std::pair<short, short>(currentRank.first + 1, currentRank.second - 1), PromotionBishop);
 								break;
 							case(1):
-								state = new InternalMove(currentRank, std::pair<short, short>(currentRank.first + 1, currentRank.second - 1), PromotionKnight);
+								state = InternalMove(currentRank, std::pair<short, short>(currentRank.first + 1, currentRank.second - 1), PromotionKnight);
 								break;
 							case(2):
-								state = new InternalMove(currentRank, std::pair<short, short>(currentRank.first + 1, currentRank.second - 1), PromotionQueen);
+								state = InternalMove(currentRank, std::pair<short, short>(currentRank.first + 1, currentRank.second - 1), PromotionQueen);
 								break;
 							case(3):
-								state = new InternalMove(currentRank, std::pair<short, short>(currentRank.first + 1, currentRank.second - 1), PromotionTower);
+								state = InternalMove(currentRank, std::pair<short, short>(currentRank.first + 1, currentRank.second - 1), PromotionTower);
 								break;
 							default:
 								direction++;
@@ -1094,7 +1099,7 @@ namespace ChessBoard
 						}
 						else
 						{
-							state = new InternalMove(currentRank, std::pair<short, short>(currentRank.first + 1, currentRank.second - 1), Standard);
+							state = InternalMove(currentRank, std::pair<short, short>(currentRank.first + 1, currentRank.second - 1), Standard);
 							direction++;
 							return *this;
 						}
@@ -1243,7 +1248,7 @@ namespace ChessBoard
 			{
 				if (IN_RANGE(currentRank.first + KnightMovementArray[direction].first) && IN_RANGE(currentRank.second + KnightMovementArray[direction].second) && (parent->fields[currentRank.first + KnightMovementArray[direction].first][currentRank.second + KnightMovementArray[direction].second].rank.type == Empty || parent->fields[currentRank.first + KnightMovementArray[direction].first][currentRank.second + KnightMovementArray[direction].second].rank.isWhite != parent->fields[currentRank.first][currentRank.second].rank.isWhite))
 				{
-					state = new InternalMove(currentRank, std::pair<short, short>(currentRank.first + KnightMovementArray[direction].first, currentRank.second + KnightMovementArray[direction].second), Standard);
+					state = InternalMove(currentRank, std::pair<short, short>(currentRank.first + KnightMovementArray[direction].first, currentRank.second + KnightMovementArray[direction].second), Standard);
 				}
 				else
 				{
@@ -1316,7 +1321,7 @@ namespace ChessBoard
 		return *this;
 	}
 
-	const ChessBoard::InternalMove * ChessBoard::Board::Moves::operator*()
+	const ChessBoard::InternalMove & ChessBoard::Board::Moves::operator*()
 	{
 		return state;
 	}

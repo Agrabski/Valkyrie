@@ -18,8 +18,8 @@ ChessEvaluator::ChessEvaluation ChessEvaluator::ChessEvaluator::evaluate(const C
 	for(short x=0;x<8;x++)
 		for (short y = 0; y < 8; y++)
 		{
-			tmp.value += board.fields[x][y].rank.type*(board.fields[x][y].coveredByWhite + 1)*friendlyValue;
-			tmp.value -= board.fields[x][y].rank.type*(board.fields[x][y].coveredByBlack + 1)*enemyValue;
+			tmp.value +=((float) board.fields[x][y].rank.type)*(board.fields[x][y].coveredByWhite + 1)*friendlyValue;
+			tmp.value -=((float) board.fields[x][y].rank.type)*(board.fields[x][y].coveredByBlack + 1)*enemyValue;
 		}
 	if (board.IsBlackChecked())
 		tmp.value += friendlyCheck;

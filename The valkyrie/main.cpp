@@ -8,30 +8,33 @@ int main()
 {
 	JudgeDredd::Valkyrie *player1, *player2;
 	Move move, buffer;
-	ChessEvaluator::ChessEvaluator currBest;
+	ChessEvaluator::ChessEvaluator currBest=ChessEvaluator::ChessEvaluator();
 	float a, b, c, d;
 	bool firstIsWhite=true;
 	move.from = { 0,0 };
 	move.to = { 0,0 };
-	for(a=.1f;a<10;a+=.1f)
-		for(b=.1f;b<10;b+=.1f)
-			for(c=.1f;c<10;c+=.1f)
-				for (d = .2f; d < 10; d += .1f)
+	for(d=300;d>0;d-=10)
+		for(c=300;c>0;c-=10)
+			for(b=10;b>0;b-=.1f)
+				for (a = 0; a < 10; a += .1f)
 				{
 					int firstWin = 0, secondWin = 0;
-					for (int i = 0; i < 4; i++)
+					for (int i = 0; i < 2; i++)
 					{
+						ChessBoard::Board board;
 						std::cout << "Game number:" << i << " Configuration:" << a << "," << b << "," << c << "," << d << std::endl;
 						player1 = new JudgeDredd::Valkyrie(firstIsWhite, currBest);
 						player2 = new JudgeDredd::Valkyrie(!firstIsWhite, ChessEvaluator::ChessEvaluator(a, b, c, d));
 						try
 						{
-							for (buffer=player1->makeMove(move), std::cout<<buffer.from.first<<" "<< buffer.from.second<<" " << buffer.to.first << " " << buffer.to.second<<std::endl; true;)
+							for (buffer=player1->makeMove(move), std::cout<<buffer.from.first<<" "<< buffer.from.second<<" " << buffer.to.first << " " << buffer.to.second<<std::endl,board.ChangeState(ChessBoard::InternalMove(buffer)); true;)
 							{
 								buffer=player2->makeMove(buffer);
-								std::cout << buffer.from.first << " " << buffer.from.second << " " << buffer.to.first << " " << buffer.to.second << std::endl;
+								board.ChangeState(ChessBoard::InternalMove(buffer));
+								std::cout << buffer.from.first << " " << buffer.from.second << " " << buffer.to.first << " " << buffer.to.second <<(board.IsBlackChecked()?"+\n": "\n");
 								buffer = player1->makeMove(buffer);
-								std::cout << buffer.from.first << " " << buffer.from.second << " " << buffer.to.first << " " << buffer.to.second << std::endl;
+								board.ChangeState(ChessBoard::InternalMove(buffer));
+								std::cout << buffer.from.first << " " << buffer.from.second << " " << buffer.to.first << " " << buffer.to.second << (board.IsWhiteChecked() ? "+\n" : "\n");
 							}
 						}
 						catch (GAME_ENDED err)
@@ -56,12 +59,17 @@ int main()
 						delete player2;
 						player1 = new JudgeDredd::Valkyrie(!firstIsWhite, currBest);
 						player2 = new JudgeDredd::Valkyrie(firstIsWhite, ChessEvaluator::ChessEvaluator(a, b, c, d));
+						board = ChessBoard::Board();
 						try
 						{
-							for (buffer = player2->makeMove(move); true;)
+							for (buffer = player2->makeMove(move), std::cout << buffer.from.first << " " << buffer.from.second << " " << buffer.to.first << " " << buffer.to.second << std::endl, board.ChangeState(ChessBoard::InternalMove(buffer)); true;)
 							{
 								buffer = player1->makeMove(buffer);
+								board.ChangeState(ChessBoard::InternalMove(buffer));
+								std::cout << buffer.from.first << " " << buffer.from.second << " " << buffer.to.first << " " << buffer.to.second << (board.IsBlackChecked() ? "+\n" : "\n");
 								buffer = player2->makeMove(buffer);
+								board.ChangeState(ChessBoard::InternalMove(buffer));
+								std::cout << buffer.from.first << " " << buffer.from.second << " " << buffer.to.first << " " << buffer.to.second << (board.IsWhiteChecked() ? "+\n" : "\n");
 							}
 						}
 						catch (GAME_ENDED err)
