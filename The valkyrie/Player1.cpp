@@ -145,6 +145,7 @@ ChessEvaluator::ChessEvaluation JudgeDredd::Valkyrie::Play(std::vector< ChessBoa
 				newBest.gameHasEnded = true;
 				newBest.isNull = false;
 				newBest.endState = 0;
+				(*boardVector)[currentRecursion + 1].Revert();
 			}
 			catch (ChessBoard::MOVE_BLOCKED)
 			{
