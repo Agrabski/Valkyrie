@@ -25,6 +25,7 @@ namespace ChessBoard
 		std::pair<short, short> to;
 		MoveTypes movetype;
 		Move ConvertToExternal(bool amIWhite);
+		bool operator!=(const InternalMove& other) const;
 	};
 
 	int sign(int x);
@@ -94,8 +95,10 @@ namespace ChessBoard
 			Moves();
 			Moves& operator++();
 			const InternalMove& operator*();
+			const InternalMove& cend();
 			void Reset(bool isWhite);
 		private:
+			static const InternalMove endState;
 			std::pair<short, short>currentRank;
 			InternalMove  state;
 			bool isWhite;

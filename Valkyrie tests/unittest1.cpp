@@ -162,7 +162,7 @@ namespace Valkyrietests
 			{
 				try
 				{
-					board.ChangeState(**iterator);
+					board.ChangeState(*iterator);
 					count++;
 					board.Revert();
 				}

@@ -77,7 +77,7 @@ ChessEvaluator::ChessEvaluation JudgeDredd::Valkyrie::Play(std::vector< ChessBoa
 
 	if (isWhite)
 	{
-		for (; (*moveIterator).from != std::pair<short,short>(8,0); ++moveIterator)
+		for (; *moveIterator != moveIterator.cend(); ++moveIterator)
 		{
 			try
 			{
@@ -128,7 +128,7 @@ ChessEvaluator::ChessEvaluation JudgeDredd::Valkyrie::Play(std::vector< ChessBoa
 	}
 	else
 	{
-		for (; (*moveIterator).from != std::pair<short, short>(8, 0); ++moveIterator)
+		for (; *moveIterator != moveIterator.cend(); ++moveIterator)
 		{
 			try
 			{

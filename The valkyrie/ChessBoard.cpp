@@ -13,6 +13,8 @@
 
 namespace ChessBoard
 {
+	const InternalMove Board::Moves::endState = InternalMove(std::pair<short, short>(0, 8), std::pair<short, short>(0, 8), Standard);
+
 	const std::pair<short, short> Board::KnightMovementArray[8] = { { -2,-1 },{ -2,1 },{ -1,2 },{ 1,2 },{ 2,1 },{ 2,-1 },{1,-2 },{ -1,-2 } };
 
 	const std::pair<short, short> Board::QueenMovementArray[8] = { std::pair<short, short>(-1,0),std::pair<short, short>(-1,1),std::pair<short, short>(0,1),std::pair<short, short>(1,1),std::pair<short, short>(1,0),std::pair<short, short>(1,-1),std::pair<short, short>(0,-1),std::pair<short, short>(-1,-1) };
@@ -757,6 +759,11 @@ namespace ChessBoard
 		return returnValue;
 	}
 
+	bool InternalMove::operator!=(const InternalMove & other) const
+	{
+		return from != other.from || to != other.to || movetype != other.movetype;
+	}
+
 
 #pragma region MOVE_MACROS
 #define MOVE_CHECK_MACRO(x,y) ((currentRank.first + x<8&&currentRank.first + x>0&&currentRank.second + y<8&&currentRank.second + y>0&&(parent->fields[currentRank.first + x][currentRank.second + y].rank.type == Empty || parent->fields[currentRank.first + x][currentRank.second + y].rank.isWhite != isWhite)))
@@ -780,7 +787,7 @@ namespace ChessBoard
 
 	ChessBoard::Board::Moves & ChessBoard::Board::Moves::operator++()
 	{
-		state.from = std::pair<short, short>(8, 0);
+		state = cend();
 		if (currentRank == std::pair<short, short>(-1, -1))
 		{
 			switch (moveIterator)
@@ -828,7 +835,7 @@ namespace ChessBoard
 
 		if ((currentRank.first == 8 || currentRank.second == 8))
 		{
-			state = InternalMove({ 8,0 }, { -1,-1 }, RochadeLeft);
+			state = cend();
 			return *this;
 		}
 
@@ -1324,6 +1331,11 @@ namespace ChessBoard
 	const ChessBoard::InternalMove & ChessBoard::Board::Moves::operator*()
 	{
 		return state;
+	}
+
+	const InternalMove & Board::Moves::cend()
+	{
+		return endState;
 	}
 
 	void ChessBoard::Board::Moves::Reset(bool isWhite)

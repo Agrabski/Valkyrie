@@ -24,20 +24,17 @@ int main()
 					int firstWin = 0, secondWin = 0;
 					for (int i = 0; i < 2; i++)
 					{
-						ChessBoard::Board board;
 						std::cout << "Game number:" << i << " Configuration:" << a << "," << b << "," << c << "," << d << std::endl;
 						player1 = new JudgeDredd::Valkyrie(firstIsWhite, currBest);
 						player2 = new JudgeDredd::Valkyrie(!firstIsWhite, ChessEvaluator::ChessEvaluator(a, b, c, d));
 						try
 						{
-							for (buffer = player1->makeMove(move), std::cout << buffer.from.first << " " << buffer.from.second << " " << buffer.to.first << " " << buffer.to.second << std::endl, board.ChangeState(ChessBoard::InternalMove(buffer)); true;)
+							for (buffer = player1->makeMove(move), std::cout << buffer.from.first << " " << buffer.from.second << " " << buffer.to.first << " " << buffer.to.second << std::endl; true;)
 							{
 								buffer = player2->makeMove(buffer);
-								board.ChangeState(ChessBoard::InternalMove(buffer));
-								std::cout << buffer.from.first << " " << buffer.from.second << " " << buffer.to.first << " " << buffer.to.second << (board.IsBlackChecked() ? "+\n" : "\n");
+								std::cout << buffer.from.first << " " << buffer.from.second << " " << buffer.to.first << " " << buffer.to.second << "\n";
 								buffer = player1->makeMove(buffer);
-								board.ChangeState(ChessBoard::InternalMove(buffer));
-								std::cout << buffer.from.first << " " << buffer.from.second << " " << buffer.to.first << " " << buffer.to.second << (board.IsWhiteChecked() ? "+\n" : "\n");
+								std::cout << buffer.from.first << " " << buffer.from.second << " " << buffer.to.first << " " << buffer.to.second << "\n";
 							}
 						}
 						catch (GAME_ENDED err)
@@ -62,18 +59,15 @@ int main()
 						delete player2;
 						player1 = new JudgeDredd::Valkyrie(!firstIsWhite, currBest);
 						player2 = new JudgeDredd::Valkyrie(firstIsWhite, ChessEvaluator::ChessEvaluator(a, b, c, d));
-						board = ChessBoard::Board();
 
 						try
 						{
-							for (buffer = player2->makeMove(move), std::cout << buffer.from.first << " " << buffer.from.second << " " << buffer.to.first << " " << buffer.to.second << std::endl, board.ChangeState(ChessBoard::InternalMove(buffer)); true;)
+							for (buffer = player2->makeMove(move), std::cout << buffer.from.first << " " << buffer.from.second << " " << buffer.to.first << " " << buffer.to.second << std::endl; true;)
 							{
 								buffer = player1->makeMove(buffer);
-								board.ChangeState(ChessBoard::InternalMove(buffer));
-								std::cout << buffer.from.first << " " << buffer.from.second << " " << buffer.to.first << " " << buffer.to.second << (board.IsBlackChecked() ? "+\n" : "\n");
+								std::cout << buffer.from.first << " " << buffer.from.second << " " << buffer.to.first << " " << buffer.to.second << "\n";
 								buffer = player2->makeMove(buffer);
-								board.ChangeState(ChessBoard::InternalMove(buffer));
-								std::cout << buffer.from.first << " " << buffer.from.second << " " << buffer.to.first << " " << buffer.to.second << (board.IsWhiteChecked() ? "+\n" : "\n");
+								std::cout << buffer.from.first << " " << buffer.from.second << " " << buffer.to.first << " " << buffer.to.second <<"\n";
 							}
 						}
 						catch (GAME_ENDED err)
