@@ -688,6 +688,17 @@ namespace ChessBoard
 		}
 	}
 
+	void Board::ChangeState(InternalMove lastMove, int)
+	{
+		if(lastMove.from==std::pair<short,short>(-1,-1))
+			if (fields[lastMove.from.first][lastMove.from.second].rank.type == Pawn || fields[lastMove.to.first][lastMove.to.second].rank.type != Empty)
+			{
+				prevBoard.clear();
+				prevBoard.shrink_to_fit();
+			}
+		ChangeState(lastMove);
+	}
+
 	bool ChessBoard::Board::operator==(Board & rightOne)
 	{
 		for (int x = 0; x < 8; x++)

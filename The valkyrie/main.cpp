@@ -27,9 +27,9 @@ int main()
 	{
 		for (c = 300; c > 0; c -= 10)
 		{
-			for (b = 9; b > 0; b -= .1f)
+			for (b = 10; b > 0; b -= .1f)
 			{
-				for (a = 9.7; a < 10; a += .1f)
+				for (a = 0; a < 10; a += .1f)
 				{
 					int firstWin = 0, secondWin = 0;
 					for (int i = 0; i < 2; i++)

@@ -30,7 +30,7 @@ Move JudgeDredd::Valkyrie::makeMove(Move lastMove)
 	if (!firstMove)
 	{
 		ChessBoard::InternalMove tmp(lastMove);
-		currBoardState->ChangeState(tmp);
+		currBoardState->ChangeState(tmp,0);
 	}
 	firstMove = false;
 	ChessEvaluator::ChessEvaluation alpha, beta;
@@ -42,7 +42,7 @@ Move JudgeDredd::Valkyrie::makeMove(Move lastMove)
 #endif // DEBUG
 	try
 	{
-		currBoardState->ChangeState(*buffer);
+		currBoardState->ChangeState(*buffer,0);
 	}
 	catch (ChessBoard::THREEFOLD_REPETITON)
 	{
@@ -194,9 +194,9 @@ ChessEvaluator::ChessEvaluation JudgeDredd::Valkyrie::Play(std::vector< ChessBoa
 	{
 		Best.isNull = false;
 		Best.gameHasEnded = true;
-		Best.endState = (*boardVector)[currentRecursion + 1].IsWhiteChecked() ? -1 : (*boardVector)[currentRecursion + 1].IsBlackChecked() ? 1 : 0;
+		Best.endState = (*boardVector)[currentRecursion + 1].IsWhiteChecked() ? -1 : ((*boardVector)[currentRecursion + 1].IsBlackChecked() ? 1 : 0);
 		if (currentRecursion == 0)
-			throw GAME_ENDED(!((*boardVector)[1].IsWhiteChecked() && (*boardVector)[1].IsBlackChecked()), (*boardVector)[1].IsWhiteChecked(), (*boardVector)[1].IsBlackChecked());
+			throw GAME_ENDED((!(*boardVector)[1].IsWhiteChecked()) && (!(*boardVector)[1].IsBlackChecked()), (*boardVector)[1].IsWhiteChecked(), (*boardVector)[1].IsBlackChecked());
 		return Best;
 	}
 

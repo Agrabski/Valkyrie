@@ -82,6 +82,7 @@ namespace ChessBoard
 		~Board();
 		Board(const Board*toCopy);
 		void ChangeState(InternalMove lastMove);
+		void ChangeState(InternalMove lastMove, int);
 		bool operator==(Board& right);
 		void Revert();
 		std::vector<std::vector<Field>>fields;
