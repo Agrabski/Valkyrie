@@ -3,9 +3,19 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <iostream>
+#include "Evaluator.h"
+#include <windows.system.h>
+#include <fstream>
+
+std::ostream & operator<<(std::ostream & stream, ChessEvaluator::ChessEvaluator const toWrite)
+{
+	return stream << toWrite.friendlyValue << " " << toWrite.enemyValue << " " << toWrite.friendlyCheck << " " << toWrite.enemyCheck << std::endl;
+}
 
 int main()
 {
+	std::ofstream stream;
+	stream.open("debug.txt", 'w');
 	JudgeDredd::Valkyrie *player1, *player2;
 	Move move, buffer;
 	ChessEvaluator::ChessEvaluator currBest = ChessEvaluator::ChessEvaluator();
@@ -17,14 +27,15 @@ int main()
 	{
 		for (c = 300; c > 0; c -= 10)
 		{
-			for (b = 10; b > 0; b -= .1f)
+			for (b = 9; b > 0; b -= .1f)
 			{
-				for (a = 2.1; a < 10; a += .1f)
+				for (a = 9.7; a < 10; a += .1f)
 				{
 					int firstWin = 0, secondWin = 0;
 					for (int i = 0; i < 2; i++)
 					{
 						std::cout << "Game number:" << i << " Configuration:" << a << "," << b << "," << c << "," << d << std::endl;
+						stream << currBest << "----" << ChessEvaluator::ChessEvaluator(a, b, c, d) << "--\n";
 						player1 = new JudgeDredd::Valkyrie(firstIsWhite, currBest);
 						player2 = new JudgeDredd::Valkyrie(!firstIsWhite, ChessEvaluator::ChessEvaluator(a, b, c, d));
 						try
@@ -67,7 +78,7 @@ int main()
 								buffer = player1->makeMove(buffer);
 								std::cout << buffer.from.first << " " << buffer.from.second << " " << buffer.to.first << " " << buffer.to.second << "\n";
 								buffer = player2->makeMove(buffer);
-								std::cout << buffer.from.first << " " << buffer.from.second << " " << buffer.to.first << " " << buffer.to.second <<"\n";
+								std::cout << buffer.from.first << " " << buffer.from.second << " " << buffer.to.first << " " << buffer.to.second << "\n";
 							}
 						}
 						catch (GAME_ENDED err)
@@ -98,8 +109,7 @@ int main()
 		}
 	}
 	std::cout << std::endl << "RESULT:" << std::endl << a << "," << b << "," << c << "," << d << std::endl;
-
-
+	system("pause");
 	std::cin >> a;
 	return 0;
 }

@@ -158,7 +158,7 @@ namespace Valkyrietests
 			ChessBoard::Board board;
 			ChessBoard::Board::Moves iterator(&board);
 			iterator.Reset(true);
-			for (++iterator; *iterator != nullptr; ++iterator)
+			for (++iterator; *iterator != iterator.cend(); ++iterator)
 			{
 				try
 				{
@@ -192,11 +192,11 @@ namespace Valkyrietests
 			ChessBoard::Board::Moves iterator(&board);
 			iterator.Reset(false);
 			++iterator;
-			for (; *iterator != nullptr; ++iterator)
+			for (; *iterator != iterator.cend(); ++iterator)
 			{
 				try
 				{
-					board.ChangeState(**iterator);
+					board.ChangeState(*iterator);
 					board.Revert();
 				}
 				catch(ChessBoard::KING_IN_DANGER)

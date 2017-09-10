@@ -31,6 +31,8 @@ ChessEvaluator::ChessEvaluation ChessEvaluator::ChessEvaluator::evaluate(const C
 	return tmp;
 }
 
+
+
 bool ChessEvaluator::ChessEvaluation::operator>(ChessEvaluation & right)
 {
 	//null saveguards

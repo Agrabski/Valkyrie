@@ -40,8 +40,20 @@ Move JudgeDredd::Valkyrie::makeMove(Move lastMove)
 #ifdef DEBUG
 	std::cout << alpha.value;
 #endif // DEBUG
-	currBoardState->ChangeState(*buffer);
-
+	try
+	{
+		currBoardState->ChangeState(*buffer);
+	}
+	catch (ChessBoard::THREEFOLD_REPETITON)
+	{
+		throw GAME_ENDED(true, false, false);
+	}
+	catch (ChessBoard::KING_IN_DANGER)
+	{
+		std::cout << "Assertion failed! (king in danger in Valkyrie::makeMove)";
+		int i;
+		std::cin >>i ;
+	}
 	Move tmp = buffer->ConvertToExternal(amIWhite);
 	delete buffer;
 	boardArray.clear();

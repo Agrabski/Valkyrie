@@ -1,5 +1,6 @@
 #pragma once
 #include "chessboard.h"
+#include <iostream>
 
 
 namespace ChessEvaluator

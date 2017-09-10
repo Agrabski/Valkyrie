@@ -169,10 +169,14 @@ namespace ChessBoard
 							{
 								fields[x + QueenMovementArray[direction].first*i][y + QueenMovementArray[direction].second*i].coveredByBlack += 1;
 								if (fields[x + QueenMovementArray[direction].first*i][y + QueenMovementArray[direction].second*i].rank.type == King&&fields[x + QueenMovementArray[direction].first*i][y + QueenMovementArray[direction].second*i].rank.isWhite != isWhite)
+								{
 									whiteCheck = true;
+								}
 							}
 							if (fields[x + QueenMovementArray[direction].first*i][y + QueenMovementArray[direction].second*i].rank.type != Empty)
+							{
 								break;
+							}
 						}
 					}
 					break;
@@ -262,7 +266,12 @@ namespace ChessBoard
 		{
 			fields[lastMove.from.first][lastMove.from.second].rank = fields[lastMove.to.first][lastMove.to.second].rank;
 			fields[lastMove.to.first][lastMove.to.second].rank = beaten;
-			PaintTheMap();
+			try
+			{
+				PaintTheMap();
+			}
+			catch(KING_IN_DANGER)
+			{ }
 			return;
 		}
 		switch (lastMove.movetype)
@@ -402,7 +411,10 @@ namespace ChessBoard
 			relativeMove = { lastMove.to.first - lastMove.from.first,lastMove.to.second - lastMove.from.second };
 			tmp.second= fields[lastMove.to.first][lastMove.to.second].rank;
 		}
-
+		else
+		{
+			currentlyMoved = { Tower,nextMoveIsWhite };
+		}
 		
 
 		//TODO:check move legitimacy
@@ -417,6 +429,8 @@ namespace ChessBoard
 					throw INVALID_MOVE();
 				if (currentlyMoved.isWhite)
 				{
+					if (lastMove.to.second == 7)
+						throw INVALID_MOVE();
 					//No beating
 					if (relativeMove.first == 0)
 					{
@@ -440,6 +454,8 @@ namespace ChessBoard
 				}
 				else
 				{
+					if (lastMove.to.second == 0)
+						throw INVALID_MOVE();
 					//No beating
 					if (relativeMove.first == 0)
 					{
@@ -535,7 +551,7 @@ namespace ChessBoard
 			break;
 		case(PromotionQueen):
 		{
-			if ((currentlyMoved.isWhite && lastMove.to.second != 6) || (!currentlyMoved.isWhite && lastMove.to.second != 1) || currentlyMoved.type != Pawn)
+			if ((currentlyMoved.isWhite && lastMove.to.second != 7) || (!currentlyMoved.isWhite && lastMove.to.second != 0) || currentlyMoved.type != Pawn)
 				throw INVALID_MOVE();
 			if (relativeMove.first == 1 || relativeMove.first == -1)
 				if (fields[lastMove.to.first][lastMove.to.second].rank.type == Empty || (fields[lastMove.to.first][lastMove.to.second].rank.type != Empty&&fields[lastMove.to.first][lastMove.to.second].rank.isWhite == currentlyMoved.isWhite))
@@ -547,7 +563,7 @@ namespace ChessBoard
 		break;
 		case(PromotionBishop):
 		{
-			if ((currentlyMoved.isWhite && lastMove.to.second != 6) || (!currentlyMoved.isWhite && lastMove.to.second != 1) || currentlyMoved.type != Pawn)
+			if ((currentlyMoved.isWhite && lastMove.to.second != 7) || (!currentlyMoved.isWhite && lastMove.to.second != 0) || currentlyMoved.type != Pawn)
 				throw INVALID_MOVE();
 			if (relativeMove.first == 1 || relativeMove.first == -1)
 				if (fields[lastMove.to.first][lastMove.to.second].rank.type == Empty || (fields[lastMove.to.first][lastMove.to.second].rank.type != Empty&&fields[lastMove.to.first][lastMove.to.second].rank.isWhite == currentlyMoved.isWhite))
@@ -559,7 +575,7 @@ namespace ChessBoard
 		break;
 		case(PromotionKnight):
 		{
-			if ((currentlyMoved.isWhite && lastMove.to.second != 6) || (!currentlyMoved.isWhite && lastMove.to.second != 1) || currentlyMoved.type != Pawn)
+			if ((currentlyMoved.isWhite && lastMove.to.second != 7) || (!currentlyMoved.isWhite && lastMove.to.second != 0) || currentlyMoved.type != Pawn)
 				throw INVALID_MOVE();
 			if (relativeMove.first == 1 || relativeMove.first == -1)
 				if (fields[lastMove.to.first][lastMove.to.second].rank.type == Empty || (fields[lastMove.to.first][lastMove.to.second].rank.type != Empty&&fields[lastMove.to.first][lastMove.to.second].rank.isWhite == currentlyMoved.isWhite))
@@ -571,7 +587,7 @@ namespace ChessBoard
 		break;
 		case(PromotionTower):
 		{
-			if ((currentlyMoved.isWhite && lastMove.to.second != 6) || (!currentlyMoved.isWhite && lastMove.to.second != 1) || currentlyMoved.type != Pawn)
+			if ((currentlyMoved.isWhite && lastMove.to.second != 7) || (!currentlyMoved.isWhite && lastMove.to.second != 0) || currentlyMoved.type != Pawn)
 				throw INVALID_MOVE();
 			if (relativeMove.first == 1 || relativeMove.first == -1)
 				if (fields[lastMove.to.first][lastMove.to.second].rank.type == Empty || (fields[lastMove.to.first][lastMove.to.second].rank.type != Empty&&fields[lastMove.to.first][lastMove.to.second].rank.isWhite == currentlyMoved.isWhite))
@@ -852,7 +868,7 @@ namespace ChessBoard
 				{
 					//check if this move is possible
 					if (currentRank.first - 1 > 0&&IN_RANGE(currentRank.second + 1) && (!parent->fields[currentRank.first - 1][currentRank.second + 1].rank.isWhite || parent->fields[currentRank.first - 1][currentRank.second + 1].rank.type == Empty))
-						if (currentRank.second == 7)
+						if (currentRank.second == 6)
 						{
 							//this pawn will be promoted, check the promotions
 							switch (moveIterator)
@@ -894,7 +910,7 @@ namespace ChessBoard
 				else
 				{
 					if (currentRank.first - 1 > 0 &&IN_RANGE(currentRank.second - 1)&& (parent->fields[currentRank.first - 1][currentRank.second - 1].rank.isWhite || parent->fields[currentRank.first - 1][currentRank.second - 1].rank.type == Empty))
-						if (currentRank.second == 7)
+						if (currentRank.second == 0)
 						{
 							//this pawn will be promoted, check the promotions
 							switch (moveIterator)
@@ -940,27 +956,14 @@ namespace ChessBoard
 			{
 				if (this->isWhite)
 				{
-					switch (moveIterator)
+					if (currentRank.second == 1)
 					{
-					case(0):
-						if (IN_RANGE(currentRank.second + 1)&&parent->fields[currentRank.first][currentRank.second + 1].rank.type == Empty)
+						switch (moveIterator)
 						{
-							state = InternalMove(currentRank, std::pair<short, short>(currentRank.first, currentRank.second + 1), Standard);
-							moveIterator++;
-							return *this;
-						}
-						else
-						{
-							direction++;
-							moveIterator = 0;
-							return ++(*this);
-						}
-					case(1):
-						if (currentRank.second == 1)
-						{
-							if (IN_RANGE(currentRank.second + 2)&&parent->fields[currentRank.first][currentRank.second + 2].rank.type == Empty&&parent->fields[currentRank.first][currentRank.second + 1].rank.type == Empty)
+						case(0):
+							if (IN_RANGE(currentRank.second + 1) && parent->fields[currentRank.first][currentRank.second + 1].rank.type == Empty)
 							{
-								state = InternalMove(currentRank, std::pair<short, short>(currentRank.first, currentRank.second + 2), Standard);
+								state = InternalMove(currentRank, std::pair<short, short>(currentRank.first, currentRank.second + 1), Standard);
 								moveIterator++;
 								return *this;
 							}
@@ -970,41 +973,84 @@ namespace ChessBoard
 								moveIterator = 0;
 								return ++(*this);
 							}
-						}
-						else
-						{
+						case(1):
+								if (IN_RANGE(currentRank.second + 2) && parent->fields[currentRank.first][currentRank.second + 2].rank.type == Empty&&parent->fields[currentRank.first][currentRank.second + 1].rank.type == Empty)
+								{
+									state = InternalMove(currentRank, std::pair<short, short>(currentRank.first, currentRank.second + 2), Standard);
+									moveIterator++;
+									return *this;
+								}
+								else
+								{
+									direction++;
+									moveIterator = 0;
+									return ++(*this);
+								}
+						default:
 							direction++;
 							moveIterator = 0;
 							return ++(*this);
 						}
-
-					default:
-						direction++;
-						moveIterator = 0;
-						return ++(*this);
 					}
-				}
-				else
-				{
-					switch (moveIterator)
+					else
 					{
-					case(0):
-						if (IN_RANGE(currentRank.second - 1)&&parent->fields[currentRank.first][currentRank.second - 1].rank.type == Empty)
+						if (currentRank.second == 6)
 						{
-							state = InternalMove(currentRank, std::pair<short, short>(currentRank.first, currentRank.second - 1), Standard);
+							//this pawn will be promoted, check the promotions
+							switch (moveIterator)
+							{
+							case(0):
+								state = InternalMove(currentRank, std::pair<short, short>(currentRank.first, currentRank.second + 1), PromotionBishop);
+								break;
+							case(1):
+								state = InternalMove(currentRank, std::pair<short, short>(currentRank.first, currentRank.second + 1), PromotionKnight);
+								break;
+							case(2):
+								state = InternalMove(currentRank, std::pair<short, short>(currentRank.first, currentRank.second + 1), PromotionQueen);
+								break;
+							case(3):
+								state = InternalMove(currentRank, std::pair<short, short>(currentRank.first, currentRank.second + 1), PromotionTower);
+								break;
+							default:
+								direction++;
+								moveIterator = 0;
+								return++(*this);
+							}
 							moveIterator++;
 							return *this;
 						}
 						else
 						{
-							direction++;
-							moveIterator = 0;
-							return ++(*this);
+							if (IN_RANGE(currentRank.second + 1) && parent->fields[currentRank.first][currentRank.second + 1].rank.type == Empty)
+							{
+								state = InternalMove(currentRank, std::pair<short, short>(currentRank.first, currentRank.second + 1), Standard);
+								direction++;
+								return *this;
+							}
 						}
-					case(1):
-						if (currentRank.second == 6)
+					}
+				}
+				else
+				{
+					if (currentRank.second == 6)
+					{
+						switch (moveIterator)
 						{
-							if (parent->fields[currentRank.first][currentRank.second - 2].rank.type == Empty&&parent->fields[currentRank.first][currentRank.second - 1].rank.type == Empty)
+						case(0):
+							if (IN_RANGE(currentRank.second - 1) && parent->fields[currentRank.first][currentRank.second - 1].rank.type == Empty)
+							{
+								state = InternalMove(currentRank, std::pair<short, short>(currentRank.first, currentRank.second - 1), Standard);
+								moveIterator++;
+								return *this;
+							}
+							else
+							{
+								direction++;
+								moveIterator = 0;
+								return ++(*this);
+							}
+						case(1):
+							if (IN_RANGE(currentRank.second - 2) && parent->fields[currentRank.first][currentRank.second - 2].rank.type == Empty&&parent->fields[currentRank.first][currentRank.second - 1].rank.type == Empty)
 							{
 								state = InternalMove(currentRank, std::pair<short, short>(currentRank.first, currentRank.second - 2), Standard);
 								moveIterator++;
@@ -1016,18 +1062,48 @@ namespace ChessBoard
 								moveIterator = 0;
 								return ++(*this);
 							}
-						}
-						else
-						{
+						default:
 							direction++;
 							moveIterator = 0;
 							return ++(*this);
 						}
-
-					default:
-						direction++;
-						moveIterator = 0;
-						return ++(*this);
+					}
+					else
+					{
+						if (currentRank.second == 1)
+						{
+							//this pawn will be promoted, check the promotions
+							switch (moveIterator)
+							{
+							case(0):
+								state = InternalMove(currentRank, std::pair<short, short>(currentRank.first, currentRank.second - 1), PromotionBishop);
+								break;
+							case(1):
+								state = InternalMove(currentRank, std::pair<short, short>(currentRank.first, currentRank.second - 1), PromotionKnight);
+								break;
+							case(2):
+								state = InternalMove(currentRank, std::pair<short, short>(currentRank.first, currentRank.second - 1), PromotionQueen);
+								break;
+							case(3):
+								state = InternalMove(currentRank, std::pair<short, short>(currentRank.first, currentRank.second - 1), PromotionTower);
+								break;
+							default:
+								direction++;
+								moveIterator = 0;
+								return++(*this);
+							}
+							moveIterator++;
+							return *this;
+						}
+						else
+						{
+							if (IN_RANGE(currentRank.second - 1) && parent->fields[currentRank.first][currentRank.second - 1].rank.type == Empty)
+							{
+								state = InternalMove(currentRank, std::pair<short, short>(currentRank.first, currentRank.second - 1), Standard);
+								direction++;
+								return *this;
+							}
+						}
 					}
 				}
 			}
@@ -1037,7 +1113,7 @@ namespace ChessBoard
 				{
 					//check if this move is possible
 					if (IN_RANGE( currentRank.first + 1)&& IN_RANGE(currentRank.second + 1) && (!parent->fields[currentRank.first + 1][currentRank.second + 1].rank.isWhite || parent->fields[currentRank.first + 1][currentRank.second + 1].rank.type == Empty))
-						if (currentRank.second == 7)
+						if (currentRank.second == 6)
 						{
 							//this pawn will be promoted, check the promotions
 							switch (moveIterator)
@@ -1079,7 +1155,7 @@ namespace ChessBoard
 				else
 				{
 					if (IN_RANGE(currentRank.first + 1)&&IN_RANGE(currentRank.second - 1) && (parent->fields[currentRank.first + 1][currentRank.second - 1].rank.isWhite || parent->fields[currentRank.first + 1][currentRank.second - 1].rank.type == Empty))
-						if (currentRank.second == 7)
+						if (currentRank.second == 6)
 						{
 							//this pawn will be promoted, check the promotions
 							switch (moveIterator)
