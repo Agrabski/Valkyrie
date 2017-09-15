@@ -48,6 +48,7 @@ namespace ChessBoard
 		bool operator<(const Field &right);
 	};
 
+
 	class Board
 	{
 	public:
@@ -76,7 +77,7 @@ namespace ChessBoard
 			fields[3][7].rank = { Queen,false };
 			fields[4][0].rank = { King,true };
 			fields[4][7].rank = { King,false };
-			MoveStack = std::stack<std::pair<InternalMove, Rank>>();
+			MoveStack = std::stack<StackElement>();
 			prevBoard = std::vector<std::pair<std::vector<std::vector<Field>>, int>>();
 		}
 		~Board();
@@ -112,7 +113,20 @@ namespace ChessBoard
 		bool IsWhiteChecked() const;
 
 	private:
+		struct StackElement
+		{
+			StackElement(InternalMove move, Rank piece, int moves)
+			{
+				this->move = move;
+				pieceType = piece;
+				movesCounter = moves;
+			}
+			InternalMove move;
+			Rank pieceType;
+			int movesCounter;
+		};
 		//returns true if game is not over
+		int moveCounter = 100;
 		bool addBoard();
 		void ClearData();
 		void removeBoard(std::vector<std::vector<Field>> board);
@@ -127,7 +141,7 @@ namespace ChessBoard
 		bool whiteCheck = false;
 		void ClearStack();
 		std::vector<std::pair<std::vector<std::vector<Field>>,int>>  prevBoard;
-		std::stack<std::pair<InternalMove, Rank>> MoveStack;
+		std::stack<StackElement> MoveStack;
 		static const std::pair<short, short> QueenMovementArray[8];
 		static const std::pair<short, short> KnightMovementArray[8];
 
@@ -163,5 +177,10 @@ namespace ChessBoard
 	class WRONG_COLOR : INVALID_MOVE
 	{
 		
+	};
+
+	class FIFTY_MOVES : INVALID_MOVE
+	{
+
 	};
 }

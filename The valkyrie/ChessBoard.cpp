@@ -73,7 +73,7 @@ namespace ChessBoard
 			prevBoard[i] = toCopy.prevBoard[i];
 		}
 		//prevBoard = std::vector<std::pair<std::vector<std::vector<Field>>, int>>(toCopy.prevBoard);
-		MoveStack = std::stack<std::pair<InternalMove, Rank>>(toCopy.MoveStack);
+		MoveStack = std::stack<StackElement>(toCopy.MoveStack);
 		nextMoveIsWhite = toCopy.nextMoveIsWhite;
 		leftWhite = toCopy.leftWhite;
 		rightWhite = toCopy.rightWhite;
@@ -259,8 +259,9 @@ namespace ChessBoard
 	{
 		nextMoveIsWhite = !nextMoveIsWhite;
 		removeBoard(fields);
-		InternalMove lastMove = MoveStack.top().first;
-		Rank beaten = MoveStack.top().second;
+		moveCounter = MoveStack.top().movesCounter;
+		InternalMove lastMove = MoveStack.top().move;
+		Rank beaten = MoveStack.top().pieceType;
 		MoveStack.pop();
 		if (lastMove.movetype == Standard)
 		{
@@ -389,7 +390,7 @@ namespace ChessBoard
 				fields[x][y] = toCopy->fields[x][y];
 
 		prevBoard = std::vector<std::pair<std::vector<std::vector<Field>>, int>>(toCopy->prevBoard);
-		MoveStack = std::stack<std::pair<InternalMove, Rank>>(toCopy->MoveStack);
+		MoveStack = std::stack<StackElement>(toCopy->MoveStack);
 		nextMoveIsWhite = toCopy->nextMoveIsWhite;
 		leftWhite = toCopy->leftWhite;
 		rightWhite = toCopy->rightWhite;
@@ -400,7 +401,9 @@ namespace ChessBoard
 
 	void ChessBoard::Board::ChangeState(ChessBoard::InternalMove lastMove)
 	{
-		std::pair<InternalMove, Rank>tmp = std::pair<InternalMove, Rank>();
+		if (moveCounter == 0)
+			throw FIFTY_MOVES();
+		StackElement tmp(lastMove, { Empty,false }, moveCounter);
 		Rank currentlyMoved = { Empty,false };
 		std::pair<short, short> relativeMove;
 		if (lastMove.from != std::pair<short, short>(-1, -1))
@@ -409,7 +412,7 @@ namespace ChessBoard
 			if (currentlyMoved.isWhite != nextMoveIsWhite)
 				throw WRONG_COLOR();
 			relativeMove = { lastMove.to.first - lastMove.from.first,lastMove.to.second - lastMove.from.second };
-			tmp.second= fields[lastMove.to.first][lastMove.to.second].rank;
+			tmp.pieceType= fields[lastMove.to.first][lastMove.to.second].rank;
 		}
 		else
 		{
@@ -559,7 +562,6 @@ namespace ChessBoard
 		}
 		fields[lastMove.to.first][lastMove.to.second].rank = { Queen,currentlyMoved.isWhite };
 		fields[lastMove.from.first][lastMove.from.second].rank.type = Empty;
-		tmp.second = fields[lastMove.to.first][lastMove.to.second].rank;
 		break;
 		case(PromotionBishop):
 		{
@@ -571,7 +573,6 @@ namespace ChessBoard
 		}
 		fields[lastMove.to.first][lastMove.to.second].rank = { Bishop,currentlyMoved.isWhite };
 		fields[lastMove.from.first][lastMove.from.second].rank.type = Empty;
-		tmp.second = fields[lastMove.to.first][lastMove.to.second].rank;
 		break;
 		case(PromotionKnight):
 		{
@@ -583,7 +584,6 @@ namespace ChessBoard
 		}
 		fields[lastMove.to.first][lastMove.to.second].rank = { Knight,currentlyMoved.isWhite };
 		fields[lastMove.from.first][lastMove.from.second].rank.type = Empty;
-		tmp.second = fields[lastMove.to.first][lastMove.to.second].rank;
 		break;
 		case(PromotionTower):
 		{
@@ -595,7 +595,6 @@ namespace ChessBoard
 		}
 		fields[lastMove.to.first][lastMove.to.second].rank = { Tower,currentlyMoved.isWhite };
 		fields[lastMove.from.first][lastMove.from.second].rank.type = Empty;
-		tmp.second = fields[lastMove.to.first][lastMove.to.second].rank;
 		break;
 		case(RochadeLeft):
 			if (nextMoveIsWhite)
@@ -662,9 +661,15 @@ namespace ChessBoard
 			throw std::runtime_error(PROGRAM_NAME + std::string(" ERROR:Move was corrupted (invalid internal move type)"));
 			break;
 		}
-		tmp.first = lastMove;
 		MoveStack.push(tmp);
 		nextMoveIsWhite = !nextMoveIsWhite;
+		if (currentlyMoved.type == Pawn || tmp.pieceType.type != Empty)
+		{
+			tmp.movesCounter = 100;
+			moveCounter = 100;
+		}
+		else
+			moveCounter--;
 		if (!addBoard())
 		{
 			throw THREEFOLD_REPETITON();
@@ -690,9 +695,10 @@ namespace ChessBoard
 
 	void Board::ChangeState(InternalMove lastMove, int)
 	{
-		if(lastMove.from==std::pair<short,short>(-1,-1))
+		if(lastMove.from!=std::pair<short,short>(-1,-1))
 			if (fields[lastMove.from.first][lastMove.from.second].rank.type == Pawn || fields[lastMove.to.first][lastMove.to.second].rank.type != Empty)
 			{
+				ClearStack();
 				prevBoard.clear();
 				prevBoard.shrink_to_fit();
 			}

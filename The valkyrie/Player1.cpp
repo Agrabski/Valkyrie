@@ -48,6 +48,10 @@ Move JudgeDredd::Valkyrie::makeMove(Move lastMove)
 	{
 		throw GAME_ENDED(true, false, false);
 	}
+	catch (ChessBoard::FIFTY_MOVES)
+	{
+		throw GAME_ENDED(true, false, false);
+	}
 	catch (ChessBoard::KING_IN_DANGER)
 	{
 		std::cout << "Assertion failed! (king in danger in Valkyrie::makeMove)";
@@ -103,6 +107,12 @@ ChessEvaluator::ChessEvaluation JudgeDredd::Valkyrie::Play(std::vector< ChessBoa
 				StealmateFlag = false;
 
 			}
+			catch (ChessBoard::FIFTY_MOVES)
+			{
+				newBest.gameHasEnded = true;
+				newBest.isNull = false;
+				newBest.endState = 0;
+			}
 			catch (ChessBoard::THREEFOLD_REPETITON)
 			{
 				newBest.gameHasEnded = true;
@@ -152,6 +162,12 @@ ChessEvaluator::ChessEvaluation JudgeDredd::Valkyrie::Play(std::vector< ChessBoa
 
 				(*boardVector)[currentRecursion + 1].Revert();
 			}
+			catch (ChessBoard::FIFTY_MOVES)
+			{
+				newBest.gameHasEnded = true;
+				newBest.isNull = false;
+				newBest.endState = 0;
+			}
 			catch (ChessBoard::THREEFOLD_REPETITON)
 			{
 				newBest.gameHasEnded = true;
@@ -166,7 +182,10 @@ ChessEvaluator::ChessEvaluation JudgeDredd::Valkyrie::Play(std::vector< ChessBoa
 			{
 
 			}
-			catch (ChessBoard::KING_IN_DANGER &err) {}
+			catch (ChessBoard::KING_IN_DANGER err) 
+			{
+				
+			}
 
 			if (newbestMove.from != std::pair<short, short>(8, 0) && !newBest.isNull&&(beta.isNull||beta.gameHasEnded||!newBest.gameHasEnded)&&(beta.isNull||((beta.gameHasEnded&&!newBest.gameHasEnded)||newBest < beta)))
 			{
