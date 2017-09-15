@@ -33,7 +33,7 @@ int main()
 		{
 			for (b = 10; b > 0; b -= .1f)
 			{
-				for (a = 1.3; a < 10; a += .1f)
+				for (a = .1f; a < 10; a += .1f)
 				{
 					int firstWin = 0, secondWin = 0;
 					for (int i = 0; i < 2; i++)

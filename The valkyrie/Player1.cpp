@@ -126,6 +126,10 @@ ChessEvaluator::ChessEvaluation JudgeDredd::Valkyrie::Play(std::vector< ChessBoa
 			{
 
 			}
+			catch (ChessBoard::KING_IN_DANGER)
+			{
+
+			}
 
 			if (newbestMove.from!= std::pair<short, short>(8, 0) &&!newBest.isNull&&(newBest > alpha))
 			{
