@@ -27,18 +27,18 @@ int main()
 	move.to = { 0,0 };
 	std::cout << "Display moves, display time?" << std::endl;
 	std::cin >> displayMoves >> displayTime;
-	for (d = 300; d > 0; d -= 10)
+	for (d = 300; d >= 0; d -= 10)
 	{
-		for (c = 300; c > 0; c -= 10)
+		for (c = 300; c >= 0; c -= 10)
 		{
-			for (b = 10; b > 0; b -= .1f)
+			for (b = 10; b >= -10; b -= .1f)
 			{
-				for (a = .1f; a < 10; a += .1f)
+				for (a = 7.6f; a <= 10; a += .1f)
 				{
 					int firstWin = 0, secondWin = 0;
 					for (int i = 0; i < 2; i++)
 					{
-						std::cout << "Game number:" << i << " Configuration:" << a << "," << b << "," << c << "," << d << std::endl;
+						std::cout << "Game number:" << i << " Configuration:" << a << "," << b << "," << c << "," << d << std::endl<<"Current Best:"<<currBest<<std::endl;
 						stream << currBest << "----" << ChessEvaluator::ChessEvaluator(a, b, c, d) << "--\n";
 						if (displayTime)
 						{

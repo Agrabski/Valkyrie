@@ -34,7 +34,7 @@ namespace ChessBoard
 	{
 		Type type;
 		bool isWhite;
-		bool const operator!=(const Rank& right);
+		bool operator!=(const Rank& right) const;
 	};
 
 	struct Field
@@ -84,7 +84,8 @@ namespace ChessBoard
 		Board(const Board*toCopy);
 		void ChangeState(InternalMove lastMove);
 		void ChangeState(InternalMove lastMove, int);
-		bool operator==(Board& right);
+		bool operator==(const Board& right) const;
+		bool operator!=(const Board& right) const;
 		void Revert();
 		std::vector<std::vector<Field>>fields;
 		struct Moves

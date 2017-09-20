@@ -4,6 +4,7 @@
 #include <sstream>
 #include "Player1.h"
 #define CUT
+#define MAPDEBUG
 
 JudgeDredd::Valkyrie::Valkyrie(bool amIWhite)
 {
@@ -52,12 +53,12 @@ Move JudgeDredd::Valkyrie::makeMove(Move lastMove)
 	{
 		throw GAME_ENDED(true, false, false);
 	}
-	catch (ChessBoard::KING_IN_DANGER)
-	{
-		std::cout << "Assertion failed! (king in danger in Valkyrie::makeMove)";
-		int i;
-		std::cin >>i ;
-	}
+	//catch (ChessBoard::KING_IN_DANGER)
+	//{
+	//	std::cout << "Assertion failed! (king in danger in Valkyrie::makeMove)";
+	//	int i;
+	//	std::cin >>i ;
+	//}
 	Move tmp = buffer->ConvertToExternal(amIWhite);
 	delete buffer;
 	boardArray.clear();
@@ -139,6 +140,10 @@ ChessEvaluator::ChessEvaluation JudgeDredd::Valkyrie::Play(std::vector< ChessBoa
 					*chosenMove = bestMove;
 			}
 
+#ifdef MAPDEBUG
+			if (currentRecursion == 0 && (*boardVector)[currentRecursion + 1] != *currBoardState)
+				throw std::runtime_error("MAP REVERSION FAILED!");
+#endif
 
 			if (!beta.isNull && !alpha.isNull&&beta <= alpha)
 			{
@@ -199,7 +204,10 @@ ChessEvaluator::ChessEvaluation JudgeDredd::Valkyrie::Play(std::vector< ChessBoa
 				if (chosenMove != nullptr)
 					*chosenMove = bestMove;
 			}
-
+#ifdef MAPDEBUG
+			if (currentRecursion == 0 && (*boardVector)[currentRecursion + 1] != *currBoardState)
+				throw std::runtime_error("MAP REVERSION FAILED!");
+#endif
 
 			if (!beta.isNull && !alpha.isNull&&beta <= alpha)
 			{

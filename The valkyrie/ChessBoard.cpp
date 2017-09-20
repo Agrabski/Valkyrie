@@ -296,10 +296,10 @@ namespace ChessBoard
 			}
 			else
 			{
-				fields[0][7].rank = { Tower, true };
-				fields[4][7].rank = { King,true };
-				fields[2][7].rank = { Empty,true };
-				fields[3][7].rank = { Empty,true };
+				fields[0][7].rank = { Tower, false };
+				fields[4][7].rank = { King,false };
+				fields[2][7].rank = { Empty,false };
+				fields[3][7].rank = { Empty,false };
 				leftBlack = true;
 				rightBlack = true;
 			}
@@ -316,10 +316,10 @@ namespace ChessBoard
 			}
 			else
 			{
-				fields[0][7].rank = { Tower, true };
-				fields[4][7].rank = { King,true };
-				fields[2][7].rank = { Empty,true };
-				fields[3][7].rank = { Empty,true };
+				fields[0][7].rank = { Tower, false };
+				fields[4][7].rank = { King,false };
+				fields[2][7].rank = { Empty,false };
+				fields[3][7].rank = { Empty,false };
 				leftBlack = true;
 				rightBlack = true;
 			}
@@ -444,7 +444,7 @@ namespace ChessBoard
 						{
 							if (lastMove.from.second != 1)
 								throw INVALID_MOVE();
-							if (fields[lastMove.to.first][lastMove.from.second + 1].rank.type != ChessBoard::Empty)
+							if (fields[lastMove.to.first][lastMove.from.second + 1].rank.type != ChessBoard::Empty|| fields[lastMove.to.first][lastMove.from.second + 2].rank.type != ChessBoard::Empty)
 								throw MOVE_BLOCKED();
 						}
 					}
@@ -469,7 +469,7 @@ namespace ChessBoard
 						{
 							if (lastMove.from.second != 6)
 								throw INVALID_MOVE();
-							if (fields[lastMove.from.first][lastMove.from.second - 1].rank.type != ChessBoard::Empty)
+							if (fields[lastMove.from.first][lastMove.from.second - 1].rank.type != ChessBoard::Empty|| fields[lastMove.from.first][lastMove.from.second - 2].rank.type != ChessBoard::Empty)
 								throw MOVE_BLOCKED();
 						}
 					}
@@ -705,13 +705,18 @@ namespace ChessBoard
 		ChangeState(lastMove);
 	}
 
-	bool ChessBoard::Board::operator==(Board & rightOne)
+	bool ChessBoard::Board::operator==(const Board & rightOne) const
 	{
 		for (int x = 0; x < 8; x++)
 			for (int y = 0; y < 8; y++)
 				if (fields[x][y].rank != rightOne.fields[x][y].rank)
 					return false;
 		return true;
+	}
+
+	bool Board::operator!=(const Board & right) const
+	{
+		return !(*this==right);
 	}
 
 	//TODO:paint the map
@@ -1437,7 +1442,7 @@ namespace ChessBoard
 		this->isWhite = isWhite;
 	}
 
-	bool const Rank::operator!=(Rank const & right)
+	bool Rank::operator!=(Rank const & right) const
 	{
 		if (type != right.type)
 			return true;
