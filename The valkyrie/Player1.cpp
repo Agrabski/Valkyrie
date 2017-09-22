@@ -47,10 +47,16 @@ Move JudgeDredd::Valkyrie::makeMove(Move lastMove)
 	}
 	catch (ChessBoard::THREEFOLD_REPETITON)
 	{
+#ifdef MAPDEBUG
+		std::cout << "Threefold repetition!" << std::endl;
+#endif // MAPDEBUG
 		throw GAME_ENDED(true, false, false);
 	}
 	catch (ChessBoard::FIFTY_MOVES)
 	{
+#ifdef MAPDEBUG
+		std::cout << "Fifty moves!" << std::endl;
+#endif // MAPDEBUG
 		throw GAME_ENDED(true, false, false);
 	}
 	//catch (ChessBoard::KING_IN_DANGER)

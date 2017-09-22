@@ -14,12 +14,12 @@ class JudgeDredd::Valkyrie
 
     public:
     Valkyrie(bool amIWhite);
-	Valkyrie(bool amIwhite, ChessEvaluator::ChessEvaluator evaluator = {.1f,.1f,.1f,.1f}, int recursion = 4);
+	Valkyrie(bool amIwhite, ChessEvaluator::ChessEvaluator evaluator = {.1f,.1f,.1f,.1f}, int recursion = 5);
     ~Valkyrie();
     struct Move makeMove(struct Move lastMove);
 
 	private:
-		int recursionDepth=4;
+		int recursionDepth=5;
 		bool firstMove;
 		ChessBoard::Board *currBoardState=new ChessBoard::Board();
 		bool amIWhite;

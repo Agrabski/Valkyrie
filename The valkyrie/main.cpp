@@ -33,10 +33,10 @@ int main()
 		{
 			for (b = 10; b >= -10; b -= .1f)
 			{
-				for (a = 7.6f; a <= 10; a += .1f)
+				for (a = -10; a <= 10; a += .1f)
 				{
 					int firstWin = 0, secondWin = 0;
-					for (int i = 0; i < 2; i++)
+					for (int i = 1; i < 6; i++)
 					{
 						std::cout << "Game number:" << i << " Configuration:" << a << "," << b << "," << c << "," << d << std::endl<<"Current Best:"<<currBest<<std::endl;
 						stream << currBest << "----" << ChessEvaluator::ChessEvaluator(a, b, c, d) << "--\n";
@@ -50,8 +50,8 @@ int main()
 								<< now.tm_sec
 								<< std::endl;
 						}
-						player1 = new JudgeDredd::Valkyrie(firstIsWhite, currBest);
-						player2 = new JudgeDredd::Valkyrie(!firstIsWhite, ChessEvaluator::ChessEvaluator(a, b, c, d));
+						player1 = new JudgeDredd::Valkyrie(firstIsWhite, currBest,i);
+						player2 = new JudgeDredd::Valkyrie(!firstIsWhite, ChessEvaluator::ChessEvaluator(a, b, c, d),i);
 						try
 						{
 							for (buffer = player1->makeMove(move), std::cout << buffer.from.first << " " << buffer.from.second << " " << buffer.to.first << " " << buffer.to.second << std::endl; true;)
@@ -94,8 +94,8 @@ int main()
 								<< now.tm_sec
 								<< std::endl;
 						}
-						player1 = new JudgeDredd::Valkyrie(!firstIsWhite, currBest);
-						player2 = new JudgeDredd::Valkyrie(firstIsWhite, ChessEvaluator::ChessEvaluator(a, b, c, d));
+						player1 = new JudgeDredd::Valkyrie(!firstIsWhite, currBest,i);
+						player2 = new JudgeDredd::Valkyrie(firstIsWhite, ChessEvaluator::ChessEvaluator(a, b, c, d),i);
 
 						try
 						{

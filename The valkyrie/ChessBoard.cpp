@@ -271,8 +271,11 @@ namespace ChessBoard
 			{
 				PaintTheMap();
 			}
-			catch(KING_IN_DANGER)
-			{ }
+			catch (KING_IN_DANGER& err)
+			{
+				blackCheck = err.isBlack;
+				whiteCheck = err.isWhite;
+			}
 			return;
 		}
 		switch (lastMove.movetype)
