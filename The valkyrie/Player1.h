@@ -4,6 +4,7 @@
 #include "chessboard.h"
 #include "judgeDredd.h"
 #include <vector>
+#include <atomic>
 #include "Evaluator.h"
 #define PROGRAM_NAME "valkyrie"
 #pragma once
@@ -17,14 +18,29 @@ class JudgeDredd::Valkyrie
 	Valkyrie(bool amIwhite, ChessEvaluator::ChessEvaluator evaluator = {.1f,.1f,.1f,.1f}, int recursion = 5);
     ~Valkyrie();
     struct Move makeMove(struct Move lastMove);
-
+		class Player
+		{
+		public:
+			//Valkyrie *ref;
+			//Player(Valkyrie * ref)
+			//{
+			//	this->ref = ref;
+			//}
+			void operator()(Valkyrie * ref,std::vector< ChessBoard::Board> *boardVector, short int currentRecursion, short int maxRecursion, ChessEvaluator::ChessEvaluation *value, bool isWhite, ChessEvaluator::ChessEvaluation alpha, ChessEvaluator::ChessEvaluation beta, std::atomic<int>*counter)
+			{
+				ref->Play(boardVector, currentRecursion, maxRecursion, value, isWhite, alpha, beta);
+				*counter += 1;
+			}
+		};
 	private:
-		int recursionDepth=5;
+		short recursionDepth=5;
+		short maxThreadCount;
 		bool firstMove;
 		ChessBoard::Board *currBoardState=new ChessBoard::Board();
 		bool amIWhite;
-		ChessEvaluator::ChessEvaluation Play(std::vector< ChessBoard::Board> *boardVector, short int currentRecursion, short int maxRecursion, ChessBoard::InternalMove *chosenMove, bool isWhite,ChessEvaluator::ChessEvaluation alpha, ChessEvaluator::ChessEvaluation beta) const;
+		void Play(std::vector< ChessBoard::Board> *boardVector, short int currentRecursion, short int maxRecursion, ChessEvaluator::ChessEvaluation *value, bool isWhite,ChessEvaluator::ChessEvaluation alpha, ChessEvaluator::ChessEvaluation beta) const;
 		ChessEvaluator::ChessEvaluator evaluator;
+
 };
 class GAME_ENDED :std::exception
 {
