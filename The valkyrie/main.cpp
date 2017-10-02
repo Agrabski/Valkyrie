@@ -36,7 +36,7 @@ int main()
 				for (a = -10; a <= 10; a += .1f)
 				{
 					int firstWin = 0, secondWin = 0;
-					for (int i = 1; i < 6; i++)
+					for (int i = 2; i < 6; i++)
 					{
 						std::cout << "Game number:" << i << " Configuration:" << a << "," << b << "," << c << "," << d << std::endl<<"Current Best:"<<currBest<<std::endl;
 						stream << currBest << "----" << ChessEvaluator::ChessEvaluator(a, b, c, d) << "--\n";

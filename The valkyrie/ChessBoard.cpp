@@ -540,7 +540,7 @@ namespace ChessBoard
 				}
 				if (KnightMovementArray[direction] != relativeMove)
 					throw INVALID_MOVE();
-				if (fields[lastMove.to.first][lastMove.to.second].rank.type != Empty&&fields[lastMove.to.first][lastMove.to.second].rank.isWhite != nextMoveIsWhite)
+				if (fields[lastMove.to.first][lastMove.to.second].rank.type != Empty&&fields[lastMove.to.first][lastMove.to.second].rank.isWhite == currentlyMoved.isWhite)
 					throw MOVE_BLOCKED();
 			}
 			break;

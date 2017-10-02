@@ -6,13 +6,13 @@
 #include <thread>
 #include <atomic>
 #define CUT
-#define MAPDEBUG
+//#define MAPDEBUG
 
 JudgeDredd::Valkyrie::Valkyrie(bool amIWhite)
 {
 	this->amIWhite = amIWhite;
 	firstMove = amIWhite;
-	maxThreadCount = std::thread::hardware_concurrency();
+	maxThreadCount = 2 * std::thread::hardware_concurrency();
 }
 
 JudgeDredd::Valkyrie::Valkyrie(bool amIwhite, ChessEvaluator::ChessEvaluator evaluator, int recursion)
@@ -21,7 +21,7 @@ JudgeDredd::Valkyrie::Valkyrie(bool amIwhite, ChessEvaluator::ChessEvaluator eva
 	firstMove = amIWhite;
 	recursionDepth = recursion;
 	this->evaluator = evaluator;
-	maxThreadCount = std::thread::hardware_concurrency();
+	maxThreadCount = 2 * std::thread::hardware_concurrency();
 }
 
 JudgeDredd::Valkyrie::~Valkyrie()
@@ -58,39 +58,42 @@ Move JudgeDredd::Valkyrie::makeMove(Move lastMove)
 
 	for (int i = 0; i < maxThreadCount && *moveIterator != moveIterator.cend();++moveIterator, i++)
 	{
-
-		try
+		for(bool successFlag=false;!successFlag&&*moveIterator != moveIterator.cend();++moveIterator)
 		{
-			boardArray[i][0].ChangeState(*moveIterator);
+			try
+			{
+				boardArray[i][0].ChangeState(*moveIterator);
 
-			threadVector[i] =std::pair<std::thread, ChessBoard::InternalMove>(std::thread(Player(), this, &boardArray[i], 1, recursionDepth, &resultVector[i], !amIWhite, alpha, beta,&evaluationCount),*moveIterator);
+				threadVector[i] =std::pair<std::thread, ChessBoard::InternalMove>(std::thread(Player(), this, &(boardArray[i]), 0, recursionDepth, &(resultVector[i]), !amIWhite, alpha, beta,&evaluationCount),*moveIterator);
 
-			stealmateFlag = false;
+				successFlag = true;
+				stealmateFlag = false;
 
-		}
-		catch (ChessBoard::FIFTY_MOVES)
-		{
-			resultVector[i].gameHasEnded = true;
-			resultVector[i].isNull = false;
-			resultVector[i].endState = 0;
-		}
-		catch (ChessBoard::THREEFOLD_REPETITON)
-		{
-			resultVector[i].gameHasEnded = true;
-			resultVector[i].isNull = false;
-			resultVector[i].endState = 0;
-			boardArray[i][0].Revert();
-		}
-		catch (ChessBoard::MOVE_BLOCKED)
-		{
-		}
-		catch (ChessBoard::INVALID_MOVE)
-		{
+			}
+			catch (ChessBoard::FIFTY_MOVES)
+			{
+				resultVector[i].gameHasEnded = true;
+				resultVector[i].isNull = false;
+				resultVector[i].endState = 0;
+			}
+			catch (ChessBoard::THREEFOLD_REPETITON)
+			{
+				resultVector[i].gameHasEnded = true;
+				resultVector[i].isNull = false;
+				resultVector[i].endState = 0;
+				boardArray[i][0].Revert();
+			}
+			catch (ChessBoard::MOVE_BLOCKED)
+			{
+			}
+			catch (ChessBoard::INVALID_MOVE)
+			{
 
-		}
-		catch (ChessBoard::KING_IN_DANGER)
-		{
+			}
+			catch (ChessBoard::KING_IN_DANGER)
+			{
 
+			}
 		}
 	}
 
@@ -133,6 +136,8 @@ Move JudgeDredd::Valkyrie::makeMove(Move lastMove)
 			}
 		}
 
+				if (threadVector[threadId].first.joinable())
+					threadVector[threadId].first.join();
 
 		boardArray[threadId][0] = *currBoardState;
 
@@ -140,12 +145,9 @@ Move JudgeDredd::Valkyrie::makeMove(Move lastMove)
 		while (*moveIterator!=moveIterator.cend())
 		{
 			try
-			{
-				threadVector[threadId].second = ChessBoard::InternalMove(*moveIterator);
+			{	
 				boardArray[threadId][0].ChangeState(*moveIterator);
-				if (threadVector[threadId].first.joinable())
-					threadVector[threadId].first.join();
-				threadVector[threadId].first= std::thread(Player(), this, &boardArray[threadId], 1, recursionDepth, &resultVector[threadId], !amIWhite, alpha, beta,&evaluationCount);
+				threadVector[threadId]=std::pair<std::thread,ChessBoard::InternalMove>( std::thread(Player(), this, &(boardArray[threadId]), 0, recursionDepth, &(resultVector[threadId]), !amIWhite, best, beta,&evaluationCount), ChessBoard::InternalMove(*moveIterator));
 				break;
 
 			}
@@ -216,7 +218,34 @@ Move JudgeDredd::Valkyrie::makeMove(Move lastMove)
 			++moveIterator;
 		}
 	}
-	
+	for (int i = 0; i < maxThreadCount; i++)
+		if (threadVector[i].first.joinable())
+			threadVector[i].first.join();
+
+	for (int i = 0; i < maxThreadCount; i++)
+	{
+		if (amIWhite)
+		{
+			if (!resultVector[i].isNull && (resultVector[i] > best))
+			{
+				best = resultVector[i];
+				bestMove = threadVector[i].second;
+				resultVector[i].isNull = true;
+			}
+		}
+		else
+		{
+			if (!resultVector[i].isNull && (best.isNull || best.gameHasEnded || !resultVector[i].gameHasEnded) && (best.isNull || ((best.gameHasEnded && !resultVector[i].gameHasEnded) || resultVector[i] < best)))
+			{
+
+				best = resultVector[i];
+				bestMove = threadVector[i].second;
+				resultVector[i].isNull = true;
+			}
+		}
+
+	}
+
 
 	try
 	{
@@ -240,9 +269,7 @@ Move JudgeDredd::Valkyrie::makeMove(Move lastMove)
 
 	Move tmp = bestMove.ConvertToExternal(amIWhite);
 	boardArray.clear();
-	for (int i = 0; i < maxThreadCount; i++)
-		if(threadVector[i].first.joinable())
-			threadVector[i].first.join();
+
 	return tmp;
 }
 
