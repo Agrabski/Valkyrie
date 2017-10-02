@@ -12,7 +12,7 @@ JudgeDredd::Valkyrie::Valkyrie(bool amIWhite)
 {
 	this->amIWhite = amIWhite;
 	firstMove = amIWhite;
-	maxThreadCount = 2 * std::thread::hardware_concurrency();
+	maxThreadCount =  std::thread::hardware_concurrency();
 }
 
 JudgeDredd::Valkyrie::Valkyrie(bool amIwhite, ChessEvaluator::ChessEvaluator evaluator, int recursion)
@@ -21,7 +21,7 @@ JudgeDredd::Valkyrie::Valkyrie(bool amIwhite, ChessEvaluator::ChessEvaluator eva
 	firstMove = amIWhite;
 	recursionDepth = recursion;
 	this->evaluator = evaluator;
-	maxThreadCount = 2 * std::thread::hardware_concurrency();
+	maxThreadCount =  std::thread::hardware_concurrency();
 }
 
 JudgeDredd::Valkyrie::~Valkyrie()

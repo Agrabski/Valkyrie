@@ -13,7 +13,7 @@ std::ostream & operator<<(std::ostream & stream, ChessEvaluator::ChessEvaluator 
 	return stream << toWrite.friendlyValue << " " << toWrite.enemyValue << " " << toWrite.friendlyCheck << " " << toWrite.enemyCheck << std::endl;
 }
 
-int main()
+void tester1()
 {
 	bool displayMoves, displayTime;
 	std::ofstream stream;
@@ -38,7 +38,7 @@ int main()
 					int firstWin = 0, secondWin = 0;
 					for (int i = 2; i < 6; i++)
 					{
-						std::cout << "Game number:" << i << " Configuration:" << a << "," << b << "," << c << "," << d << std::endl<<"Current Best:"<<currBest<<std::endl;
+						std::cout << "Game number:" << i << " Configuration:" << a << "," << b << "," << c << "," << d << std::endl << "Current Best:" << currBest << std::endl;
 						stream << currBest << "----" << ChessEvaluator::ChessEvaluator(a, b, c, d) << "--\n";
 						if (displayTime)
 						{
@@ -50,14 +50,14 @@ int main()
 								<< now.tm_sec
 								<< std::endl;
 						}
-						player1 = new JudgeDredd::Valkyrie(firstIsWhite, currBest,i);
-						player2 = new JudgeDredd::Valkyrie(!firstIsWhite, ChessEvaluator::ChessEvaluator(a, b, c, d),i);
+						player1 = new JudgeDredd::Valkyrie(firstIsWhite, currBest, i);
+						player2 = new JudgeDredd::Valkyrie(!firstIsWhite, ChessEvaluator::ChessEvaluator(a, b, c, d), i);
 						try
 						{
 							for (buffer = player1->makeMove(move), std::cout << buffer.from.first << " " << buffer.from.second << " " << buffer.to.first << " " << buffer.to.second << std::endl; true;)
 							{
 								buffer = player2->makeMove(buffer);
-								if(displayMoves)
+								if (displayMoves)
 									std::cout << buffer.from.first << " " << buffer.from.second << " " << buffer.to.first << " " << buffer.to.second << "\n";
 								buffer = player1->makeMove(buffer);
 								if (displayMoves)
@@ -94,8 +94,8 @@ int main()
 								<< now.tm_sec
 								<< std::endl;
 						}
-						player1 = new JudgeDredd::Valkyrie(!firstIsWhite, currBest,i);
-						player2 = new JudgeDredd::Valkyrie(firstIsWhite, ChessEvaluator::ChessEvaluator(a, b, c, d),i);
+						player1 = new JudgeDredd::Valkyrie(!firstIsWhite, currBest, i);
+						player2 = new JudgeDredd::Valkyrie(firstIsWhite, ChessEvaluator::ChessEvaluator(a, b, c, d), i);
 
 						try
 						{
@@ -139,5 +139,40 @@ int main()
 	std::cout << std::endl << "RESULT:" << std::endl << a << "," << b << "," << c << "," << d << std::endl;
 	system("pause");
 	std::cin >> a;
+}
+
+void tester2()
+{
+	Move move, buffer;
+	std::ofstream stream;
+	JudgeDredd::Valkyrie *player1, *player2;
+	stream.open("debug.txt", 'w');
+	for (int i = 2; i < 10; i++)
+	{
+		std::cout << i << std::endl;
+		time_t t1 = time(0);   // get time now
+		player1 = new JudgeDredd::Valkyrie(true, ChessEvaluator::ChessEvaluator(), i);
+		player2 = new JudgeDredd::Valkyrie(false, ChessEvaluator::ChessEvaluator(), i);
+		try
+		{
+			for (buffer = player1->makeMove(move); true;)
+			{
+				buffer = player2->makeMove(buffer);
+				buffer = player1->makeMove(buffer);
+			}
+		}
+		catch (GAME_ENDED err)
+		{
+		}
+		stream << time(0) - t1 << std::endl;
+		delete player1;
+		delete player2;
+	}
+
+}
+
+int main()
+{
+	tester2();
 	return 0;
 }
