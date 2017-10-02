@@ -144,7 +144,7 @@ void tester1()
 void tester2()
 {
 	Move move, buffer;
-	std::ofstream stream;
+	std::fstream stream;
 	JudgeDredd::Valkyrie *player1, *player2;
 	stream.open("debug.txt", 'w');
 	for (int i = 2; i < 10; i++)
@@ -164,7 +164,7 @@ void tester2()
 		catch (GAME_ENDED err)
 		{
 		}
-		stream << time(0) - t1 << std::endl;
+		stream <<i<<"-"<< time(0) - t1 <<";" <<std::endl;
 		delete player1;
 		delete player2;
 	}
