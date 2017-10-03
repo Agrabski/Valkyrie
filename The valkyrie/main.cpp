@@ -138,6 +138,7 @@ void tester1()
 	}
 	std::cout << std::endl << "RESULT:" << std::endl << a << "," << b << "," << c << "," << d << std::endl;
 	system("pause");
+	stream.close();
 	std::cin >> a;
 }
 
@@ -168,7 +169,7 @@ void tester2()
 		delete player1;
 		delete player2;
 	}
-
+	stream.close();
 }
 
 int main()

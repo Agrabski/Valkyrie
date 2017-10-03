@@ -5,6 +5,7 @@
 #include "Player1.h"
 #include <thread>
 #include <atomic>
+#include <concurrent_queue.h>
 #define CUT
 //#define MAPDEBUG
 
@@ -147,7 +148,7 @@ Move JudgeDredd::Valkyrie::makeMove(Move lastMove)
 			try
 			{	
 				boardArray[threadId][0].ChangeState(*moveIterator);
-				threadVector[threadId]=std::pair<std::thread,ChessBoard::InternalMove>( std::thread(Player(), this, &(boardArray[threadId]), 0, recursionDepth, &(resultVector[threadId]), !amIWhite, best, beta,&evaluationCount), ChessBoard::InternalMove(*moveIterator));
+				threadVector[threadId]=std::pair<std::thread,ChessBoard::InternalMove>( std::thread(Player(), this, &(boardArray[threadId]), 0, recursionDepth, &(resultVector[threadId]), !amIWhite, amIWhite?best:alpha,amIWhite?beta:best,&evaluationCount), ChessBoard::InternalMove(*moveIterator));
 				break;
 
 			}
