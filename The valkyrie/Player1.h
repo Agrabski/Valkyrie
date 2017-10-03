@@ -6,6 +6,8 @@
 #include <vector>
 #include <atomic>
 #include "Evaluator.h"
+#include <concurrent_queue.h>
+#include <thread>
 #define PROGRAM_NAME "valkyrie"
 #pragma once
 
@@ -26,9 +28,45 @@ class JudgeDredd::Valkyrie
 			//{
 			//	this->ref = ref;
 			//}
-			void operator()(Valkyrie * ref,std::vector< ChessBoard::Board> *boardVector, short int currentRecursion, short int maxRecursion, ChessEvaluator::ChessEvaluation *value, bool isWhite, ChessEvaluator::ChessEvaluation alpha, ChessEvaluator::ChessEvaluation beta, std::atomic<int>*counter)
+			void operator()(Valkyrie * ref,std::vector< ChessBoard::Board> *boardVector, short int currentRecursion, short int maxRecursion, bool isWhite, ChessEvaluator::ChessEvaluation alpha, ChessEvaluator::ChessEvaluation beta, std::atomic<int>*counter, Concurrency::concurrent_queue<ChessBoard::InternalMove> *toEvaluate,Concurrency::concurrent_queue<std::pair<ChessBoard::InternalMove, ChessEvaluator::ChessEvaluation>> *evaluated, bool *completionFlag)
 			{
-				ref->Play(boardVector, currentRecursion, maxRecursion, value, isWhite, alpha, beta);
+				ChessBoard::InternalMove buffer;
+				ChessEvaluator::ChessEvaluation tmpEval;
+				while (!*completionFlag || !toEvaluate->empty())
+				{
+					if (toEvaluate->try_pop(buffer))
+					{
+						try
+						{
+							tmpEval.isNull = true;
+							(*boardVector)[0].ChangeState(buffer);
+							ref->Play(boardVector, currentRecursion, maxRecursion, &tmpEval, isWhite, alpha, beta);
+							(*boardVector)[0].Revert();
+						}
+						catch (ChessBoard::THREEFOLD_REPETITON)
+						{
+							tmpEval.gameHasEnded = true;
+							tmpEval.isNull = false;
+							tmpEval.endState = 0;
+							(*boardVector)[0].Revert();
+						}
+						catch (ChessBoard::MOVE_BLOCKED)
+						{
+						}
+						catch (ChessBoard::INVALID_MOVE)
+						{
+
+						}
+						catch (ChessBoard::KING_IN_DANGER)
+						{
+
+						}
+						if (!tmpEval.isNull)
+							evaluated->push(std::pair<ChessBoard::InternalMove, ChessEvaluator::ChessEvaluation>(buffer, tmpEval));
+					}
+					else
+						std::this_thread::yield();
+				}
 				*counter += 1;
 			}
 		};
