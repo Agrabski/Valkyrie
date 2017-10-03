@@ -138,13 +138,14 @@ void tester1()
 	}
 	std::cout << std::endl << "RESULT:" << std::endl << a << "," << b << "," << c << "," << d << std::endl;
 	system("pause");
+	stream.close();
 	std::cin >> a;
 }
 
 void tester2()
 {
 	Move move, buffer;
-	std::ofstream stream;
+	std::fstream stream;
 	JudgeDredd::Valkyrie *player1, *player2;
 	stream.open("debug.txt", 'w');
 	for (int i = 2; i < 10; i++)
@@ -164,11 +165,11 @@ void tester2()
 		catch (GAME_ENDED err)
 		{
 		}
-		stream << time(0) - t1 << std::endl;
+		stream << i << "-" << time(0) - t1 << ";" << std::endl;
 		delete player1;
 		delete player2;
 	}
-
+	stream.close();
 }
 
 int main()
