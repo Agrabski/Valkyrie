@@ -735,9 +735,11 @@ namespace ChessBoard
 			switch (toConvert.type)
 			{
 			case('L'):
+				from = std::pair<short, short>(-1, -1);
 				movetype = RochadeLeft;
 				break;
 			case('R'):
+				from = std::pair<short, short>(-1, -1);
 				movetype = RochadeRight;
 				break;
 			case('B'):
