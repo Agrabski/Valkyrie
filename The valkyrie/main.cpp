@@ -148,7 +148,7 @@ void tester2()
 	std::fstream stream;
 	JudgeDredd::Valkyrie *player1, *player2;
 	stream.open("debug.txt", 'w');
-	for (int i = 2; i < 10; i++)
+	for (int i = 2; i < 8; i++)
 	{
 		std::cout << i << std::endl;
 		time_t t1 = time(0);   // get time now
