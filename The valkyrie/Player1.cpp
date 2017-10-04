@@ -69,7 +69,7 @@ Move JudgeDredd::Valkyrie::makeMove(Move lastMove)
 	completionFlag = true;
 
 	std::pair<ChessBoard::InternalMove, ChessEvaluator::ChessEvaluation> pairBuffer;
-	while (evaluationCount < maxThreadCount)
+	while (evaluationCount < maxThreadCount || !evaluated.empty())
 	{
 		if (evaluated.try_pop(pairBuffer))
 		{
