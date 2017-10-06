@@ -33,7 +33,7 @@ class JudgeDredd::Valkyrie
 			//{
 			//	this->ref = ref;
 			//}
-			void operator()(Valkyrie * ref,std::vector< ChessBoard::Board> *boardVector, short int currentRecursion, short int maxRecursion, bool isWhite, ChessEvaluator::ChessEvaluation alpha, ChessEvaluator::ChessEvaluation beta, std::atomic<int>*counter, ConcurrentQueue<ChessBoard::InternalMove> *toEvaluate,Concurrency::concurrent_queue<std::pair<ChessBoard::InternalMove, ChessEvaluator::ChessEvaluation>> *evaluated)
+			void operator()(Valkyrie * ref,std::vector< ChessBoard::Board> *boardVector, short int currentRecursion, short int maxRecursion, bool isWhite, ChessEvaluator::ChessEvaluation * alpha, ChessEvaluator::ChessEvaluation * beta, std::atomic<int>*counter, ConcurrentQueue<ChessBoard::InternalMove> *toEvaluate,Concurrency::concurrent_queue<std::pair<ChessBoard::InternalMove, ChessEvaluator::ChessEvaluation>> *evaluated)
 			{
 				ChessBoard::InternalMove buffer;
 				ChessEvaluator::ChessEvaluation tmpEval;
@@ -44,7 +44,7 @@ class JudgeDredd::Valkyrie
 						{
 							tmpEval.isNull = true;
 							(*boardVector)[0].ChangeState(buffer);
-							ref->Play(boardVector, currentRecursion, maxRecursion, &tmpEval, isWhite, alpha, beta);
+							ref->Play(boardVector, currentRecursion, maxRecursion, &tmpEval, isWhite, *alpha, *beta);
 							(*boardVector)[0].Revert();
 						}
 						catch (ChessBoard::THREEFOLD_REPETITON)

@@ -17,15 +17,15 @@ template<typename t>
 inline bool ConcurrentQueue<t>::pop(t & object)
 {
 	std::unique_lock<std::mutex> locker(lock);
-	waiter.wait(locker, [this] {return !queue.empty() || completionFlag; });
-	if (!queue.empty())
+	if (queue.empty())
 	{
-		object = queue.front();
-		queue.pop();
-		return true;
+		waiter.wait(locker, [&] {return !queue.empty() || completionFlag; });
+		if (completionFlag)
+			return false;
 	}
-	else
-		return false;
+	object = queue.front();
+	queue.pop();
+	return true;
 }
 
 template<typename t>
@@ -40,4 +40,5 @@ template<typename t>
 inline void ConcurrentQueue<t>::finish()
 {
 	completionFlag = true;
+	waiter.notify_all();
 }

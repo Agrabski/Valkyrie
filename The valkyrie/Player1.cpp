@@ -52,7 +52,7 @@ Move JudgeDredd::Valkyrie::makeMove(Move lastMove)
 	{
 		boardArray[i].resize(recursionDepth + 1);
 		boardArray[i][0] = *currBoardState;
-		threadVector[i] = std::thread(Player(), this, &(boardArray[i]), 0, recursionDepth, !amIWhite, amIWhite ? best : alpha, amIWhite ? beta : best, &evaluationCount, &toEvaluate, &evaluated);
+		threadVector[i] = std::thread(Player(), this, &(boardArray[i]), 0, recursionDepth, !amIWhite, amIWhite ? &best : &alpha, amIWhite ? &beta : &best, &evaluationCount, &toEvaluate, &evaluated);
 	}
 
 	ChessBoard::Board::Moves moveIterator(currBoardState);
