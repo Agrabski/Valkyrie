@@ -8,8 +8,13 @@
 #include "Evaluator.h"
 #include <concurrent_queue.h>
 #include <thread>
+#include <queue>
+#include <atomic>
+#include <condition_variable>
+#include "ConcurentQueue.h"
 #define PROGRAM_NAME "valkyrie"
 #pragma once
+
 
 class JudgeDredd::Valkyrie
 {
@@ -28,19 +33,18 @@ class JudgeDredd::Valkyrie
 			//{
 			//	this->ref = ref;
 			//}
-			void operator()(Valkyrie * ref,std::vector< ChessBoard::Board> *boardVector, short int currentRecursion, short int maxRecursion, bool isWhite, ChessEvaluator::ChessEvaluation alpha, ChessEvaluator::ChessEvaluation beta, std::atomic<int>*counter, Concurrency::concurrent_queue<ChessBoard::InternalMove> *toEvaluate,Concurrency::concurrent_queue<std::pair<ChessBoard::InternalMove, ChessEvaluator::ChessEvaluation>> *evaluated, volatile bool *completionFlag)
+			void operator()(Valkyrie * ref,std::vector< ChessBoard::Board> *boardVector, short int currentRecursion, short int maxRecursion, bool isWhite, ChessEvaluator::ChessEvaluation * alpha, ChessEvaluator::ChessEvaluation * beta, std::atomic<int>*counter, ConcurrentQueue<ChessBoard::InternalMove> *toEvaluate,Concurrency::concurrent_queue<std::pair<ChessBoard::InternalMove, ChessEvaluator::ChessEvaluation>> *evaluated)
 			{
 				ChessBoard::InternalMove buffer;
 				ChessEvaluator::ChessEvaluation tmpEval;
-				while (!*completionFlag || !toEvaluate->empty())
+				while (toEvaluate->pop(buffer))
 				{
-					if (toEvaluate->try_pop(buffer))
-					{
+
 						try
 						{
 							tmpEval.isNull = true;
 							(*boardVector)[0].ChangeState(buffer);
-							ref->Play(boardVector, currentRecursion, maxRecursion, &tmpEval, isWhite, alpha, beta);
+							ref->Play(boardVector, currentRecursion, maxRecursion, &tmpEval, isWhite, *alpha, *beta);
 							(*boardVector)[0].Revert();
 						}
 						catch (ChessBoard::THREEFOLD_REPETITON)
@@ -63,9 +67,6 @@ class JudgeDredd::Valkyrie
 						}
 						if (!tmpEval.isNull)
 							evaluated->push(std::pair<ChessBoard::InternalMove, ChessEvaluator::ChessEvaluation>(buffer, tmpEval));
-					}
-					else
-						std::this_thread::yield();
 				}
 				*counter += 1;
 			}
@@ -80,6 +81,7 @@ class JudgeDredd::Valkyrie
 		ChessEvaluator::ChessEvaluator evaluator;
 
 };
+
 class GAME_ENDED :std::exception
 {
 public:
@@ -93,4 +95,5 @@ public:
 	bool whiteWon;
 	bool blackWon;
 };
+
 #endif // PLAYER1_H_INCLUDED

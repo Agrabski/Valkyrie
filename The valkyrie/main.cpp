@@ -150,6 +150,7 @@ void tester2()
 	stream.open("debug.txt", 'w');
 	for (int i = 2; i < 8; i++)
 	{
+		int moveCount = 1;
 		std::cout << i << std::endl;
 		time_t t1 = time(0);   // get time now
 		player1 = new JudgeDredd::Valkyrie(true, ChessEvaluator::ChessEvaluator(), i);
@@ -159,13 +160,15 @@ void tester2()
 			for (buffer = player1->makeMove(move); true;)
 			{
 				buffer = player2->makeMove(buffer);
+				moveCount++;
 				buffer = player1->makeMove(buffer);
+				moveCount++;
 			}
 		}
 		catch (GAME_ENDED err)
 		{
 		}
-		stream <<i<<"-"<< time(0) - t1 <<";" <<std::endl;
+		stream <<i<<"-"<< (double)(time(0) - t1)/(double)moveCount <<";" <<std::endl;
 		delete player1;
 		delete player2;
 	}

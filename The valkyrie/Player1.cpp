@@ -38,7 +38,7 @@ Move JudgeDredd::Valkyrie::makeMove(Move lastMove)
 		currBoardState->ChangeState(tmp, 0);
 	}
 	firstMove = false;
-	Concurrency::concurrent_queue<ChessBoard::InternalMove> toEvaluate;
+	ConcurrentQueue<ChessBoard::InternalMove> toEvaluate;
 	Concurrency::concurrent_queue<std::pair<ChessBoard::InternalMove, ChessEvaluator::ChessEvaluation>> evaluated;
 	ChessEvaluator::ChessEvaluation alpha, beta;
 	volatile bool completionFlag = false;
@@ -52,7 +52,7 @@ Move JudgeDredd::Valkyrie::makeMove(Move lastMove)
 	{
 		boardArray[i].resize(recursionDepth + 1);
 		boardArray[i][0] = *currBoardState;
-		threadVector[i] = std::thread(Player(), this, &(boardArray[i]), 0, recursionDepth, !amIWhite, amIWhite ? best : alpha, amIWhite ? beta : best, &evaluationCount, &toEvaluate, &evaluated, &completionFlag);
+		threadVector[i] = std::thread(Player(), this, &(boardArray[i]), 0, recursionDepth, !amIWhite, amIWhite ? &best : &alpha, amIWhite ? &beta : &best, &evaluationCount, &toEvaluate, &evaluated);
 	}
 
 	ChessBoard::Board::Moves moveIterator(currBoardState);
@@ -66,7 +66,7 @@ Move JudgeDredd::Valkyrie::makeMove(Move lastMove)
 		toEvaluate.push(*moveIterator);
 		++moveIterator;
 	}
-	completionFlag = true;
+	toEvaluate.finish();
 
 	std::pair<ChessBoard::InternalMove, ChessEvaluator::ChessEvaluation> pairBuffer;
 	while (evaluationCount < maxThreadCount || !evaluated.empty())
