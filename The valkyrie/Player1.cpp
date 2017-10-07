@@ -42,7 +42,7 @@ Move JudgeDredd::Valkyrie::makeMove(Move lastMove)
 	Concurrency::concurrent_queue<std::pair<ChessBoard::InternalMove, ChessEvaluator::ChessEvaluation>> evaluated;
 	ChessEvaluator::ChessEvaluation alpha, beta;
 	volatile bool completionFlag = false;
-	std::vector<std::vector<ChessBoard::Board>>boardArray(maxThreadCount);
+	std::vector<ChessBoard::Board>boardArray(maxThreadCount);
 	std::vector<std::thread>threadVector(maxThreadCount);
 	threadVector.resize(maxThreadCount);
 	std::atomic<int>evaluationCount = 0;
@@ -50,9 +50,8 @@ Move JudgeDredd::Valkyrie::makeMove(Move lastMove)
 	ChessBoard::InternalMove bestMove;
 	for (int i = 0; i < maxThreadCount; i++)
 	{
-		boardArray[i].resize(recursionDepth + 1);
-		boardArray[i][0] = *currBoardState;
-		threadVector[i] = std::thread(Player(), this, &(boardArray[i]), 0, recursionDepth, !amIWhite, amIWhite ? &best : &alpha, amIWhite ? &beta : &best, &evaluationCount, &toEvaluate, &evaluated);
+		boardArray[i] = *currBoardState;
+		threadVector[i] = std::thread(Player(), this, boardArray[i], 0, recursionDepth, !amIWhite, amIWhite ? &best : &alpha, amIWhite ? &beta : &best, &evaluationCount, &toEvaluate, &evaluated);
 	}
 
 	ChessBoard::Board::Moves moveIterator(currBoardState);
@@ -127,7 +126,7 @@ Move JudgeDredd::Valkyrie::makeMove(Move lastMove)
 	return tmp;
 }
 
-void JudgeDredd::Valkyrie::Play(std::vector< ChessBoard::Board> *boardVector, short int currentRecursion, short int maxRecursion, ChessEvaluator::ChessEvaluation *value, bool isWhite, ChessEvaluator::ChessEvaluation alpha, ChessEvaluator::ChessEvaluation beta) const
+void JudgeDredd::Valkyrie::Play( ChessBoard::Board &board, short int currentRecursion, short int maxRecursion, ChessEvaluator::ChessEvaluation *value, bool isWhite, ChessEvaluator::ChessEvaluation alpha, ChessEvaluator::ChessEvaluation beta) const
 {
 #ifdef DEBUG
 	std::cout << currentRecursion<<(currentRecursion!=maxRecursion?"----":"");
@@ -138,7 +137,7 @@ void JudgeDredd::Valkyrie::Play(std::vector< ChessBoard::Board> *boardVector, sh
 		std::cout << std::endl;
 #endif // DEBUG
 		if(value!=nullptr)
-			*value= evaluator.evaluate((*boardVector)[currentRecursion]);
+			*value= evaluator.evaluate(board);
 		return;
 
 	}
@@ -148,8 +147,7 @@ void JudgeDredd::Valkyrie::Play(std::vector< ChessBoard::Board> *boardVector, sh
 	ChessBoard::InternalMove bestMove;
 	ChessBoard::InternalMove newbestMove;
 	bool StealmateFlag = true;
-	(*boardVector)[currentRecursion + 1] = ((*boardVector)[currentRecursion]);
-	ChessBoard::Board::Moves moveIterator(&(*boardVector)[currentRecursion+1]);
+	ChessBoard::Board::Moves moveIterator(&board);
 
 	moveIterator.Reset(isWhite);
 	++(moveIterator);
@@ -163,11 +161,11 @@ void JudgeDredd::Valkyrie::Play(std::vector< ChessBoard::Board> *boardVector, sh
 			{
 				newBest.isNull = true;
 				newbestMove =ChessBoard::InternalMove( *moveIterator);
-				(*boardVector)[currentRecursion + 1].ChangeState(*moveIterator);
-				Play(boardVector, currentRecursion + 1, maxRecursion, &newBest, !isWhite, alpha, beta);
+				board.ChangeState(*moveIterator);
+				Play(board, currentRecursion + 1, maxRecursion, &newBest, !isWhite, alpha, beta);
 
 
-				(*boardVector)[currentRecursion + 1].Revert();
+				board.Revert();
 				StealmateFlag = false;
 
 			}
@@ -182,7 +180,7 @@ void JudgeDredd::Valkyrie::Play(std::vector< ChessBoard::Board> *boardVector, sh
 				newBest.gameHasEnded = true;
 				newBest.isNull = false;
 				newBest.endState = 0;
-				(*boardVector)[currentRecursion + 1].Revert();
+				board.Revert();
 			}
 			catch(ChessBoard::MOVE_BLOCKED)
 			{ }
@@ -226,11 +224,11 @@ void JudgeDredd::Valkyrie::Play(std::vector< ChessBoard::Board> *boardVector, sh
 			{
 				newBest.isNull = true;
 				newbestMove = *moveIterator;
-				(*boardVector)[currentRecursion + 1].ChangeState(*moveIterator);
-				Play(boardVector, currentRecursion + 1, maxRecursion, &newBest, !isWhite, alpha, beta);
+				board.ChangeState(*moveIterator);
+				Play(board, currentRecursion + 1, maxRecursion, &newBest, !isWhite, alpha, beta);
 				StealmateFlag = false;
 
-				(*boardVector)[currentRecursion + 1].Revert();
+				board.Revert();
 			}
 			catch (ChessBoard::FIFTY_MOVES)
 			{
@@ -243,7 +241,7 @@ void JudgeDredd::Valkyrie::Play(std::vector< ChessBoard::Board> *boardVector, sh
 				newBest.gameHasEnded = true;
 				newBest.isNull = false;
 				newBest.endState = 0;
-				(*boardVector)[currentRecursion + 1].Revert();
+				board.Revert();
 			}
 			catch (ChessBoard::MOVE_BLOCKED)
 			{
@@ -284,7 +282,7 @@ void JudgeDredd::Valkyrie::Play(std::vector< ChessBoard::Board> *boardVector, sh
 	{
 		Best.isNull = false;
 		Best.gameHasEnded = true;
-		Best.endState = (*boardVector)[currentRecursion + 1].IsWhiteChecked() ? -1 : ((*boardVector)[currentRecursion + 1].IsBlackChecked() ? 1 : 0);
+		Best.endState = board.IsWhiteChecked() ? -1 : board.IsBlackChecked() ? 1 : 0;
 		if (value != nullptr)
 			*value = Best;
 	}

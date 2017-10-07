@@ -7,12 +7,25 @@
 
 #pragma once
 
+#pragma region MOVE_MACROS
+#define MOVE_CHECK_MACRO(x,y) ((currentRank.first + x<8&&currentRank.first + x>0&&currentRank.second + y<8&&currentRank.second + y>0&&(parent->fields[currentRank.first + x][currentRank.second + y].rank.type == Empty || parent->fields[currentRank.first + x][currentRank.second + y].rank.isWhite != isWhite)))
+#define MOVE_MACRO(x,y) 	state=InternalMove(currentRank, std::pair<short, short>(currentRank.first +x, currentRank.second +y), Standard);
+#define COMPLETE_MOVE_MACRO(x,y) if(MOVE_CHECK_MACRO(x,y)) {MOVE_MACRO(x,y)} else { direction++; moveIterator = 0; return ++(*this);}
+#pragma endregion
+
+#pragma region SAFETY_MACROS
+#define IN_RANGE(x) (0<=x&&x<8)
+#pragma endregion
+
+
 #ifndef PROGRAM_NAME
 #define PROGRAM_NAME "Valkirye"
 #endif // !PROGRAM_NAME
 
 namespace ChessBoard
 {
+	auto invert = [](int i) {return i - 4 > 0 ? i - 4 : 4 + i; };
+
 	const InternalMove Board::Moves::endState = InternalMove(std::pair<short, short>(0, 8), std::pair<short, short>(0, 8), Standard);
 
 	const std::pair<short, short> Board::KnightMovementArray[8] = { { -2,-1 },{ -2,1 },{ -1,2 },{ 1,2 },{ 2,1 },{ 2,-1 },{1,-2 },{ -1,-2 } };
@@ -48,21 +61,16 @@ namespace ChessBoard
 				return (prevBoard)[i].second < 3;
 			}
 		}
-		prevBoard.emplace_back(std::pair<std::vector<std::vector<Field>>, int>(fields, 1));
+		prevBoard.emplace_back(std::pair<std::array<std::array<Field, 8>, 8>, int>(fields, 1));
 		return true;
 	}
+
 
 	Board & Board::operator=(const Board & toCopy)
 	{
 		if (this == &toCopy)
 			return *this;
 		ClearData();
-		if(fields.size()!=8)
-			fields.resize(8);
-		for (int i = 0; i < 8; i++)
-			if (fields[i].size() != 8)
-				fields[i].resize(8);
-
 		for (int x = 0; x < 8; x++)
 			for (int y = 0; y < 8; y++)
 				fields[x][y] = toCopy.fields[x][y];
@@ -259,9 +267,14 @@ namespace ChessBoard
 	{
 		nextMoveIsWhite = !nextMoveIsWhite;
 		removeBoard(fields);
-		moveCounter = MoveStack.top().movesCounter;
-		InternalMove lastMove = MoveStack.top().move;
-		Rank beaten = MoveStack.top().pieceType;
+		StackElement tmp = MoveStack.top();
+		moveCounter = tmp.movesCounter;
+		InternalMove lastMove =tmp.move;
+		Rank beaten = tmp.pieceType;
+		rightBlack = tmp.rightBlack;
+		leftBlack = tmp.leftBlack;
+		rightWhite = tmp.rightWhite;
+		leftWhite = tmp.leftWhite;
 		MoveStack.pop();
 		if (lastMove.movetype == Standard)
 		{
@@ -294,8 +307,6 @@ namespace ChessBoard
 				fields[4][0].rank = { King,true };
 				fields[2][0].rank = { Empty,true };
 				fields[3][0].rank = { Empty,true };
-				leftWhite = true;
-				rightWhite = true;
 			}
 			else
 			{
@@ -303,8 +314,6 @@ namespace ChessBoard
 				fields[4][7].rank = { King,false };
 				fields[2][7].rank = { Empty,false };
 				fields[3][7].rank = { Empty,false };
-				leftBlack = true;
-				rightBlack = true;
 			}
 			break;
 		case(RochadeRight):
@@ -314,8 +323,6 @@ namespace ChessBoard
 				fields[4][0].rank = { King,true };
 				fields[6][0].rank = { Empty,true };
 				fields[5][0].rank = { Empty,true };
-				leftWhite = true;
-				rightWhite = true;
 			}
 			else
 			{
@@ -323,8 +330,6 @@ namespace ChessBoard
 				fields[4][7].rank = { King,false };
 				fields[2][7].rank = { Empty,false };
 				fields[3][7].rank = { Empty,false };
-				leftBlack = true;
-				rightBlack = true;
 			}
 			break;
 		default:
@@ -351,9 +356,9 @@ namespace ChessBoard
 		prevBoard.resize(0);
 	}
 
-	void ChessBoard::Board::removeBoard(std::vector<std::vector<Field>> board)
+	void Board::removeBoard(std::array<std::array<Field, 8>, 8> &board)
 	{
-		for (std::vector<std::pair<std::vector<std::vector<Field>>, int>>::iterator i = prevBoard.begin(); i != prevBoard.end(); ++i)
+		for (std::vector<std::pair<std::array<std::array<Field, 8>, 8>, int>>::iterator i = prevBoard.begin(); i != prevBoard.end(); ++i)
 		{
 			bool flag = true;
 			for (int x = 0; x < 8&&flag; x++)
@@ -384,15 +389,11 @@ namespace ChessBoard
 
 	Board::Board(const Board * toCopy)
 	{
-		fields.resize(8);
-		for (int i = 0; i < 8; i++)
-			fields[i].resize(8);
-
 		for (int x = 0; x < 8; x++)
 			for (int y = 0; y < 8; y++)
 				fields[x][y] = toCopy->fields[x][y];
 
-		prevBoard = std::vector<std::pair<std::vector<std::vector<Field>>, int>>(toCopy->prevBoard);
+		prevBoard = std::vector<std::pair<std::array<std::array<Field, 8>, 8>, int>>(toCopy->prevBoard);
 		MoveStack = std::stack<StackElement>(toCopy->MoveStack);
 		nextMoveIsWhite = toCopy->nextMoveIsWhite;
 		leftWhite = toCopy->leftWhite;
@@ -406,7 +407,7 @@ namespace ChessBoard
 	{
 		if (moveCounter == 0)
 			throw FIFTY_MOVES();
-		StackElement tmp(lastMove, { Empty,false }, moveCounter);
+		StackElement tmp(lastMove, { Empty,false }, moveCounter,leftWhite,rightWhite,leftBlack,rightBlack);
 		Rank currentlyMoved = { Empty,false };
 		std::pair<short, short> relativeMove;
 		if (lastMove.from != std::pair<short, short>(-1, -1))
@@ -507,6 +508,16 @@ namespace ChessBoard
 						throw INVALID_MOVE();
 				}
 			}
+			if (currentlyMoved.isWhite)
+			{
+				rightWhite = false;
+				leftWhite = false;
+			}
+			else
+			{
+				rightBlack = false;
+				leftBlack = false;
+			}
 			break;
 			case(ChessBoard::Bishop):
 			{
@@ -550,6 +561,17 @@ namespace ChessBoard
 					if (!(relativeMove.second >= -1 && relativeMove.second <= 1))
 						throw INVALID_MOVE();
 			}
+			if (currentlyMoved.isWhite)
+			{
+				rightWhite = false;
+				leftWhite = false;
+			}
+			else
+			{
+				rightBlack = false;
+				leftBlack = false;
+			}
+
 			break;
 			}
 			fields[lastMove.from.first][lastMove.from.second].rank.type = Empty;
@@ -664,15 +686,14 @@ namespace ChessBoard
 			throw std::runtime_error(PROGRAM_NAME + std::string(" ERROR:Move was corrupted (invalid internal move type)"));
 			break;
 		}
-		MoveStack.push(tmp);
 		nextMoveIsWhite = !nextMoveIsWhite;
 		if (currentlyMoved.type == Pawn || tmp.pieceType.type != Empty)
 		{
-			tmp.movesCounter = 100;
 			moveCounter = 100;
 		}
 		else
 			moveCounter--;
+		MoveStack.push(tmp);
 		if (!addBoard())
 		{
 			throw THREEFOLD_REPETITON();
@@ -714,6 +735,13 @@ namespace ChessBoard
 			for (int y = 0; y < 8; y++)
 				if (fields[x][y].rank != rightOne.fields[x][y].rank)
 					return false;
+		for(int i=0;i<prevBoard.size();i++)
+			for (int x = 0; x < 8; x++)
+				for (int y = 0; y < 8; y++)
+					if (prevBoard[i].first[x][y].rank != rightOne.prevBoard[i].first[x][y].rank)
+						return false;
+		if (MoveStack.size() != rightOne.MoveStack.size() || moveCounter != rightOne.moveCounter)
+			return false;
 		return true;
 	}
 
@@ -723,8 +751,38 @@ namespace ChessBoard
 	}
 
 	//TODO:paint the map
-	void Board::PaintTheMap(InternalMove lastMove)
+	void Board::PaintTheMap(InternalMove lastMove, Rank currentlyMoved)
 	{
+		bool isWhite = fields[lastMove.from.first][lastMove.from.second].rank.isWhite;
+		if(fields[lastMove.from.first][lastMove.from.second].coveredByWhite|| fields[lastMove.from.first][lastMove.from.second].coveredByBlack)
+		{
+			for (short i = 0; i < 8; i++)
+			{
+				if(IN_RANGE(lastMove.from.first + QueenMovementArray[i].first)&&IN_RANGE(lastMove.from.second + QueenMovementArray[i].second))
+				{
+					switch (currentlyMoved.type)
+					{
+					case(Pawn):
+					case(Knight):
+					case(Tower):
+					case(King):
+					case(Bishop):
+					default:
+						break;
+					}
+					if (fields[lastMove.from.first + QueenMovementArray[i].first][lastMove.from.second + QueenMovementArray[i].second].coveredByWhite|| fields[lastMove.from.first + QueenMovementArray[i].first][lastMove.from.second + QueenMovementArray[i].second].coveredByBlack)
+					{
+						for (short k = 0; IN_RANGE(lastMove.from.first + QueenMovementArray[i].first*k) && IN_RANGE(lastMove.from.second + QueenMovementArray[i].second*k); k++)
+							if (!fields[lastMove.from.first + QueenMovementArray[i].first*k][lastMove.from.second + QueenMovementArray[i].second*k].coveredByWhite && !fields[lastMove.from.first + QueenMovementArray[i].first*k][lastMove.from.second + QueenMovementArray[i].second*k].coveredByBlack)
+								break;
+							else
+							{
+
+							}
+					}
+				}
+			}
+		}
 	}
 
 	ChessBoard::InternalMove::InternalMove(Move toConvert)
@@ -807,16 +865,6 @@ namespace ChessBoard
 		return from != other.from || to != other.to || movetype != other.movetype;
 	}
 
-
-#pragma region MOVE_MACROS
-#define MOVE_CHECK_MACRO(x,y) ((currentRank.first + x<8&&currentRank.first + x>0&&currentRank.second + y<8&&currentRank.second + y>0&&(parent->fields[currentRank.first + x][currentRank.second + y].rank.type == Empty || parent->fields[currentRank.first + x][currentRank.second + y].rank.isWhite != isWhite)))
-#define MOVE_MACRO(x,y) 	state=InternalMove(currentRank, std::pair<short, short>(currentRank.first +x, currentRank.second +y), Standard);
-#define COMPLETE_MOVE_MACRO(x,y) if(MOVE_CHECK_MACRO(x,y)) {MOVE_MACRO(x,y)} else { direction++; moveIterator = 0; return ++(*this);}
-#pragma endregion
-
-#pragma region SAFETY_MACROS
-#define IN_RANGE(x) (0<=x&&x<8)
-#pragma endregion
 
 	Board::Moves::~Moves()
 	{

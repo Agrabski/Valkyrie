@@ -33,7 +33,7 @@ class JudgeDredd::Valkyrie
 			//{
 			//	this->ref = ref;
 			//}
-			void operator()(Valkyrie * ref,std::vector< ChessBoard::Board> *boardVector, short int currentRecursion, short int maxRecursion, bool isWhite, ChessEvaluator::ChessEvaluation * alpha, ChessEvaluator::ChessEvaluation * beta, std::atomic<int>*counter, ConcurrentQueue<ChessBoard::InternalMove> *toEvaluate,Concurrency::concurrent_queue<std::pair<ChessBoard::InternalMove, ChessEvaluator::ChessEvaluation>> *evaluated)
+			void operator()(Valkyrie * ref, ChessBoard::Board &board, short int currentRecursion, short int maxRecursion, bool isWhite, ChessEvaluator::ChessEvaluation * alpha, ChessEvaluator::ChessEvaluation * beta, std::atomic<int>*counter, ConcurrentQueue<ChessBoard::InternalMove> *toEvaluate,Concurrency::concurrent_queue<std::pair<ChessBoard::InternalMove, ChessEvaluator::ChessEvaluation>> *evaluated)
 			{
 				ChessBoard::InternalMove buffer;
 				ChessEvaluator::ChessEvaluation tmpEval;
@@ -43,25 +43,32 @@ class JudgeDredd::Valkyrie
 						try
 						{
 							tmpEval.isNull = true;
-							(*boardVector)[0].ChangeState(buffer);
-							ref->Play(boardVector, currentRecursion, maxRecursion, &tmpEval, isWhite, *alpha, *beta);
-							(*boardVector)[0].Revert();
+							board.ChangeState(buffer);
+							ref->Play(board, currentRecursion, maxRecursion, &tmpEval, isWhite, *alpha, *beta);
+							board.Revert();
+						}
+						catch (ChessBoard::FIFTY_MOVES)
+						{
+							tmpEval.gameHasEnded = true;
+							tmpEval.isNull = false;
+							tmpEval.endState = 0;
 						}
 						catch (ChessBoard::THREEFOLD_REPETITON)
 						{
 							tmpEval.gameHasEnded = true;
 							tmpEval.isNull = false;
 							tmpEval.endState = 0;
-							(*boardVector)[0].Revert();
+							board.Revert();
 						}
 						catch (ChessBoard::MOVE_BLOCKED)
 						{
 						}
-						catch (ChessBoard::INVALID_MOVE)
+
+						catch (ChessBoard::KING_IN_DANGER)
 						{
 
 						}
-						catch (ChessBoard::KING_IN_DANGER)
+						catch (ChessBoard::INVALID_MOVE)
 						{
 
 						}
@@ -77,7 +84,7 @@ class JudgeDredd::Valkyrie
 		bool firstMove;
 		ChessBoard::Board *currBoardState=new ChessBoard::Board();
 		bool amIWhite;
-		void Play(std::vector< ChessBoard::Board> *boardVector, short int currentRecursion, short int maxRecursion, ChessEvaluator::ChessEvaluation *value, bool isWhite,ChessEvaluator::ChessEvaluation alpha, ChessEvaluator::ChessEvaluation beta) const;
+		void Play( ChessBoard::Board &board, short int currentRecursion, short int maxRecursion, ChessEvaluator::ChessEvaluation *value, bool isWhite,ChessEvaluator::ChessEvaluation alpha, ChessEvaluator::ChessEvaluation beta) const;
 		ChessEvaluator::ChessEvaluator evaluator;
 
 };

@@ -5,6 +5,7 @@
 #include "judgeDredd.h"
 #include <math.h>
 #include <stack>
+#include <array>
 
 namespace ChessBoard
 {
@@ -54,9 +55,6 @@ namespace ChessBoard
 	public:
 		Board()
 		{
-			fields.resize(8);
-			for (int i = 0; i < 8; i++)
-				fields[i].resize(8);
 			for (int y = 0; y < 8; y++)
 				for (int x = 0; x < 8; x++)
 					fields[x][y].rank = { Empty, false };
@@ -78,7 +76,7 @@ namespace ChessBoard
 			fields[4][0].rank = { King,true };
 			fields[4][7].rank = { King,false };
 			MoveStack = std::stack<StackElement>();
-			prevBoard = std::vector<std::pair<std::vector<std::vector<Field>>, int>>();
+			prevBoard = std::vector<std::pair<std::array<std::array<Field, 8>, 8>, int>>();
 		}
 		~Board();
 		Board(const Board*toCopy);
@@ -87,7 +85,7 @@ namespace ChessBoard
 		bool operator==(const Board& right) const;
 		bool operator!=(const Board& right) const;
 		void Revert();
-		std::vector<std::vector<Field>>fields;
+		std::array<std::array<Field, 8>, 8>fields;
 		struct Moves
 		{
 			Moves(Board *Parent)
@@ -116,22 +114,31 @@ namespace ChessBoard
 	private:
 		struct StackElement
 		{
-			StackElement(InternalMove move, Rank piece, int moves)
+			StackElement(InternalMove move, Rank piece, int moves, bool lWhite, bool rWhite, bool lBlack, bool rBlack)
 			{
 				this->move = move;
 				pieceType = piece;
 				movesCounter = moves;
+				leftWhite = lWhite;
+				rightWhite = rWhite;
+				leftBlack = lBlack;
+				rightBlack = rBlack;
 			}
 			InternalMove move;
 			Rank pieceType;
 			int movesCounter;
+			bool leftWhite;
+			bool rightWhite;
+			bool leftBlack;
+			bool rightBlack;
 		};
+
 		//returns true if game is not over
 		int moveCounter = 100;
 		bool addBoard();
 		void ClearData();
-		void removeBoard(std::vector<std::vector<Field>> board);
-		void PaintTheMap(InternalMove lastMove);
+		void removeBoard(std::array<std::array<Field, 8>, 8> &board);
+		void Board::PaintTheMap(InternalMove lastMove, Rank currentlyMoved);
 		void PaintTheMap();
 		bool nextMoveIsWhite = true;
 		bool leftWhite = true;
@@ -141,7 +148,7 @@ namespace ChessBoard
 		bool blackCheck = false;
 		bool whiteCheck = false;
 		void ClearStack();
-		std::vector<std::pair<std::vector<std::vector<Field>>,int>>  prevBoard;
+		std::vector<std::pair<std::array<std::array<Field,8>,8>,int>>  prevBoard;
 		std::stack<StackElement> MoveStack;
 		static const std::pair<short, short> QueenMovementArray[8];
 		static const std::pair<short, short> KnightMovementArray[8];
