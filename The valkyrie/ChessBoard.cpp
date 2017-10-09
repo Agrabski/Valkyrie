@@ -45,23 +45,16 @@ namespace ChessBoard
 
 	bool Board::addBoard()
 	{
-		for(int i=0;i<prevBoard.size();i++)
+		int k = prevBoard.size();
+		for(int i=0;i<k;i++)
 		{
-			bool flag = true;
-			for(int x=0;x<8&&flag;x++)
-				for(int y=0;y<8;y++)
-					if ((prevBoard)[i].first[x][y] != fields[x][y])
-					{
-						flag = false;
-						break;
-					}
-			if (flag)
+			if (prevBoard[i]==fields)
 			{
-				(prevBoard)[i].second++;
-				return (prevBoard)[i].second < 3;
+				++(prevBoard)[i];
+				return (prevBoard)[i].count < 3;
 			}
 		}
-		prevBoard.emplace_back(std::pair<std::array<std::array<Field, 8>, 8>, int>(fields, 1));
+		prevBoard.push_back(PrevBoardElement(fields, (short)1));
 		return true;
 	}
 
@@ -233,7 +226,7 @@ namespace ChessBoard
 					break;
 				case(Bishop):
 				{
-					for (int direction = 0; direction < 8; direction += 2)
+					for (int direction = 1; direction < 8; direction += 2)
 					{
 						for (int i = 1; i < 8 && x + QueenMovementArray[direction].first*i>0 && x + QueenMovementArray[direction].first*i < 8 && y + QueenMovementArray[direction].second*i>0 && y + QueenMovementArray[direction].second*i < 8; ++i)
 						{
@@ -356,27 +349,19 @@ namespace ChessBoard
 		prevBoard.resize(0);
 	}
 
-	void Board::removeBoard(std::array<std::array<Field, 8>, 8> &board)
+	void Board::removeBoard(Field board[8][8])
 	{
-		for (std::vector<std::pair<std::array<std::array<Field, 8>, 8>, int>>::iterator i = prevBoard.begin(); i != prevBoard.end(); ++i)
+		std::vector<PrevBoardElement>::iterator k = prevBoard.end();
+		for (std::vector<PrevBoardElement>::iterator i = prevBoard.begin(); i != k; ++i)
 		{
-			bool flag = true;
-			for (int x = 0; x < 8&&flag; x++)
-				for (int y = 0; y < 8; y++)
-					if (i->first[x][y] != fields[x][y])
-					{
-						flag = false;
-						break;
-					}
-			if (flag)
+			if (*i==fields)
 			{
-				if (i->second == 1)
+				if (i->count== 1)
 				{
 					prevBoard.erase(i);
-					prevBoard.shrink_to_fit();
 				}
 				else
-					i->second--;
+					--*i;
 				return;
 			}
 		}
@@ -393,7 +378,7 @@ namespace ChessBoard
 			for (int y = 0; y < 8; y++)
 				fields[x][y] = toCopy->fields[x][y];
 
-		prevBoard = std::vector<std::pair<std::array<std::array<Field, 8>, 8>, int>>(toCopy->prevBoard);
+		prevBoard = std::vector<PrevBoardElement>(toCopy->prevBoard);
 		MoveStack = std::stack<StackElement>(toCopy->MoveStack);
 		nextMoveIsWhite = toCopy->nextMoveIsWhite;
 		leftWhite = toCopy->leftWhite;
@@ -735,11 +720,6 @@ namespace ChessBoard
 			for (int y = 0; y < 8; y++)
 				if (fields[x][y].rank != rightOne.fields[x][y].rank)
 					return false;
-		for(int i=0;i<prevBoard.size();i++)
-			for (int x = 0; x < 8; x++)
-				for (int y = 0; y < 8; y++)
-					if (prevBoard[i].first[x][y].rank != rightOne.prevBoard[i].first[x][y].rank)
-						return false;
 		if (MoveStack.size() != rightOne.MoveStack.size() || moveCounter != rightOne.moveCounter)
 			return false;
 		return true;
@@ -1506,24 +1486,66 @@ namespace ChessBoard
 		return false;
 	}
 
-	bool Field::operator!=(const Field & right)
+	bool Rank::operator==(const Rank & right) const
 	{
-		return rank!=right.rank;
+		if (type == Empty&& right.type == Empty)
+			return true;
+		else
+			return type == right.type&&isWhite == right.isWhite;
 	}
 
-	bool Field::operator==(const Field & right)
+	Board::PrevBoardElement::PrevBoardElement(const Field toCopy[8][8], short count)
 	{
-		return false;
+		for (short x = 0; x < 8; x++)
+			for (short y = 0; y < 8; y++)
+				map[x][y] = toCopy[x][y];
+		this->count = count;
 	}
 
-	bool Field::operator>(const Field & right)
+	Board::PrevBoardElement::PrevBoardElement()
 	{
-		return false;
+		count = 0;
 	}
 
-	bool Field::operator<(const Field & right)
+	Board::PrevBoardElement Board::PrevBoardElement::operator++()
 	{
-		return false;
+		count++;
+		return *this;
+	}
+
+	Board::PrevBoardElement Board::PrevBoardElement::operator--()
+	{
+		count--;
+		return *this;
+	}
+
+	bool Board::PrevBoardElement::operator==(const Field right[8][8]) const
+	{
+		for (short x = 0; x < 8; x++)
+			for (short y = 0; y < 8; y++)
+				if (map[x][y] == (right)[x][y])
+					return false;
+		return true;
+	}
+
+	bool Board::PrevBoardElement::operator==(const PrevBoardElement & right) const
+	{
+		if (right.count != count)
+			return false;
+		for (short x = 0; x < 8; x++)
+			for (short y = 0; y < 8; y++)
+				if (map[x][y] != (right).map[x][y])
+					return false;
+	}
+
+	bool Field::operator==(const Field & right) const
+	{
+		return rank == right.rank&&coveredByWhite == right.coveredByWhite&&coveredByBlack == right.coveredByBlack;
+	}
+
+	bool Field::operator!=(const Field & right) const
+	{
+		return coveredByWhite != right.coveredByWhite || coveredByBlack != right.coveredByBlack || rank != right.rank;
 	}
 
 }

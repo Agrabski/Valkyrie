@@ -13,6 +13,7 @@
 #include <condition_variable>
 #include "ConcurentQueue.h"
 #define PROGRAM_NAME "valkyrie"
+#define REVERSION
 #pragma once
 
 
@@ -42,10 +43,31 @@ class JudgeDredd::Valkyrie
 
 						try
 						{
+#ifdef REVERSION
+							if (board != ref->currBoardState)
+								throw std::runtime_error("Map reversion fail");
+#endif // REVERSION
 							tmpEval.isNull = true;
 							board.ChangeState(buffer);
-							ref->Play(board, currentRecursion, maxRecursion, &tmpEval, isWhite, *alpha, *beta);
+#ifdef REVERSION
+
+							ChessBoard::Board tmp = ChessBoard::Board(ref->currBoardState);
+							tmp.ChangeState(buffer);
+							if (board != tmp)
+								throw std::runtime_error("Map reversion fail");
+
+#endif
+							ref->Play(board, currentRecursion, maxRecursion, &tmpEval, !isWhite, *alpha, *beta);
+#ifdef REVERSION
+
+							if (board !=tmp)
+								throw std::runtime_error("Map reversion fail");
+#endif
 							board.Revert();
+#ifdef REVERSION
+							if (board != ref->currBoardState)
+								throw std::runtime_error("Map reversion fail");
+#endif // REVERSION
 						}
 						catch (ChessBoard::FIFTY_MOVES)
 						{
@@ -74,6 +96,10 @@ class JudgeDredd::Valkyrie
 						}
 						if (!tmpEval.isNull)
 							evaluated->push(std::pair<ChessBoard::InternalMove, ChessEvaluator::ChessEvaluation>(buffer, tmpEval));
+#ifdef REVERSION
+						if (board != ref->currBoardState)
+							throw std::runtime_error("Map reversion fail");
+#endif // REVERSION
 				}
 				*counter += 1;
 			}

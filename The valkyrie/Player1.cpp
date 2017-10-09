@@ -51,7 +51,7 @@ Move JudgeDredd::Valkyrie::makeMove(Move lastMove)
 	for (int i = 0; i < maxThreadCount; i++)
 	{
 		boardArray[i] = *currBoardState;
-		threadVector[i] = std::thread(Player(), this, boardArray[i], 0, recursionDepth, !amIWhite, amIWhite ? &best : &alpha, amIWhite ? &beta : &best, &evaluationCount, &toEvaluate, &evaluated);
+		threadVector[i] = std::thread(Player(), this, boardArray[i], 0, recursionDepth, amIWhite, amIWhite ? &best : &alpha, amIWhite ? &beta : &best, &evaluationCount, &toEvaluate, &evaluated);
 	}
 
 	ChessBoard::Board::Moves moveIterator(currBoardState);
@@ -151,7 +151,9 @@ void JudgeDredd::Valkyrie::Play( ChessBoard::Board &board, short int currentRecu
 
 	moveIterator.Reset(isWhite);
 	++(moveIterator);
-
+#ifdef REVERSION
+	ChessBoard::Board tmp(board);
+#endif
 
 	if (isWhite)
 	{
@@ -161,11 +163,20 @@ void JudgeDredd::Valkyrie::Play( ChessBoard::Board &board, short int currentRecu
 			{
 				newBest.isNull = true;
 				newbestMove =ChessBoard::InternalMove( *moveIterator);
+#ifdef REVERSION
+				if (tmp != board)
+					throw std::runtime_error("reversion fail");
+#endif
 				board.ChangeState(*moveIterator);
+
 				Play(board, currentRecursion + 1, maxRecursion, &newBest, !isWhite, alpha, beta);
 
 
 				board.Revert();
+#ifdef REVERSION
+				if (tmp != board)
+					throw std::runtime_error("reversion fail");
+#endif
 				StealmateFlag = false;
 
 			}
@@ -224,11 +235,19 @@ void JudgeDredd::Valkyrie::Play( ChessBoard::Board &board, short int currentRecu
 			{
 				newBest.isNull = true;
 				newbestMove = *moveIterator;
+#ifdef REVERSION
+				if (tmp != board)
+					throw std::runtime_error("reversion fail");
+#endif
 				board.ChangeState(*moveIterator);
 				Play(board, currentRecursion + 1, maxRecursion, &newBest, !isWhite, alpha, beta);
 				StealmateFlag = false;
 
 				board.Revert();
+#ifdef REVERSION
+				if (tmp != board)
+					throw std::runtime_error("reversion fail");
+#endif
 			}
 			catch (ChessBoard::FIFTY_MOVES)
 			{
@@ -254,6 +273,12 @@ void JudgeDredd::Valkyrie::Play( ChessBoard::Board &board, short int currentRecu
 			{
 				
 			}
+#ifdef REVERSION
+			if (tmp != board)
+				throw std::runtime_error("reversion fail");
+#endif
+
+
 
 			if (newbestMove.from != std::pair<short, short>(8, 0) && !newBest.isNull&&(beta.isNull||beta.gameHasEnded||!newBest.gameHasEnded)&&(beta.isNull||((beta.gameHasEnded&&!newBest.gameHasEnded)||newBest < beta)))
 			{

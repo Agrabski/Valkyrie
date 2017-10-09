@@ -36,6 +36,7 @@ namespace ChessBoard
 		Type type;
 		bool isWhite;
 		bool operator!=(const Rank& right) const;
+		bool operator==(const Rank& right) const;
 	};
 
 	struct Field
@@ -43,10 +44,8 @@ namespace ChessBoard
 		Rank rank;
 		int coveredByWhite = 0;
 		int coveredByBlack = 0;
-		bool operator!=(const Field &right);
-		bool operator==(const Field &right);
-		bool operator>(const Field &right);
-		bool operator<(const Field &right);
+		bool operator==(const Field &right) const;
+		bool operator!=(const Field &right) const;
 	};
 
 
@@ -76,7 +75,8 @@ namespace ChessBoard
 			fields[4][0].rank = { King,true };
 			fields[4][7].rank = { King,false };
 			MoveStack = std::stack<StackElement>();
-			prevBoard = std::vector<std::pair<std::array<std::array<Field, 8>, 8>, int>>();
+			prevBoard = std::vector<PrevBoardElement>();
+			prevBoard.reserve(100);
 		}
 		~Board();
 		Board(const Board*toCopy);
@@ -85,7 +85,7 @@ namespace ChessBoard
 		bool operator==(const Board& right) const;
 		bool operator!=(const Board& right) const;
 		void Revert();
-		std::array<std::array<Field, 8>, 8>fields;
+		Field fields[8][8];
 		struct Moves
 		{
 			Moves(Board *Parent)
@@ -137,7 +137,7 @@ namespace ChessBoard
 		int moveCounter = 100;
 		bool addBoard();
 		void ClearData();
-		void removeBoard(std::array<std::array<Field, 8>, 8> &board);
+		void removeBoard(Field board[8][8]);
 		void Board::PaintTheMap(InternalMove lastMove, Rank currentlyMoved);
 		void PaintTheMap();
 		bool nextMoveIsWhite = true;
@@ -148,7 +148,19 @@ namespace ChessBoard
 		bool blackCheck = false;
 		bool whiteCheck = false;
 		void ClearStack();
-		std::vector<std::pair<std::array<std::array<Field,8>,8>,int>>  prevBoard;
+		struct PrevBoardElement
+		{
+		public:
+			PrevBoardElement(const Field toCopy[8][8], short count);
+			PrevBoardElement();
+			Field map[8][8];
+			short count;
+			PrevBoardElement operator++();
+			PrevBoardElement operator--();
+			bool operator==( const Field right[8][8]) const;
+			bool operator==(const PrevBoardElement&right)const;
+		};
+		std::vector<PrevBoardElement>  prevBoard;
 		std::stack<StackElement> MoveStack;
 		static const std::pair<short, short> QueenMovementArray[8];
 		static const std::pair<short, short> KnightMovementArray[8];
