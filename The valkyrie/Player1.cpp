@@ -42,7 +42,7 @@ Move JudgeDredd::Valkyrie::makeMove(Move lastMove)
 	Concurrency::concurrent_queue<std::pair<ChessBoard::InternalMove, ChessEvaluator::ChessEvaluation>> evaluated;
 	ChessEvaluator::ChessEvaluation alpha, beta;
 	volatile bool completionFlag = false;
-	std::vector<ChessBoard::Board>boardArray(maxThreadCount);
+	ChessBoard::Board *boardArray = new ChessBoard::Board[maxThreadCount];
 	std::vector<std::thread>threadVector(maxThreadCount);
 	threadVector.resize(maxThreadCount);
 	std::atomic<int>evaluationCount = 0;
@@ -121,7 +121,7 @@ Move JudgeDredd::Valkyrie::makeMove(Move lastMove)
 
 
 	Move tmp = bestMove.ConvertToExternal(amIWhite);
-	boardArray.clear();
+	delete[] boardArray;
 
 	return tmp;
 }
