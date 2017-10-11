@@ -68,7 +68,7 @@ namespace ChessBoard
 			for (int y = 0; y < 8; y++)
 				fields[x][y] = toCopy.fields[x][y];
 
-		prevBoard.resize(toCopy.prevBoard.size());
+		prevBoard.resize( toCopy.prevBoard.size());
 		for (int i = 0; i < toCopy.prevBoard.size(); i++)
 		{
 			prevBoard[i] = toCopy.prevBoard[i];
@@ -292,7 +292,7 @@ namespace ChessBoard
 		case(PromotionQueen):
 			fields[lastMove.from.first][lastMove.from.second].rank.type = Pawn;
 			fields[lastMove.to.first][lastMove.to.second].rank = beaten;
-			return;
+			break;
 		case(RochadeLeft):
 			if (nextMoveIsWhite)
 			{

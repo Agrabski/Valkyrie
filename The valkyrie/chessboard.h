@@ -76,7 +76,7 @@ namespace ChessBoard
 			fields[4][7].rank = { King,false };
 			MoveStack = std::stack<StackElement>();
 			prevBoard = std::vector<PrevBoardElement>();
-			prevBoard.reserve(100);
+			prevBoard.reserve(50);
 		}
 		~Board();
 		Board(const Board*toCopy);
