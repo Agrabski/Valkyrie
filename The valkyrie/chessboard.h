@@ -33,6 +33,15 @@ namespace ChessBoard
 
 	struct Rank
 	{
+		Rank(Type type, bool IsWhite)
+		{
+			this->type = type;
+			this->isWhite = IsWhite;
+		}
+		Rank()
+		{
+			
+		}
 		Type type;
 		bool isWhite;
 		bool operator!=(const Rank& right) const;
