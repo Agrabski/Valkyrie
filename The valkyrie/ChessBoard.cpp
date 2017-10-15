@@ -47,18 +47,35 @@ namespace ChessBoard
 
 	bool Board::addBoard()
 	{
-		PrevBoardElement::hashType hash = PrevBoardElement::CreateHash(fields);
-		int k = prevBoard.size();
-		for (int i = 0; i < k; i++)
+		if (prevBoard.size() > 2)
 		{
-			if (hash == prevBoard[i].hash&&prevBoard[i] == fields)
+			PrevBoardElement::hashType hash = PrevBoardElement::CreateHash(fields);
+			int k = prevBoard.size();
+			for (int i = 0; i < k; i++)
 			{
-				++(prevBoard)[i];
-				return (prevBoard)[i].count < 3;
+				if (hash == prevBoard[i].hash&&prevBoard[i] == fields)
+				{
+					++(prevBoard)[i];
+					return (prevBoard)[i].count < 3;
+				}
 			}
+			prevBoard.push_back(PrevBoardElement(fields, (short)1));
+			return true;
 		}
-		prevBoard.push_back(PrevBoardElement(fields, (short)1));
-		return true;
+		else
+		{
+			int k = prevBoard.size();
+			for (int i = 0; i < k; i++)
+			{
+				if (prevBoard[i] == fields)
+				{
+					++(prevBoard)[i];
+					return (prevBoard)[i].count < 3;
+				}
+			}
+			prevBoard.push_back(PrevBoardElement(fields, (short)1));
+			return true;
+		}
 	}
 
 
@@ -362,19 +379,39 @@ namespace ChessBoard
 
 	void Board::removeBoard(Field board[8][8])
 	{
-		std::vector<PrevBoardElement>::iterator k = prevBoard.end();
-		PrevBoardElement::hashType hash = PrevBoardElement::CreateHash(board);
-		for (std::vector<PrevBoardElement>::iterator i = prevBoard.begin(); i != k; ++i)
+		if(prevBoard.size()>2)
 		{
-			if (hash == i->hash&&*i == fields)
+			std::vector<PrevBoardElement>::iterator k = prevBoard.end();
+			PrevBoardElement::hashType hash = PrevBoardElement::CreateHash(board);
+			for (std::vector<PrevBoardElement>::iterator i = prevBoard.begin(); i != k; ++i)
 			{
-				if (i->count == 1)
+				if (hash == i->hash&&*i == fields)
 				{
-					prevBoard.erase(i);
+					if (i->count == 1)
+					{
+						prevBoard.erase(i);
+					}
+					else
+						--*i;
+					return;
 				}
-				else
-					--*i;
-				return;
+			}
+		}
+		else
+		{
+			std::vector<PrevBoardElement>::iterator k = prevBoard.end();
+			for (std::vector<PrevBoardElement>::iterator i = prevBoard.begin(); i != k; ++i)
+			{
+				if (*i == fields)
+				{
+					if (i->count == 1)
+					{
+						prevBoard.erase(i);
+					}
+					else
+						--*i;
+					return;
+				}
 			}
 		}
 	}
