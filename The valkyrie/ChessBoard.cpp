@@ -47,10 +47,11 @@ namespace ChessBoard
 
 	bool Board::addBoard()
 	{
+		PrevBoardElement::hashType hash = PrevBoardElement::CreateHash(fields);
 		int k = prevBoard.size();
-		for(int i=0;i<k;i++)
+		for (int i = 0; i < k; i++)
 		{
-			if (prevBoard[i]==fields)
+			if (hash == prevBoard[i].hash&&prevBoard[i] == fields)
 			{
 				++(prevBoard)[i];
 				return (prevBoard)[i].count < 3;
@@ -362,11 +363,12 @@ namespace ChessBoard
 	void Board::removeBoard(Field board[8][8])
 	{
 		std::vector<PrevBoardElement>::iterator k = prevBoard.end();
+		PrevBoardElement::hashType hash = PrevBoardElement::CreateHash(board);
 		for (std::vector<PrevBoardElement>::iterator i = prevBoard.begin(); i != k; ++i)
 		{
-			if (*i==fields)
+			if (hash == i->hash&&*i == fields)
 			{
-				if (i->count== 1)
+				if (i->count == 1)
 				{
 					prevBoard.erase(i);
 				}
@@ -1553,12 +1555,23 @@ namespace ChessBoard
 		for (short x = 0; x < 8; x++)
 			for (short y = 0; y < 8; y++)
 				map[x][y] = toCopy[x][y];
+		hash = CreateHash(map);
 		this->count = count;
 	}
 
 	Board::PrevBoardElement::PrevBoardElement()
 	{
 		count = 0;
+	}
+
+	unsigned long long int Board::PrevBoardElement::CreateHash(const Field toHash[8][8]) 
+	{
+		hashType hash=0;
+		for (short x = 0; x < 8; ++x)
+			for (short y = 0; y < 8; ++y)
+				if (toHash[x][y].rank.type != Empty)
+					hash =hash | shift(x ,y);
+		return hash;
 	}
 
 	Board::PrevBoardElement Board::PrevBoardElement::operator++()
@@ -1573,6 +1586,12 @@ namespace ChessBoard
 		return *this;
 	}
 
+	Board::PrevBoardElement::hashType Board::PrevBoardElement::shift(short x, short y)
+	{
+		hashType result = 1;
+		return result << (x + 8 * y);
+	}
+
 	bool Board::PrevBoardElement::operator==(const Field right[8][8]) const
 	{
 		for (short x = 0; x < 8; x++)
@@ -1584,6 +1603,8 @@ namespace ChessBoard
 
 	bool Board::PrevBoardElement::operator==(const PrevBoardElement & right) const
 	{
+		if (hash != right.hash)
+			return false;
 		if (right.count != count)
 			return false;
 		for (short x = 0; x < 8; x++)

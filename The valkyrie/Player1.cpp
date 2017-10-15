@@ -7,7 +7,7 @@
 #include <atomic>
 #include <concurrent_queue.h>
 #define CUT
-#define REVERSION
+//#define REVERSION
 //#define MAPDEBUG
 
 JudgeDredd::Valkyrie::Valkyrie(bool amIWhite)

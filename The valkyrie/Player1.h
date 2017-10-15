@@ -13,7 +13,7 @@
 #include <condition_variable>
 #include "ConcurentQueue.h"
 #define PROGRAM_NAME "valkyrie"
-#define REVERSION
+//#define REVERSION
 #pragma once
 
 

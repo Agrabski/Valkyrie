@@ -7,6 +7,8 @@
 #include <stack>
 #include <array>
 
+typedef std::pair<short, short> point;
+
 namespace ChessBoard
 {
 	enum Type { Pawn = 2, Knight = 4, Bishop = 5, Tower = 10, Queen = 15, King = 1, Empty = 0 };
@@ -160,12 +162,16 @@ namespace ChessBoard
 		struct PrevBoardElement
 		{
 		public:
+			typedef unsigned long long int hashType;
 			PrevBoardElement(const Field toCopy[8][8], short count);
 			PrevBoardElement();
 			Field map[8][8];
 			short count;
+			hashType hash;
+			static hashType CreateHash(const Field toHash[8][8]);
 			PrevBoardElement operator++();
 			PrevBoardElement operator--();
+			static hashType shift(short x, short y);
 			bool operator==( const Field right[8][8]) const;
 			bool operator==(const PrevBoardElement&right)const;
 		};
