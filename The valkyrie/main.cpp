@@ -168,7 +168,7 @@ void tester2()
 		catch (GAME_ENDED err)
 		{
 		}
-		stream <<i<<"-"<< (double)(time(0) - t1)/(double)moveCount <<";" <<std::endl;
+		stream <<i<<"	"<< (double)(time(0) - t1)/(double)moveCount <<std::endl;
 		delete player1;
 		delete player2;
 	}
