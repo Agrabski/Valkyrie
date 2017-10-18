@@ -4,12 +4,13 @@ ChessEvaluator::ChessEvaluator::ChessEvaluator()
 {
 }
 
-ChessEvaluator::ChessEvaluator::ChessEvaluator(float a, float b, float c, float d)
+ChessEvaluator::ChessEvaluator::ChessEvaluator(float a, float b, float c, float d, double e)
 {
 	friendlyValue = a;
 	enemyValue = b;
 	friendlyCheck = c;
 	enemyCheck = d;
+	pawnConstant = e;
 }
 
 ChessEvaluator::ChessEvaluation ChessEvaluator::ChessEvaluator::evaluate(const ChessBoard::Board & board) const
@@ -18,6 +19,13 @@ ChessEvaluator::ChessEvaluation ChessEvaluator::ChessEvaluator::evaluate(const C
 	for(short x=0;x<8;x++)
 		for (short y = 0; y < 8; y++)
 		{
+			if (board.fields[x][y].rank.type == ChessBoard::Pawn)
+			{
+				if (board.fields[x][y].rank.isWhite)
+					tmp.value += pawnConstant*y;
+				else
+					tmp.value -= pawnConstant*(8-y);
+			}
 			tmp.value +=((float) board.fields[x][y].rank.type)*(board.fields[x][y].coveredByWhite + 1)*friendlyValue;
 			tmp.value -=((float) board.fields[x][y].rank.type)*(board.fields[x][y].coveredByBlack + 1)*enemyValue;
 		}

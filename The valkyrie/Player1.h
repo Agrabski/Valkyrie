@@ -23,7 +23,7 @@ class JudgeDredd::Valkyrie
 
     public:
     Valkyrie(bool amIWhite);
-	Valkyrie(bool amIwhite, ChessEvaluator::ChessEvaluator evaluator = {.1f,.1f,.1f,.1f}, int recursion = 5);
+	Valkyrie(bool amIwhite, ChessEvaluator::ChessEvaluator evaluator = {.1f,.1f,.1f,.1f,.1f}, int recursion = 5);
     ~Valkyrie();
     struct Move makeMove(struct Move lastMove);
 		class Player
