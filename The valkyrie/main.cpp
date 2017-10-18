@@ -287,7 +287,7 @@ void tester3()
 						{
 							std::cout << "Recursion Depth:" << i << averageTime[i]/moveCount[i] << std::endl;
 						}
-						std::cout << "COMPLETION:" <<100.0 * (double)completion / (30.0 * 30.0 * 20.0 * 20.0 * 50.0)<<std::endl;
+						std::cout << "COMPLETION:" <<100.0 * (double)completion / (30.0 * 30.0 * 20.0 * 20.0 * 50.0)<<"%"<<std::endl;
 					}
 				}
 			}
