@@ -177,7 +177,7 @@ void tester4(int times, char* name)
 	Move move, buffer;
 	std::fstream stream;
 	JudgeDredd::Valkyrie *player1, *player2;
-	stream.open(name, 'w');
+	stream.open("master", 'w');
 	time_t timeElapsed[8] = { 0 };
 	int moveCount[8] = { 1 };
 	while (times)
