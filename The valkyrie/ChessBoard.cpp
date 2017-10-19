@@ -94,6 +94,7 @@ namespace ChessBoard
 			prevBoard[i] = toCopy.prevBoard[i];
 		}
 		//prevBoard = std::vector<std::pair<std::vector<std::vector<Field>>, int>>(toCopy.prevBoard);
+		moveCounter = toCopy.moveCounter;
 		MoveStack = std::stack<StackElement>(toCopy.MoveStack);
 		nextMoveIsWhite = toCopy.nextMoveIsWhite;
 		leftWhite = toCopy.leftWhite;
