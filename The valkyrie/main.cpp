@@ -10,7 +10,7 @@
 
 std::ostream & operator<<(std::ostream & stream, ChessEvaluator::ChessEvaluator const toWrite)
 {
-	return stream << toWrite.friendlyValue << " " << toWrite.enemyValue << " " << toWrite.friendlyCheck << " " << toWrite.enemyCheck << std::endl;
+	return stream << toWrite.friendlyValue << " " << toWrite.enemyValue << " " << toWrite.friendlyCheck << " " << toWrite.enemyCheck <<" "<<toWrite.pawnConstant<< std::endl;
 }
 
 void tester1()
@@ -205,7 +205,7 @@ void tester3()
 	JudgeDredd::Valkyrie *player1, *player2;
 	Move move, buffer;
 	ChessEvaluator::ChessEvaluator currBest = ChessEvaluator::ChessEvaluator();
-	float a, b, c, d;
+	float a, b, c, d,e;
 	bool firstIsWhite = true;
 	move.from = { 0,0 };
 	move.to = { 0,0 };
@@ -213,11 +213,11 @@ void tester3()
 	{
 		for (c = 0; c < 300; c += 10)
 		{
-			for (b = -10; b >= 10; b += .1f)
+			for (b = -10; b < 10; b += .1f)
 			{
 				for (a = -10; a <= 10; a += .1f)
 				{
-					for (double e = 0; e<5; e += .1f)
+					for (e = 0; e<5; e += .1f)
 					{
 						int firstWin = 0, secondWin = 0;
 						for (int i = 3; i < 7; i++)
@@ -227,7 +227,7 @@ void tester3()
 							time_t t2 = time(0);
 							try
 							{
-								for (moveCount[i - 3]++, buffer = player1->makeMove(move), std::cout << buffer.from.first << " " << buffer.from.second << " " << buffer.to.first << " " << buffer.to.second << std::endl; true;)
+								for (moveCount[i - 3]++, buffer = player1->makeMove(move); true;)
 								{
 									buffer = player2->makeMove(buffer);
 									moveCount[i - 3]++;
@@ -256,7 +256,7 @@ void tester3()
 							t2 = time(0);
 							try
 							{
-								for (moveCount[i - 3]++, buffer = player2->makeMove(move), std::cout << buffer.from.first << " " << buffer.from.second << " " << buffer.to.first << " " << buffer.to.second << std::endl; true;)
+								for (moveCount[i - 3]++, buffer = player2->makeMove(move); true;)
 								{
 									buffer = player1->makeMove(buffer);
 									moveCount[i - 3]++;
@@ -285,7 +285,7 @@ void tester3()
 						std::cout << currBest << std::endl<<"Current Averages:"<<std::endl;
 						for (int i = 7 - 3; i > 0; i--)
 						{
-							std::cout << "Recursion Depth:" << i << averageTime[i]/moveCount[i] << std::endl;
+							std::cout << "Recursion Depth:" << i+3 << " " << averageTime[i]/moveCount[i] << std::endl;
 						}
 						std::cout << "COMPLETION:" <<100.0 * (double)completion / (30.0 * 30.0 * 20.0 * 20.0 * 50.0)<<"%"<<std::endl;
 					}
@@ -295,11 +295,11 @@ void tester3()
 	}
 	for (int i = 7 - 3; i > 0; i--)
 		averageTime[i] = averageTime[i] / (double)moveCount[i];
-	std::cout << std::endl << "RESULT:" << std::endl << a << "," << b << "," << c << "," << d << std::endl;
+	std::cout << std::endl << "RESULT:" << std::endl << a << "," << b << "," << c << "," << d <<","<<e <<std::endl;
 	std::cout << "TIMES:" << std::endl;
 	for (int i = 7 - 3; i > 0; i--)
 	{
-		std::cout << "Recursion Depth:" << i << averageTime[i] << std::endl;
+		std::cout << "Recursion Depth:" << i <<" "<< averageTime[i] << std::endl;
 	}
 	system("pause");
 	stream.close();
