@@ -167,7 +167,7 @@ void tester2()
 	std::fstream stream;
 	JudgeDredd::Valkyrie *player1, *player2;
 	stream.open("debug.txt", 'w');
-	for (int i = 2; i < 8; i++)
+	for (int i = 2; i < 10; i++)
 	{
 		int moveCount = 1;
 		std::cout << i << std::endl;
@@ -188,9 +188,11 @@ void tester2()
 		{
 		}
 		stream <<i<<"	"<< (double)(time(0) - t1)/(double)moveCount <<std::endl;
+		std::cout <<"RECURSION DEPTH:" << i << "-" << (double)(time(0) - t1) / (double)moveCount << std::endl;
 		delete player1;
 		delete player2;
 	}
+	std::cin.ignore();
 	stream.close();
 }
 
@@ -306,6 +308,48 @@ void tester3()
 	std::cin >> a;
 }
 
+void tester4(int times, char* name)
+{
+	Move move, buffer;
+	std::fstream stream;
+	JudgeDredd::Valkyrie *player1, *player2;
+	stream.open(name, 'w');
+	time_t timeElapsed[8] = { 0 };
+	int moveCount[8] = {1};
+	while (times)
+	{
+		for (int i = 2; i < 10; i++)
+		{
+			std::cout << i << std::endl;
+			time_t t1 = time(0);   // get time now
+			player1 = new JudgeDredd::Valkyrie(true, ChessEvaluator::ChessEvaluator(), i);
+			player2 = new JudgeDredd::Valkyrie(false, ChessEvaluator::ChessEvaluator(), i);
+			try
+			{
+				for (buffer = player1->makeMove(move); true;)
+				{
+					buffer = player2->makeMove(buffer);
+					moveCount[i-2]++;
+					buffer = player1->makeMove(buffer);
+					moveCount[i-2]++;
+				}
+			}
+			catch (GAME_ENDED err)
+			{
+			}
+			timeElapsed[i - 2] += (time(0) - t1);
+			std::cout << "RECURSION DEPTH:" << i << "-" << (double)(time(0) - t1) / (double)moveCount[i-2] << std::endl;
+			delete player1;
+			delete player2;
+		}
+		times--;
+	}
+	for (int i = 0; i < 8; i++)
+		stream << i << "	" << ((double)timeElapsed[i]) / ((double)moveCount[i - 2]) << std::endl;
+	stream.close();
+}
+
+
 
 int main(int argc, char * argv[])
 {
@@ -323,6 +367,8 @@ int main(int argc, char * argv[])
 	case 3:
 		tester3();
 		return 0;
+	case 4:
+		tester4(atoi(argv[2]), argv[0]);
 	}
 	return 0;
 }
