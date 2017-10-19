@@ -4,7 +4,7 @@
 #include <sstream>
 #include "Player1.h"
 #define CUT
-#define MAPDEBUG
+//#define MAPDEBUG
 
 JudgeDredd::Valkyrie::Valkyrie(bool amIWhite)
 {
