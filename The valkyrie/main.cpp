@@ -228,9 +228,6 @@ int main(int argc, char * argv[])
 	case 2:
 		tester2();
 		return 0;
-	case 3:
-		tester3();
-		return 0;
 	case 4:
 		tester4(atoi(argv[2]), argv[0]);
 	}
