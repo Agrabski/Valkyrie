@@ -353,8 +353,8 @@ void tester4(int times, char* name)
 
 int main(int argc, char * argv[])
 {
-	int selectedTester=1;
-	if (argc == 2)
+	int selectedTester = 1;
+	if (argc >= 2)
 		selectedTester = atoi(argv[1]);
 	switch (selectedTester)
 	{
@@ -363,9 +363,6 @@ int main(int argc, char * argv[])
 		return 0;
 	case 2:
 		tester2();
-		return 0;
-	case 3:
-		tester3();
 		return 0;
 	case 4:
 		tester4(atoi(argv[2]), argv[0]);
