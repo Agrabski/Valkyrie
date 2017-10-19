@@ -218,7 +218,7 @@ void tester4(int times, char* name)
 int main(int argc, char * argv[])
 {
 	int selectedTester = 1;
-	if (argc == 2)
+	if (argc >= 2)
 		selectedTester = atoi(argv[1]);
 	switch (selectedTester)
 	{
