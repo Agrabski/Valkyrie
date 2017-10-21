@@ -318,7 +318,7 @@ void tester4(int times, char* name)
 	int moveCount[8] = {1};
 	while (times)
 	{
-		for (int i = 2; i < 10; i++)
+		for (int i = 2; i < 8; i++)
 		{
 			std::cout << i << std::endl;
 			time_t t1 = time(0);   // get time now
