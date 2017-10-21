@@ -314,8 +314,8 @@ void tester4(int times, char* name)
 	std::fstream stream;
 	JudgeDredd::Valkyrie *player1, *player2;
 	stream.open("queue.txt", 'w');
-	time_t timeElapsed[5] = { 0 };
-	int moveCount[5] = {1};
+	time_t timeElapsed[6] = { 0 };
+	int moveCount[6] = {1};
 	while (times)
 	{
 		for (int i = 2; i < 8; i++)
@@ -344,7 +344,7 @@ void tester4(int times, char* name)
 		}
 		times--;
 	}
-	for (int i = 0; i < 5; i++)
+	for (int i = 0; i < 6; i++)
 		stream << i + 2 << "	" << ((double)timeElapsed[i]) / ((double)moveCount[i]) << std::endl;
 	stream.close();
 }
