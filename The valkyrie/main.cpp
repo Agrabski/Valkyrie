@@ -177,12 +177,12 @@ void tester4(int times, char* name)
 	Move move, buffer;
 	std::fstream stream;
 	JudgeDredd::Valkyrie *player1, *player2;
-	stream.open("master", 'w');
-	time_t timeElapsed[8] = { 0 };
-	int moveCount[8] = { 1 };
+	stream.open("queue.txt", 'w');
+	time_t timeElapsed[5] = { 0 };
+	int moveCount[5] = { 1 };
 	while (times)
 	{
-		for (int i = 2; i < 10; i++)
+		for (int i = 2; i < 8; i++)
 		{
 			std::cout << i << std::endl;
 			time_t t1 = time(0);   // get time now
@@ -202,14 +202,14 @@ void tester4(int times, char* name)
 			{
 			}
 			timeElapsed[i - 2] += (time(0) - t1);
-			std::cout << "RECURSION DEPTH:" << i << "-" << (double)(time(0) - t1) / (double)moveCount[i - 2] << std::endl;
+			std::cout << "RECURSION DEPTH:" << i << "-" << (double)timeElapsed[i - 2] / (double)moveCount[i - 2] << std::endl;
 			delete player1;
 			delete player2;
 		}
 		times--;
 	}
-	for (int i = 0; i < 8; i++)
-		stream << i << "	" << ((double)timeElapsed[i]) / ((double)moveCount[i - 2]) << std::endl;
+	for (int i = 0; i < 5; i++)
+		stream << i + 2 << "	" << ((double)timeElapsed[i]) / ((double)moveCount[i]) << std::endl;
 	stream.close();
 }
 
