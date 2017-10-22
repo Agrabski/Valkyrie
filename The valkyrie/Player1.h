@@ -34,7 +34,7 @@ class JudgeDredd::Valkyrie
 			//{
 			//	this->ref = ref;
 			//}
-			void operator()(Valkyrie * ref, ChessBoard::Board &board, short int currentRecursion, short int maxRecursion, bool isWhite, ChessEvaluator::ChessEvaluation * alpha, ChessEvaluator::ChessEvaluation * beta, std::atomic<int>*counter, ConcurrentQueue<ChessBoard::InternalMove> *toEvaluate,Concurrency::concurrent_queue<std::pair<ChessBoard::InternalMove, ChessEvaluator::ChessEvaluation>> *evaluated)
+			void operator()(Valkyrie * ref, ChessBoard::Board *board, short int currentRecursion, short int maxRecursion, bool isWhite, ChessEvaluator::ChessEvaluation * alpha, ChessEvaluator::ChessEvaluation * beta, std::atomic<int>*counter, ConcurrentQueue<ChessBoard::InternalMove> *toEvaluate,Concurrency::concurrent_queue<std::pair<ChessBoard::InternalMove, ChessEvaluator::ChessEvaluation>> *evaluated)
 			{
 				ChessBoard::InternalMove buffer;
 				ChessEvaluator::ChessEvaluation tmpEval;
@@ -48,7 +48,7 @@ class JudgeDredd::Valkyrie
 								throw std::runtime_error("Map reversion fail");
 #endif // REVERSION
 							tmpEval.isNull = true;
-							board.ChangeState(buffer);
+							board->ChangeState(buffer);
 #ifdef REVERSION
 
 							ChessBoard::Board tmp = ChessBoard::Board(ref->currBoardState);
@@ -57,13 +57,13 @@ class JudgeDredd::Valkyrie
 								throw std::runtime_error("Map reversion fail");
 
 #endif
-							ref->Play(board, currentRecursion, maxRecursion, &tmpEval, !isWhite, *alpha, *beta);
+							ref->Play(*board, currentRecursion, maxRecursion, &tmpEval, !isWhite, *alpha, *beta);
 #ifdef REVERSION
 
 							if (board !=tmp)
 								throw std::runtime_error("Map reversion fail");
 #endif
-							board.Revert();
+							board->Revert();
 #ifdef REVERSION
 							if (board != ref->currBoardState)
 								throw std::runtime_error("Map reversion fail");
@@ -80,7 +80,7 @@ class JudgeDredd::Valkyrie
 							tmpEval.gameHasEnded = true;
 							tmpEval.isNull = false;
 							tmpEval.endState = 0;
-							board.Revert();
+							board->Revert();
 						}
 						catch (ChessBoard::MOVE_BLOCKED)
 						{
@@ -100,11 +100,18 @@ class JudgeDredd::Valkyrie
 						if (board != ref->currBoardState)
 							throw std::runtime_error("Map reversion fail");
 #endif // REVERSION
+						*counter -= 1;
 				}
-				*counter += 1;
 			}
 		};
 	private:
+		std::vector<std::thread> threadVector;
+		ChessBoard::Board *boardVector;
+		ConcurrentQueue<ChessBoard::InternalMove> toEvaluate;
+		Concurrency::concurrent_queue<std::pair<ChessBoard::InternalMove, ChessEvaluator::ChessEvaluation>> evaluated;
+		ChessEvaluator::ChessEvaluation alpha, beta;
+		std::atomic<int>evaluationCount = 0;
+		ChessEvaluator::ChessEvaluation best;
 		short recursionDepth=5;
 		short maxThreadCount;
 		bool firstMove;

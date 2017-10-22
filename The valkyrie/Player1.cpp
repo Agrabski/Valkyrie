@@ -12,49 +12,63 @@
 
 JudgeDredd::Valkyrie::Valkyrie(bool amIWhite)
 {
+	maxThreadCount = std::thread::hardware_concurrency();
+	boardVector = new ChessBoard::Board[maxThreadCount];
+	threadVector = std::vector<std::thread>();
+	threadVector.reserve(maxThreadCount);
 	this->amIWhite = amIWhite;
 	firstMove = amIWhite;
 	maxThreadCount =  std::thread::hardware_concurrency();
+	for (int i = 0; i < maxThreadCount; i++)
+	{
+		boardVector[i] = *currBoardState;
+		threadVector.push_back(std::thread(Player(), this, &boardVector[i], 0, recursionDepth, amIWhite, amIWhite ? &best : &alpha, amIWhite ? &beta : &best, &evaluationCount, &toEvaluate, &evaluated));
+	}
 }
 
 JudgeDredd::Valkyrie::Valkyrie(bool amIwhite, ChessEvaluator::ChessEvaluator evaluator, int recursion)
 {
+	maxThreadCount =  std::thread::hardware_concurrency();
+	boardVector = new ChessBoard::Board[maxThreadCount]();
+	threadVector=std::vector<std::thread>();
+	threadVector.reserve(maxThreadCount);
 	amIWhite = amIwhite;
 	firstMove = amIWhite;
 	recursionDepth = recursion;
 	this->evaluator = evaluator;
-	maxThreadCount =  std::thread::hardware_concurrency();
+	for (int i = 0; i < maxThreadCount; i++)
+	{
+		boardVector[i] = *currBoardState;
+		threadVector.push_back(std::thread( Player(), this, &boardVector[i], 0, recursionDepth, amIWhite, amIWhite ? &best : &alpha, amIWhite ? &beta : &best, &evaluationCount, &toEvaluate, &evaluated));
+	}
 }
 
 JudgeDredd::Valkyrie::~Valkyrie()
 {
+	toEvaluate.finish();
+	for (int i = 0; i < maxThreadCount; i++)
+		if (threadVector[i].joinable())
+			threadVector[i].join();
+	delete[] boardVector;
 	delete currBoardState;
 }
 
 Move JudgeDredd::Valkyrie::makeMove(Move lastMove)
 {
+	best.isNull = true;
 	if (!firstMove)
 	{
 		ChessBoard::InternalMove tmp(lastMove);
 		currBoardState->ChangeState(tmp, 0);
+		for (int i = 0; i < maxThreadCount; i++)
+		{
+			boardVector[i].ChangeState(tmp, 0);
+		}
 	}
+	evaluationCount = 0;
 	firstMove = false;
-	ConcurrentQueue<ChessBoard::InternalMove> toEvaluate;
-	Concurrency::concurrent_queue<std::pair<ChessBoard::InternalMove, ChessEvaluator::ChessEvaluation>> evaluated;
-	ChessEvaluator::ChessEvaluation alpha, beta;
 	volatile bool completionFlag = false;
-	ChessBoard::Board *boardArray = new ChessBoard::Board[maxThreadCount];
-	std::vector<std::thread>threadVector(maxThreadCount);
-	threadVector.resize(maxThreadCount);
-	std::atomic<int>evaluationCount = 0;
-	ChessEvaluator::ChessEvaluation best;
 	ChessBoard::InternalMove bestMove;
-	for (int i = 0; i < maxThreadCount; i++)
-	{
-		boardArray[i] = *currBoardState;
-		threadVector[i] = std::thread(Player(), this, boardArray[i], 0, recursionDepth, amIWhite, amIWhite ? &best : &alpha, amIWhite ? &beta : &best, &evaluationCount, &toEvaluate, &evaluated);
-	}
-
 	ChessBoard::Board::Moves moveIterator(currBoardState);
 	moveIterator.Reset(amIWhite);
 	++moveIterator;
@@ -65,11 +79,11 @@ Move JudgeDredd::Valkyrie::makeMove(Move lastMove)
 	{
 		toEvaluate.push(*moveIterator);
 		++moveIterator;
+		evaluationCount++;
 	}
-	toEvaluate.finish();
 
 	std::pair<ChessBoard::InternalMove, ChessEvaluator::ChessEvaluation> pairBuffer;
-	while (evaluationCount < maxThreadCount || !evaluated.empty())
+	while (evaluationCount > 0 || !evaluated.empty())
 	{
 		if (evaluated.try_pop(pairBuffer))
 		{
@@ -93,10 +107,6 @@ Move JudgeDredd::Valkyrie::makeMove(Move lastMove)
 		}
 	}
 
-	for (int i = 0; i < maxThreadCount; i++)
-		if (threadVector[i].joinable())
-			threadVector[i].join();
-
 	if (best.isNull)
 		throw GAME_ENDED((!currBoardState->IsWhiteChecked()) && (!currBoardState->IsBlackChecked()), currBoardState->IsWhiteChecked(), currBoardState->IsBlackChecked());
 
@@ -104,6 +114,10 @@ Move JudgeDredd::Valkyrie::makeMove(Move lastMove)
 	try
 	{
 		currBoardState->ChangeState(bestMove, 0);
+		for (int i = 0; i < maxThreadCount; i++)
+		{
+			boardVector[i].ChangeState(bestMove, 0);
+		}
 	}
 	catch (ChessBoard::THREEFOLD_REPETITON)
 	{
@@ -122,7 +136,6 @@ Move JudgeDredd::Valkyrie::makeMove(Move lastMove)
 
 
 	Move tmp = bestMove.ConvertToExternal(amIWhite);
-	delete[] boardArray;
 
 	return tmp;
 }
