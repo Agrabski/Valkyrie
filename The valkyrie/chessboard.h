@@ -6,6 +6,7 @@
 #include <math.h>
 #include <stack>
 #include <array>
+#include <unordered_map>
 
 typedef std::pair<short, short> point;
 
@@ -86,7 +87,6 @@ namespace ChessBoard
 			fields[4][0].rank = { King,true };
 			fields[4][7].rank = { King,false };
 			MoveStack = std::stack<StackElement>();
-			prevBoard = std::vector<PrevBoardElement>();
 			prevBoard.reserve(50);
 		}
 		~Board();
@@ -167,7 +167,6 @@ namespace ChessBoard
 			PrevBoardElement();
 			Field map[8][8];
 			short count;
-			hashType hash;
 			static hashType CreateHash(const Field toHash[8][8]);
 			PrevBoardElement operator++();
 			PrevBoardElement operator--();
@@ -175,7 +174,7 @@ namespace ChessBoard
 			bool operator==( const Field right[8][8]) const;
 			bool operator==(const PrevBoardElement&right)const;
 		};
-		std::vector<PrevBoardElement>  prevBoard;
+		std::unordered_multimap<PrevBoardElement::hashType,PrevBoardElement>  prevBoard;
 		std::stack<StackElement> MoveStack;
 		static const std::pair<short, short> QueenMovementArray[8];
 		static const std::pair<short, short> KnightMovementArray[8];

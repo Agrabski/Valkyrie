@@ -47,35 +47,27 @@ namespace ChessBoard
 
 	bool Board::addBoard()
 	{
-		if (prevBoard.size() > 2)
+		PrevBoardElement::hashType tmphash = PrevBoardElement::CreateHash(fields);
+		auto tmp = prevBoard.equal_range(tmphash);
+
+		if (tmp.first == prevBoard.end())
 		{
-			PrevBoardElement::hashType hash = PrevBoardElement::CreateHash(fields);
-			int k = prevBoard.size();
-			for (int i = 0; i < k; i++)
-			{
-				if (hash == prevBoard[i].hash&&prevBoard[i] == fields)
-				{
-					++(prevBoard)[i];
-					return (prevBoard)[i].count < 3;
-				}
-			}
-			prevBoard.push_back(PrevBoardElement(fields, (short)1));
+			prevBoard.insert(std::pair<PrevBoardElement::hashType, PrevBoardElement>(PrevBoardElement::CreateHash(fields), PrevBoardElement(fields, 1)));
 			return true;
 		}
 		else
 		{
-			int k = prevBoard.size();
-			for (int i = 0; i < k; i++)
+			while (tmp.first != tmp.second)
 			{
-				if (prevBoard[i] == fields)
+				if (tmp.first->second == fields)
 				{
-					++(prevBoard)[i];
-					return (prevBoard)[i].count < 3;
+					++(tmp.first->second);
+					return tmp.first->second.count < 3;
 				}
+				tmp.first++;
 			}
-			prevBoard.push_back(PrevBoardElement(fields, (short)1));
-			return true;
 		}
+		prevBoard.insert(std::pair<PrevBoardElement::hashType, PrevBoardElement>(PrevBoardElement::CreateHash(fields), PrevBoardElement(fields, 1)));
 	}
 
 
@@ -88,11 +80,9 @@ namespace ChessBoard
 			for (int y = 0; y < 8; y++)
 				fields[x][y] = toCopy.fields[x][y];
 
-		prevBoard.resize( toCopy.prevBoard.size());
-		for (int i = 0; i < toCopy.prevBoard.size(); i++)
-		{
-			prevBoard[i] = toCopy.prevBoard[i];
-		}
+
+		prevBoard = toCopy.prevBoard;
+
 		//prevBoard = std::vector<std::pair<std::vector<std::vector<Field>>, int>>(toCopy.prevBoard);
 		moveCounter = toCopy.moveCounter;
 		MoveStack = std::stack<StackElement>(toCopy.MoveStack);
@@ -375,46 +365,28 @@ namespace ChessBoard
 	{
 		ClearStack();
 		prevBoard.clear();
-		prevBoard.resize(0);
 	}
 
 	void Board::removeBoard(Field board[8][8])
 	{
-		if(prevBoard.size()>2)
-		{
-			std::vector<PrevBoardElement>::iterator k = prevBoard.end();
-			PrevBoardElement::hashType hash = PrevBoardElement::CreateHash(board);
-			for (std::vector<PrevBoardElement>::iterator i = prevBoard.begin(); i != k; ++i)
-			{
-				if (hash == i->hash&&*i == fields)
-				{
-					if (i->count == 1)
-					{
-						prevBoard.erase(i);
-					}
-					else
-						--*i;
-					return;
-				}
-			}
-		}
+		PrevBoardElement::hashType t = PrevBoardElement::CreateHash(board);
+		auto tmp = prevBoard.equal_range(t);
+
+		if (tmp.first == prevBoard.end())
+			throw std::runtime_error("map not found");
 		else
 		{
-			std::vector<PrevBoardElement>::iterator k = prevBoard.end();
-			for (std::vector<PrevBoardElement>::iterator i = prevBoard.begin(); i != k; ++i)
+			while (tmp.first != tmp.second)
 			{
-				if (*i == fields)
+				if (tmp.first->second == fields)
 				{
-					if (i->count == 1)
-					{
-						prevBoard.erase(i);
-					}
-					else
-						--*i;
+					--(tmp.first->second);
 					return;
 				}
+				tmp.first++;
 			}
 		}
+		throw std::runtime_error("map not found");
 	}
 
 	Board::~Board()
@@ -428,7 +400,7 @@ namespace ChessBoard
 			for (int y = 0; y < 8; y++)
 				fields[x][y] = toCopy->fields[x][y];
 
-		prevBoard = std::vector<PrevBoardElement>(toCopy->prevBoard);
+		prevBoard =toCopy->prevBoard;
 		MoveStack = std::stack<StackElement>(toCopy->MoveStack);
 		nextMoveIsWhite = toCopy->nextMoveIsWhite;
 		leftWhite = toCopy->leftWhite;
@@ -803,7 +775,6 @@ namespace ChessBoard
 			{
 				ClearStack();
 				prevBoard.clear();
-				prevBoard.shrink_to_fit();
 			}
 		ChangeState(lastMove);
 	}
@@ -1593,7 +1564,6 @@ namespace ChessBoard
 		for (short x = 0; x < 8; x++)
 			for (short y = 0; y < 8; y++)
 				map[x][y] = toCopy[x][y];
-		hash = CreateHash(map);
 		this->count = count;
 	}
 
@@ -1641,14 +1611,11 @@ namespace ChessBoard
 
 	bool Board::PrevBoardElement::operator==(const PrevBoardElement & right) const
 	{
-		if (hash != right.hash)
-			return false;
-		if (right.count != count)
-			return false;
 		for (short x = 0; x < 8; x++)
 			for (short y = 0; y < 8; y++)
 				if (map[x][y] != (right).map[x][y])
 					return false;
+		return true;
 	}
 
 	bool Field::operator==(const Field & right) const
