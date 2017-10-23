@@ -378,7 +378,7 @@ namespace ChessBoard
 		{
 			while (tmp.first != tmp.second)
 			{
-				if (tmp.first->second == fields)
+				if (tmp.first->second == board)
 				{
 					--(tmp.first->second);
 					if (tmp.first->second.count == 0)
