@@ -370,7 +370,7 @@ namespace ChessBoard
 	void Board::removeBoard(Field board[8][8])
 	{
 		PrevBoardElement::hashType t = PrevBoardElement::CreateHash(board);
-		auto tmp = prevBoard.equal_range(t);
+		std::pair<std::unordered_multimap<PrevBoardElement::hashType, PrevBoardElement>::iterator, std::unordered_multimap<PrevBoardElement::hashType, PrevBoardElement>::iterator> tmp = prevBoard.equal_range(t);
 
 		if (tmp.first == prevBoard.end())
 			throw std::runtime_error("map not found");
@@ -381,6 +381,12 @@ namespace ChessBoard
 				if (tmp.first->second == board)
 				{
 					--(tmp.first->second);
+					if (tmp.first->second.count == 0)
+					{
+						std::unordered_multimap<PrevBoardElement::hashType, PrevBoardElement>::iterator plus = tmp.first;
+						++plus;
+						prevBoard.erase(tmp.first, plus);
+					}
 					return;
 				}
 				tmp.first++;
