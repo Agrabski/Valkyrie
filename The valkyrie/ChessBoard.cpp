@@ -415,6 +415,7 @@ namespace ChessBoard
 				}
 			}
 		}
+		throw std::runtime_error("map not found");
 	}
 
 	Board::~Board()
