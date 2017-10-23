@@ -381,8 +381,6 @@ namespace ChessBoard
 				if (tmp.first->second == board)
 				{
 					--(tmp.first->second);
-					if (tmp.first->second.count == 0)
-						prevBoard.erase(tmp.first);
 					return;
 				}
 				tmp.first++;
