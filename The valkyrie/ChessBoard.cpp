@@ -391,6 +391,7 @@ namespace ChessBoard
 					if (i->count == 1)
 					{
 						prevBoard.erase(i);
+						return;
 					}
 					else
 						--*i;
@@ -408,6 +409,7 @@ namespace ChessBoard
 					if (i->count == 1)
 					{
 						prevBoard.erase(i);
+						return;
 					}
 					else
 						--*i;
@@ -415,6 +417,7 @@ namespace ChessBoard
 				}
 			}
 		}
+		throw std::runtime_error("map not found");
 	}
 
 	Board::~Board()
