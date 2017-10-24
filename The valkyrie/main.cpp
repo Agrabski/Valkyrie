@@ -177,9 +177,9 @@ void tester4(int times, char* name)
 	Move move, buffer;
 	std::fstream stream;
 	JudgeDredd::Valkyrie *player1, *player2;
-	stream.open("queue.txt", 'w');
-	time_t timeElapsed[5] = { 0 };
-	int moveCount[5] = { 1 };
+	stream.open("map.txt", 'w');
+	time_t timeElapsed[6] = { 0 ,0,0,0,0,0 };
+	int moveCount[6] = { 0,0,0,0,0,0 };
 	while (times)
 	{
 		for (int i = 2; i < 8; i++)
@@ -190,6 +190,7 @@ void tester4(int times, char* name)
 			player2 = new JudgeDredd::Valkyrie(false, ChessEvaluator::ChessEvaluator(), i);
 			try
 			{
+				moveCount[i - 2]++;
 				for (buffer = player1->makeMove(move); true;)
 				{
 					buffer = player2->makeMove(buffer);
@@ -208,7 +209,7 @@ void tester4(int times, char* name)
 		}
 		times--;
 	}
-	for (int i = 0; i < 5; i++)
+	for (int i = 0; i < 6; i++)
 		stream << i + 2 << "	" << ((double)timeElapsed[i]) / ((double)moveCount[i]) << std::endl;
 	stream.close();
 }
