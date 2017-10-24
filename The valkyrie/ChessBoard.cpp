@@ -373,14 +373,23 @@ namespace ChessBoard
 		std::pair<std::unordered_multimap<PrevBoardElement::hashType, PrevBoardElement>::iterator, std::unordered_multimap<PrevBoardElement::hashType, PrevBoardElement>::iterator> tmp = prevBoard.equal_range(t);
 
 		if (tmp.first == prevBoard.end())
+		{
+			for(std::unordered_multimap<PrevBoardElement::hashType, PrevBoardElement>::iterator i=prevBoard.begin();i!=prevBoard.end();++i)
+				if (i->second == board)
+				{
+					std::cerr << "map not found correctly 1";
+					throw std::runtime_error("map not found correctly");
+				}
 			throw std::runtime_error("map not found");
+		}
+			
 		else
 		{
 			while (tmp.first != tmp.second)
 			{
 				if (tmp.first->second == board)
 				{
-					--(tmp.first->second);
+					tmp.first->second.count -= 1;
 					if (tmp.first->second.count == 0)
 					{
 						std::unordered_multimap<PrevBoardElement::hashType, PrevBoardElement>::iterator plus = tmp.first;
@@ -392,6 +401,12 @@ namespace ChessBoard
 				tmp.first++;
 			}
 		}
+		for (std::unordered_multimap<PrevBoardElement::hashType, PrevBoardElement>::iterator i = prevBoard.begin(); i != prevBoard.end(); ++i)
+			if (i->second == board)
+			{
+				std::cerr << "map not found correctly 2";
+				throw std::runtime_error("map not found correctly");
+			}
 		throw std::runtime_error("map not found");
 	}
 
@@ -427,7 +442,10 @@ namespace ChessBoard
 		{
 			currentlyMoved = fields[lastMove.from.first][lastMove.from.second].rank;
 			if (currentlyMoved.isWhite != nextMoveIsWhite)
+			{
+				std::cerr << "Wrong color!";
 				throw WRONG_COLOR();
+			}
 			relativeMove = { lastMove.to.first - lastMove.from.first,lastMove.to.second - lastMove.from.second };
 			tmp.pieceType= fields[lastMove.to.first][lastMove.to.second].rank;
 		}
