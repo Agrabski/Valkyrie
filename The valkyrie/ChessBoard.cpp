@@ -52,7 +52,7 @@ namespace ChessBoard
 
 		if (tmp.first == prevBoard.end())
 		{
-			prevBoard.insert(std::pair<PrevBoardElement::hashType, PrevBoardElement>(PrevBoardElement::CreateHash(fields), PrevBoardElement(fields, 1)));
+			prevBoard.insert(std::pair<PrevBoardElement::hashType, PrevBoardElement>(tmphash, PrevBoardElement(fields, 1)));
 			return true;
 		}
 		else
@@ -67,7 +67,7 @@ namespace ChessBoard
 				tmp.first++;
 			}
 		}
-		prevBoard.insert(std::pair<PrevBoardElement::hashType, PrevBoardElement>(PrevBoardElement::CreateHash(fields), PrevBoardElement(fields, 1)));
+		prevBoard.insert(std::pair<PrevBoardElement::hashType, PrevBoardElement>(tmphash, PrevBoardElement(fields, 1)));
 	}
 
 
