@@ -61,7 +61,7 @@ namespace ChessBoard
 			{
 				if (tmp.first->second == fields)
 				{
-					++(tmp.first->second);
+					(tmp.first->second).count += 1;
 					return tmp.first->second.count < 3;
 				}
 				tmp.first++;
@@ -377,7 +377,7 @@ namespace ChessBoard
 			for(std::unordered_multimap<PrevBoardElement::hashType, PrevBoardElement>::iterator i=prevBoard.begin();i!=prevBoard.end();++i)
 				if (i->second == board)
 				{
-					std::cerr << "map not found correctly 1";
+					std::cout << "map not found correctly 1";
 					throw std::runtime_error("map not found correctly");
 				}
 			throw std::runtime_error("map not found");
@@ -392,9 +392,10 @@ namespace ChessBoard
 					tmp.first->second.count -= 1;
 					if (tmp.first->second.count == 0)
 					{
-						std::unordered_multimap<PrevBoardElement::hashType, PrevBoardElement>::iterator plus = tmp.first;
-						++plus;
-						prevBoard.erase(tmp.first, plus);
+						int i = prevBoard.size();
+						prevBoard.erase(tmp.first);
+						if (i - prevBoard.size() != 1)
+							throw std::exception();
 					}
 					return;
 				}
@@ -404,7 +405,7 @@ namespace ChessBoard
 		for (std::unordered_multimap<PrevBoardElement::hashType, PrevBoardElement>::iterator i = prevBoard.begin(); i != prevBoard.end(); ++i)
 			if (i->second == board)
 			{
-				std::cerr << "map not found correctly 2";
+				std::cout << "map not found correctly 2";
 				throw std::runtime_error("map not found correctly");
 			}
 		throw std::runtime_error("map not found");
