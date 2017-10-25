@@ -392,9 +392,7 @@ namespace ChessBoard
 					tmp.first->second.count -= 1;
 					if (tmp.first->second.count == 0)
 					{
-						std::unordered_multimap<PrevBoardElement::hashType, PrevBoardElement>::iterator plus = tmp.first;
-						++plus;
-						prevBoard.erase(tmp.first, plus);
+						prevBoard.erase(tmp.first);
 					}
 					return;
 				}
