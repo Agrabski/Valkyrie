@@ -19,106 +19,106 @@
 
 class JudgeDredd::Valkyrie
 {
-    int x;
+	int x;
 
-    public:
-    Valkyrie(bool amIWhite);
-	Valkyrie(bool amIwhite, ChessEvaluator::ChessEvaluator evaluator = {.1f,.1f,.1f,.1f,.1f}, int recursion = 5);
-    ~Valkyrie();
-    struct Move makeMove(struct Move lastMove);
-		class Player
+public:
+	Valkyrie(bool amIWhite);
+	Valkyrie(bool amIwhite, ChessEvaluator::ChessEvaluator evaluator = { .1f,.1f,.1f,.1f,.1f }, int recursion = 5);
+	~Valkyrie();
+	struct Move makeMove(struct Move lastMove);
+	class Player
+	{
+	public:
+		//Valkyrie *ref;
+		//Player(Valkyrie * ref)
+		//{
+		//	this->ref = ref;
+		//}
+		void operator()(Valkyrie * ref, ChessBoard::Board *board, short int currentRecursion, short int maxRecursion, bool isWhite, ChessEvaluator::ChessEvaluation * alpha, ChessEvaluator::ChessEvaluation * beta, std::atomic<int>*counter, ConcurrentQueue<ChessBoard::InternalMove> *toEvaluate, Concurrency::concurrent_queue<std::pair<ChessBoard::InternalMove, ChessEvaluator::ChessEvaluation>> *evaluated)
 		{
-		public:
-			//Valkyrie *ref;
-			//Player(Valkyrie * ref)
-			//{
-			//	this->ref = ref;
-			//}
-			void operator()(Valkyrie * ref, ChessBoard::Board *board, short int currentRecursion, short int maxRecursion, bool isWhite, ChessEvaluator::ChessEvaluation * alpha, ChessEvaluator::ChessEvaluation * beta, std::atomic<int>*counter, ConcurrentQueue<ChessBoard::InternalMove> *toEvaluate,Concurrency::concurrent_queue<std::pair<ChessBoard::InternalMove, ChessEvaluator::ChessEvaluation>> *evaluated)
+			ChessBoard::InternalMove buffer;
+			ChessEvaluator::ChessEvaluation tmpEval;
+			while (toEvaluate->pop(buffer))
 			{
-				ChessBoard::InternalMove buffer;
-				ChessEvaluator::ChessEvaluation tmpEval;
-				while (toEvaluate->pop(buffer))
+
+				try
+				{
+#ifdef REVERSION
+					if (board != ref->currBoardState)
+						throw std::runtime_error("Map reversion fail");
+#endif // REVERSION
+					tmpEval.isNull = true;
+					board->ChangeState(buffer);
+#ifdef REVERSION
+
+					ChessBoard::Board tmp = ChessBoard::Board(ref->currBoardState);
+					tmp.ChangeState(buffer);
+					if (board != tmp)
+						throw std::runtime_error("Map reversion fail");
+
+#endif
+					ref->Play(*board, currentRecursion, maxRecursion, &tmpEval, !isWhite, alpha, beta, *alpha, *beta);
+#ifdef REVERSION
+
+					if (board != tmp)
+						throw std::runtime_error("Map reversion fail");
+#endif
+					board->Revert();
+#ifdef REVERSION
+					if (board != ref->currBoardState)
+						throw std::runtime_error("Map reversion fail");
+#endif // REVERSION
+				}
+				catch (ChessBoard::FIFTY_MOVES)
+				{
+					tmpEval.gameHasEnded = true;
+					tmpEval.isNull = false;
+					tmpEval.endState = 0;
+				}
+				catch (ChessBoard::THREEFOLD_REPETITON)
+				{
+					tmpEval.gameHasEnded = true;
+					tmpEval.isNull = false;
+					tmpEval.endState = 0;
+					board->Revert();
+				}
+				catch (ChessBoard::MOVE_BLOCKED)
+				{
+				}
+
+				catch (ChessBoard::KING_IN_DANGER)
 				{
 
-						try
-						{
-#ifdef REVERSION
-							if (board != ref->currBoardState)
-								throw std::runtime_error("Map reversion fail");
-#endif // REVERSION
-							tmpEval.isNull = true;
-							board->ChangeState(buffer);
-#ifdef REVERSION
-
-							ChessBoard::Board tmp = ChessBoard::Board(ref->currBoardState);
-							tmp.ChangeState(buffer);
-							if (board != tmp)
-								throw std::runtime_error("Map reversion fail");
-
-#endif
-							ref->Play(*board, currentRecursion, maxRecursion, &tmpEval, !isWhite, *alpha, *beta);
-#ifdef REVERSION
-
-							if (board !=tmp)
-								throw std::runtime_error("Map reversion fail");
-#endif
-							board->Revert();
-#ifdef REVERSION
-							if (board != ref->currBoardState)
-								throw std::runtime_error("Map reversion fail");
-#endif // REVERSION
-						}
-						catch (ChessBoard::FIFTY_MOVES)
-						{
-							tmpEval.gameHasEnded = true;
-							tmpEval.isNull = false;
-							tmpEval.endState = 0;
-						}
-						catch (ChessBoard::THREEFOLD_REPETITON)
-						{
-							tmpEval.gameHasEnded = true;
-							tmpEval.isNull = false;
-							tmpEval.endState = 0;
-							board->Revert();
-						}
-						catch (ChessBoard::MOVE_BLOCKED)
-						{
-						}
-
-						catch (ChessBoard::KING_IN_DANGER)
-						{
-
-						}
-						catch (ChessBoard::INVALID_MOVE)
-						{
-
-						}
-						if (!tmpEval.isNull)
-							evaluated->push(std::pair<ChessBoard::InternalMove, ChessEvaluator::ChessEvaluation>(buffer, tmpEval));
-#ifdef REVERSION
-						if (board != ref->currBoardState)
-							throw std::runtime_error("Map reversion fail");
-#endif // REVERSION
-						*counter -= 1;
 				}
+				catch (ChessBoard::INVALID_MOVE)
+				{
+
+				}
+				if (!tmpEval.isNull)
+					evaluated->push(std::pair<ChessBoard::InternalMove, ChessEvaluator::ChessEvaluation>(buffer, tmpEval));
+#ifdef REVERSION
+				if (board != ref->currBoardState)
+					throw std::runtime_error("Map reversion fail");
+#endif // REVERSION
+				*counter -= 1;
 			}
-		};
-	private:
-		std::vector<std::thread> threadVector;
-		ChessBoard::Board *boardVector;
-		ConcurrentQueue<ChessBoard::InternalMove> toEvaluate;
-		Concurrency::concurrent_queue<std::pair<ChessBoard::InternalMove, ChessEvaluator::ChessEvaluation>> evaluated;
-		ChessEvaluator::ChessEvaluation alpha, beta;
-		std::atomic<int>evaluationCount = 0;
-		ChessEvaluator::ChessEvaluation best;
-		short recursionDepth=5;
-		short maxThreadCount;
-		bool firstMove;
-		ChessBoard::Board *currBoardState=new ChessBoard::Board();
-		bool amIWhite;
-		void Play( ChessBoard::Board &board, short int currentRecursion, short int maxRecursion, ChessEvaluator::ChessEvaluation *value, bool isWhite,ChessEvaluator::ChessEvaluation alpha, ChessEvaluator::ChessEvaluation beta) const;
-		ChessEvaluator::ChessEvaluator evaluator;
+		}
+	};
+private:
+	std::vector<std::thread> threadVector;
+	ChessBoard::Board *boardVector;
+	ConcurrentQueue<ChessBoard::InternalMove> toEvaluate;
+	Concurrency::concurrent_queue<std::pair<ChessBoard::InternalMove, ChessEvaluator::ChessEvaluation>> evaluated;
+	ChessEvaluator::ChessEvaluation alpha, beta;
+	std::atomic<int>evaluationCount = 0;
+	ChessEvaluator::ChessEvaluation best;
+	short recursionDepth = 5;
+	short maxThreadCount;
+	bool firstMove;
+	ChessBoard::Board *currBoardState = new ChessBoard::Board();
+	bool amIWhite;
+	void Play(ChessBoard::Board &board, short int currentRecursion, short int maxRecursion, ChessEvaluator::ChessEvaluation *value, bool isWhite, ChessEvaluator::ChessEvaluation * alphaPointer, ChessEvaluator::ChessEvaluation * betaPointer, ChessEvaluator::ChessEvaluation alpha, ChessEvaluator::ChessEvaluation beta) const;
+	ChessEvaluator::ChessEvaluator evaluator;
 
 };
 
