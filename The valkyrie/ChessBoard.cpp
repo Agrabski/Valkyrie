@@ -61,7 +61,7 @@ namespace ChessBoard
 			{
 				if (tmp.first->second == fields)
 				{
-					++(tmp.first->second);
+					(tmp.first->second).count += 1;
 					return tmp.first->second.count < 3;
 				}
 				tmp.first++;
@@ -392,7 +392,10 @@ namespace ChessBoard
 					tmp.first->second.count -= 1;
 					if (tmp.first->second.count == 0)
 					{
+						int i = prevBoard.size();
 						prevBoard.erase(tmp.first);
+						if (i - prevBoard.size() != 1)
+							throw std::exception();
 					}
 					return;
 				}
