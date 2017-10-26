@@ -395,7 +395,7 @@ namespace ChessBoard
 						int i = prevBoard.size();
 						prevBoard.erase(tmp.first);
 						if (i - prevBoard.size() != 1)
-							throw std::exception();
+							throw std::runtime_error("too many maps deleted");
 					}
 					return;
 				}
@@ -1605,6 +1605,45 @@ namespace ChessBoard
 				if (toHash[x][y].rank.type != Empty)
 					hash =hash | shift(x ,y);
 		return hash;
+	}
+
+	Board::PrevBoardElement::hashType Board::PrevBoardElement::ReHash(hashType old, InternalMove move, bool isWhite)
+	{
+		switch (move.movetype)
+		{
+		case Standard:
+		case PromotionBishop:
+		case PromotionKnight:
+		case PromotionQueen:
+		case PromotionTower:
+			old ^= shift(move.from.first, move.from.second);
+			old |= shift(move.to.first, move.to.second);
+			break;
+		case RochadeLeft:
+			if (isWhite)
+			{
+				old ^= 0b10001ull;
+				old |= 0b1100ull;
+			}
+			else
+			{
+				old ^= 0b1000100000000000000000000000000000000000000000000000000000000ull;
+				old |= 0b110000000000000000000000000000000000000000000000000000000000ull;
+			}
+			break;
+		case RochadeRight:
+			if (isWhite)
+			{
+				old ^= 0b10010000;
+				old |= 0b1100000;
+			}
+			else
+			{
+				old ^= 0b1001000000000000000000000000000000000000000000000000000000000000ull;
+				old |= 0b110000000000000000000000000000000000000000000000000000000000000ull;
+			}
+			return old;
+		}
 	}
 
 	Board::PrevBoardElement Board::PrevBoardElement::operator++()
