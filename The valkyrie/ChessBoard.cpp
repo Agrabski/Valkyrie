@@ -68,6 +68,7 @@ namespace ChessBoard
 			}
 		}
 		prevBoard.insert(std::pair<PrevBoardElement::hashType, PrevBoardElement>(tmphash, PrevBoardElement(fields, 1)));
+		return true;
 	}
 
 
@@ -392,10 +393,7 @@ namespace ChessBoard
 					tmp.first->second.count -= 1;
 					if (tmp.first->second.count == 0)
 					{
-						int i = prevBoard.size();
 						prevBoard.erase(tmp.first);
-						if (i - prevBoard.size() != 1)
-							throw std::runtime_error("too many maps deleted");
 					}
 					return;
 				}
@@ -1642,8 +1640,8 @@ namespace ChessBoard
 				old ^= 0b1001000000000000000000000000000000000000000000000000000000000000ull;
 				old |= 0b110000000000000000000000000000000000000000000000000000000000000ull;
 			}
-			return old;
 		}
+		return old;
 	}
 
 	Board::PrevBoardElement Board::PrevBoardElement::operator++()
