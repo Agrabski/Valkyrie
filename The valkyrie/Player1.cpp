@@ -60,6 +60,11 @@ Move JudgeDredd::Valkyrie::makeMove(Move lastMove)
 	{
 		ChessBoard::InternalMove tmp(lastMove);
 		currBoardState->ChangeState(tmp, 0);
+		if (evaluationCount.load() != 0)
+		{
+			std::cout << "error";
+			throw std::runtime_error("threads running!");
+		}
 		for (int i = 0; i < maxThreadCount; i++)
 		{
 			boardVector[i].ChangeState(tmp, 0);

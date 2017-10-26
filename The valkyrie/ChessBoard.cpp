@@ -377,7 +377,7 @@ namespace ChessBoard
 			for(std::unordered_multimap<PrevBoardElement::hashType, PrevBoardElement>::iterator i=prevBoard.begin();i!=prevBoard.end();++i)
 				if (i->second == board)
 				{
-					std::cerr << "map not found correctly 1";
+					std::cout << "map not found correctly 1";
 					throw std::runtime_error("map not found correctly");
 				}
 			throw std::runtime_error("map not found");
@@ -402,7 +402,7 @@ namespace ChessBoard
 		for (std::unordered_multimap<PrevBoardElement::hashType, PrevBoardElement>::iterator i = prevBoard.begin(); i != prevBoard.end(); ++i)
 			if (i->second == board)
 			{
-				std::cerr << "map not found correctly 2";
+				std::cout << "map not found correctly 2";
 				throw std::runtime_error("map not found correctly");
 			}
 		throw std::runtime_error("map not found");
