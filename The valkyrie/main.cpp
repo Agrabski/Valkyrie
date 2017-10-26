@@ -201,7 +201,6 @@ void tester3()
 	double averageTime[7 - 3];
 	int completion = 0;
 	long int moveCount[7 - 3] = { 0 };
-	bool displayMoves, displayTime;
 	std::ofstream stream;
 	stream.open("debug.txt", 'w');
 	JudgeDredd::Valkyrie *player1, *player2;
