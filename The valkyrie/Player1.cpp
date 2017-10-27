@@ -13,7 +13,6 @@
 JudgeDredd::Valkyrie::Valkyrie(bool amIWhite)
 {
 	maxThreadCount = std::thread::hardware_concurrency();
-	boardVector = new ChessBoard::Board[maxThreadCount];
 	threadVector = std::vector<std::thread>();
 	threadVector.reserve(maxThreadCount);
 	this->amIWhite = amIWhite;
@@ -21,15 +20,14 @@ JudgeDredd::Valkyrie::Valkyrie(bool amIWhite)
 	maxThreadCount =  std::thread::hardware_concurrency();
 	for (int i = 0; i < maxThreadCount; i++)
 	{
-		boardVector[i] = *currBoardState;
-		threadVector.push_back(std::thread(Player(), this, &boardVector[i], 0, recursionDepth, amIWhite, amIWhite ? &best : &alpha, amIWhite ? &beta : &best, &evaluationCount, &toEvaluate, &evaluated));
+		boardVector.emplace_back((*currBoardState));
+		threadVector.push_back(std::thread(Player(), this, i, 0, recursionDepth, amIWhite, amIWhite ? &best : &alpha, amIWhite ? &beta : &best, &evaluationCount, &toEvaluate, &evaluated));
 	}
 }
 
 JudgeDredd::Valkyrie::Valkyrie(bool amIwhite, ChessEvaluator::ChessEvaluator evaluator, int recursion)
 {
 	maxThreadCount =  std::thread::hardware_concurrency();
-	boardVector = new ChessBoard::Board[maxThreadCount]();
 	threadVector=std::vector<std::thread>();
 	threadVector.reserve(maxThreadCount);
 	amIWhite = amIwhite;
@@ -38,8 +36,8 @@ JudgeDredd::Valkyrie::Valkyrie(bool amIwhite, ChessEvaluator::ChessEvaluator eva
 	this->evaluator = evaluator;
 	for (int i = 0; i < maxThreadCount; i++)
 	{
-		boardVector[i] = *currBoardState;
-		threadVector.push_back(std::thread( Player(), this, &boardVector[i], 0, recursionDepth, amIWhite, amIWhite ? &best : &alpha, amIWhite ? &beta : &best, &evaluationCount, &toEvaluate, &evaluated));
+		boardVector.emplace_back((*currBoardState));
+		threadVector.push_back(std::thread( Player(), this, i, 0, recursionDepth, amIWhite, amIWhite ? &best : &alpha, amIWhite ? &beta : &best, &evaluationCount, &toEvaluate, &evaluated));
 	}
 }
 
@@ -49,7 +47,6 @@ JudgeDredd::Valkyrie::~Valkyrie()
 	for (int i = 0; i < maxThreadCount; i++)
 		if (threadVector[i].joinable())
 			threadVector[i].join();
-	delete[] boardVector;
 	delete currBoardState;
 }
 
@@ -68,6 +65,8 @@ Move JudgeDredd::Valkyrie::makeMove(Move lastMove)
 		for (int i = 0; i < maxThreadCount; i++)
 		{
 			boardVector[i].ChangeState(tmp, 0);
+			if (**boardVector[i] != *currBoardState)
+				throw std::runtime_error("map reversion fail");
 		}
 	}
 	evaluationCount = 0;
@@ -145,7 +144,7 @@ Move JudgeDredd::Valkyrie::makeMove(Move lastMove)
 	return tmp;
 }
 
-void JudgeDredd::Valkyrie::Play( ChessBoard::Board &board, short int currentRecursion, short int maxRecursion, ChessEvaluator::ChessEvaluation *value, bool isWhite, ChessEvaluator::ChessEvaluation alpha, ChessEvaluator::ChessEvaluation beta) const
+void JudgeDredd::Valkyrie::Play(ChessBoard::BoardConcurencyLock &board, short int currentRecursion, short int maxRecursion, ChessEvaluator::ChessEvaluation *value, bool isWhite, ChessEvaluator::ChessEvaluation alpha, ChessEvaluator::ChessEvaluation beta) const
 {
 #ifdef DEBUG
 	std::cout << currentRecursion<<(currentRecursion!=maxRecursion?"----":"");
@@ -156,7 +155,7 @@ void JudgeDredd::Valkyrie::Play( ChessBoard::Board &board, short int currentRecu
 		std::cout << std::endl;
 #endif // DEBUG
 		if(value!=nullptr)
-			*value= evaluator.evaluate(board);
+			*value= evaluator.evaluate(*board);
 		return;
 
 	}
@@ -166,7 +165,7 @@ void JudgeDredd::Valkyrie::Play( ChessBoard::Board &board, short int currentRecu
 	ChessBoard::InternalMove bestMove;
 	ChessBoard::InternalMove newbestMove;
 	bool StealmateFlag = true;
-	ChessBoard::Board::Moves moveIterator(&board);
+	ChessBoard::Board::Moves moveIterator(*board);
 
 	moveIterator.Reset(isWhite);
 	++(moveIterator);
@@ -328,7 +327,7 @@ void JudgeDredd::Valkyrie::Play( ChessBoard::Board &board, short int currentRecu
 	{
 		Best.isNull = false;
 		Best.gameHasEnded = true;
-		Best.endState = board.IsWhiteChecked() ? -1 : board.IsBlackChecked() ? 1 : 0;
+		Best.endState = (board.isWhiteChecked() ? -1 : (board.isBlackChecked() ? 1 : 0));
 		if (value != nullptr)
 			*value = Best;
 	}

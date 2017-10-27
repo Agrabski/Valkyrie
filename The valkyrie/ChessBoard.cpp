@@ -1690,4 +1690,107 @@ namespace ChessBoard
 		return coveredByWhite != right.coveredByWhite || coveredByBlack != right.coveredByBlack || rank != right.rank;
 	}
 
+
+	BoardConcurencyLock::BoardConcurencyLock(const Board & data)
+	{
+		this->data =  data;
+	}
+
+	void BoardConcurencyLock::ChangeState(InternalMove lastMove)
+	{
+		lock.lock();
+		try
+		{
+			data.ChangeState(lastMove);
+		}
+		catch (ChessBoard::FIFTY_MOVES err)
+		{
+			lock.unlock();
+			throw err;
+		}
+		catch (ChessBoard::THREEFOLD_REPETITON err)
+		{
+			lock.unlock();
+			throw err;
+		}
+		catch (ChessBoard::MOVE_BLOCKED err)
+		{
+			lock.unlock();
+			throw err;
+		}
+		catch (ChessBoard::KING_IN_DANGER err)
+		{
+			lock.unlock();
+			throw err;
+		}
+		catch (ChessBoard::INVALID_MOVE err) 
+		{
+			lock.unlock();
+			throw err;
+		}
+		lock.unlock();
+	}
+
+	void BoardConcurencyLock::ChangeState(InternalMove lastmove, int)
+	{
+		lock.lock();
+		try
+		{
+			data.ChangeState(lastmove, 0);
+		}
+		catch (ChessBoard::FIFTY_MOVES err)
+		{
+			lock.unlock();
+			throw err;
+		}
+		catch (ChessBoard::THREEFOLD_REPETITON err)
+		{
+			lock.unlock();
+			throw err;
+		}
+		catch (ChessBoard::MOVE_BLOCKED err)
+		{
+			lock.unlock();
+			throw err;
+		}
+		catch (ChessBoard::KING_IN_DANGER err)
+		{
+			lock.unlock();
+			throw err;
+		}
+		catch (ChessBoard::INVALID_MOVE err)
+		{
+			lock.unlock();
+			throw err;
+		}
+		lock.unlock();
+	}
+
+	void BoardConcurencyLock::Revert()
+	{
+		lock.lock();	
+		data.Revert();
+		lock.unlock();
+	}
+
+	bool BoardConcurencyLock::isWhiteChecked()
+	{
+		return data.IsWhiteChecked();
+	}
+
+	bool BoardConcurencyLock::isBlackChecked()
+	{
+		return data.IsBlackChecked();
+	}
+
+	const Board * BoardConcurencyLock::operator*()
+	{
+		return &data;
+	}
+
+	BoardConcurencyLock::BoardConcurencyLock(const BoardConcurencyLock & toCopy)
+	{
+		BoardConcurencyLock(Board( &toCopy.data));
+	}
+
 }
