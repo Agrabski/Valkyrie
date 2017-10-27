@@ -53,6 +53,8 @@ JudgeDredd::Valkyrie::~Valkyrie()
 Move JudgeDredd::Valkyrie::makeMove(Move lastMove)
 {
 	best.isNull = true;
+	if (evaluationCount.load() != 0)
+		throw std::runtime_error("too many threads");
 	if (!firstMove)
 	{
 		ChessBoard::InternalMove tmp(lastMove);
