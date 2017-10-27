@@ -196,6 +196,10 @@ void JudgeDredd::Valkyrie::Play(ChessBoard::Board &board, short int currentRecur
 				StealmateFlag = false;
 
 			}
+			catch (ChessBoard::KING_IN_DANGER)
+			{
+
+			}
 			catch (ChessBoard::FIFTY_MOVES)
 			{
 				newBest.gameHasEnded = true;
@@ -216,10 +220,7 @@ void JudgeDredd::Valkyrie::Play(ChessBoard::Board &board, short int currentRecur
 			{
 
 			}
-			catch (ChessBoard::KING_IN_DANGER)
-			{
 
-			}
 
 			if (alpha < *alphaPointer)
 				alpha = *alphaPointer;
@@ -266,6 +267,10 @@ void JudgeDredd::Valkyrie::Play(ChessBoard::Board &board, short int currentRecur
 					throw std::runtime_error("reversion fail");
 #endif
 			}
+			catch (ChessBoard::KING_IN_DANGER err)
+			{
+
+			}
 			catch (ChessBoard::FIFTY_MOVES)
 			{
 				newBest.gameHasEnded = true;
@@ -286,10 +291,7 @@ void JudgeDredd::Valkyrie::Play(ChessBoard::Board &board, short int currentRecur
 			{
 
 			}
-			catch (ChessBoard::KING_IN_DANGER err)
-			{
 
-			}
 #ifdef REVERSION
 			if (tmp != board)
 				throw std::runtime_error("reversion fail");
