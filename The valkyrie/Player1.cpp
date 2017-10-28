@@ -67,8 +67,7 @@ Move JudgeDredd::Valkyrie::makeMove(Move lastMove)
 		for (int i = 0; i < maxThreadCount; i++)
 		{
 			boardVector[i].ChangeState(tmp, 0);
-			if (**boardVector[i] != *currBoardState)
-				throw std::runtime_error("map reversion fail");
+
 		}
 	}
 	evaluationCount = 0;
