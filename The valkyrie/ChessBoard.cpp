@@ -731,32 +731,36 @@ namespace ChessBoard
 		switch (int n=lastMove.from.first)
 		{
 		case 0:
-			if (n == 0)
+			if (lastMove.from.second == 0)
 				leftWhite = false;
-			else if (lastMove.from.second == 7)
-				leftBlack = false;
+			else
+				if (lastMove.from.second == 7)
+					leftBlack = false;
 			break;
 		case 7:
-			if (n == 0)
+			if (lastMove.from.second == 0)
 				rightWhite = false;
-			else if (n == 7)
-				rightBlack = false;
+			else
+				if (lastMove.from.second == 7)
+					rightBlack = false;
 		default:
 			break;
 		}
 		switch (int n = lastMove.to.first)
 		{
 		case 0:
-			if (n == 0)
+			if (lastMove.to.second == 0)
 				leftWhite = false;
-			else if (lastMove.from.second == 7)
-				leftBlack = false;
+			else
+				if (lastMove.to.second == 7)
+					leftBlack = false;
 			break;
 		case 7:
-			if (n == 0)
+			if (lastMove.to.second == 0)
 				rightWhite = false;
-			else if (n == 7)
-				rightBlack = false;
+			else
+				if (lastMove.to.second == 7)
+					rightBlack = false;
 		default:
 			break;
 		}
@@ -808,7 +812,7 @@ namespace ChessBoard
 			for (int y = 0; y < 8; y++)
 				if (fields[x][y].rank != rightOne.fields[x][y].rank)
 					return false;
-		if (MoveStack.size() != rightOne.MoveStack.size() || moveCounter != rightOne.moveCounter)
+		if (MoveStack.size() != rightOne.MoveStack.size() || moveCounter != rightOne.moveCounter||prevBoard.size()!=rightOne.prevBoard.size())
 			return false;
 		return true;
 	}
