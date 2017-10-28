@@ -661,28 +661,34 @@ namespace ChessBoard
 			if (nextMoveIsWhite)
 			{
 				if (rightWhite && fields[3][0].coveredByBlack == 0 && fields[3][0].rank.type == Empty && fields[2][0].coveredByBlack == 0 && fields[2][0].rank.type == Empty)
-				{
-					fields[4][0].rank.type = Empty;
-					fields[0][0].rank.type = Empty;
-					fields[2][0].rank = { King, true };
-					fields[3][0].rank = { Tower,true };
-					rightWhite = false;
-					leftWhite = false;
-				}
+					if (fields[4][0].rank ==Rank( King,true)&&fields[0][0].rank == Rank(Tower, true))
+					{
+						fields[4][0].rank.type = Empty;
+						fields[0][0].rank.type = Empty;
+						fields[2][0].rank = { King, true };
+						fields[3][0].rank = { Tower,true };
+						rightWhite = false;
+						leftWhite = false;
+					}
+					else
+						throw INVALID_MOVE();
 				else
 					throw INVALID_MOVE();
 			}
 			else
 			{
 				if (rightBlack && fields[3][7].coveredByWhite == 0 && fields[3][7].rank.type == Empty && fields[2][7].coveredByWhite == 0 && fields[2][7].rank.type == Empty)
-				{
-					fields[4][7].rank.type = Empty;
-					fields[0][7].rank.type = Empty;
-					fields[2][7].rank = { King, false };
-					fields[3][7].rank = { Tower,false };
-					rightBlack = false;
-					leftBlack = false;
-				}
+					if (fields[4][7].rank == Rank(King, false) && fields[0][7].rank == Rank(Tower, false))
+					{
+						fields[4][7].rank.type = Empty;
+						fields[0][7].rank.type = Empty;
+						fields[2][7].rank = { King, false };
+						fields[3][7].rank = { Tower,false };
+						rightBlack = false;
+						leftBlack = false;
+					}
+					else
+						throw INVALID_MOVE();
 				else
 					throw INVALID_MOVE();
 			}
@@ -692,28 +698,35 @@ namespace ChessBoard
 			if (nextMoveIsWhite)
 			{
 				if (rightWhite && fields[5][0].coveredByBlack == 0 && fields[5][0].rank.type == Empty && fields[6][0].coveredByBlack == 0 && fields[6][0].rank.type == Empty)
-				{
-					fields[4][0].rank.type = Empty;
-					fields[7][0].rank.type = Empty;
-					fields[6][0].rank = { King, true };
-					fields[5][0].rank = { Tower,true };
-					rightWhite = false;
-					leftWhite = false;
-				}
+					if (fields[4][0].rank == Rank(King, true) && fields[7][0].rank == Rank(Tower, true))
+					{
+						fields[4][0].rank.type = Empty;
+						fields[7][0].rank.type = Empty;
+						fields[6][0].rank = { King, true };
+						fields[5][0].rank = { Tower,true };
+						rightWhite = false;
+						leftWhite = false;
+					}
+					else
+						throw INVALID_MOVE();
 				else
 					throw INVALID_MOVE();
 			}
 			else
 			{
 				if (rightBlack && fields[5][7].coveredByWhite == 0 && fields[5][7].rank.type == Empty && fields[6][7].coveredByWhite == 0 && fields[6][7].rank.type == Empty)
-				{
-					fields[4][7].rank.type = Empty;
-					fields[7][7].rank.type = Empty;
-					fields[6][7].rank = { King, false };
-					fields[5][7].rank = { Tower,false };
-					rightBlack = false;
-					leftBlack = false;
-				}
+					if (fields[4][7].rank == Rank(King, false) && fields[7][7].rank == Rank(Tower, false))
+
+					{
+						fields[4][7].rank.type = Empty;
+						fields[7][7].rank.type = Empty;
+						fields[6][7].rank = { King, false };
+						fields[5][7].rank = { Tower,false };
+						rightBlack = false;
+						leftBlack = false;
+					}
+					else
+						throw INVALID_MOVE();
 				else
 					throw INVALID_MOVE();
 			}
