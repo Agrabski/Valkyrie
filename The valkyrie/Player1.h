@@ -40,7 +40,6 @@ public:
 			ChessEvaluator::ChessEvaluation tmpEval;
 			while (toEvaluate->pop(buffer))
 			{
-
 				try
 				{
 #ifdef REVERSION
@@ -49,6 +48,9 @@ public:
 #endif // REVERSION
 					tmpEval.isNull = true;
 					board->ChangeState(buffer);
+=======
+							tmpEval.isNull = true;
+							ref->boardVector[boardIndex].ChangeState(buffer);
 #ifdef REVERSION
 
 					ChessBoard::Board tmp = ChessBoard::Board(ref->currBoardState);
@@ -58,6 +60,7 @@ public:
 
 #endif
 					ref->Play(*board, currentRecursion, maxRecursion, &tmpEval, !isWhite, alpha, beta, *alpha, *beta);
+=======
 #ifdef REVERSION
 
 					if (board != tmp)
@@ -119,6 +122,7 @@ private:
 	bool amIWhite;
 	void Play(ChessBoard::Board &board, short int currentRecursion, short int maxRecursion, ChessEvaluator::ChessEvaluation *value, bool isWhite, ChessEvaluator::ChessEvaluation * alphaPointer, ChessEvaluator::ChessEvaluation * betaPointer, ChessEvaluator::ChessEvaluation alpha, ChessEvaluator::ChessEvaluation beta) const;
 	ChessEvaluator::ChessEvaluator evaluator;
+
 
 };
 

@@ -7,6 +7,8 @@
 #include <stack>
 #include <array>
 #include <unordered_map>
+#include <mutex>
+#define CONCURENCYDEBUG
 
 typedef std::pair<short, short> point;
 
@@ -100,7 +102,7 @@ namespace ChessBoard
 		Field fields[8][8];
 		struct Moves
 		{
-			Moves(Board *Parent)
+			Moves(const Board *Parent)
 			{
 				this->parent = Parent;
 			}
@@ -221,6 +223,22 @@ namespace ChessBoard
 
 	class FIFTY_MOVES : INVALID_MOVE
 	{
+
+	};
+
+	class BoardConcurencyLock
+	{
+		Board data;
+		std::recursive_mutex lock;
+	public:
+		BoardConcurencyLock(const Board &data);
+		void ChangeState(InternalMove lastMove);
+		void ChangeState(InternalMove lastmove, int);
+		void Revert();
+		bool isWhiteChecked();
+		bool isBlackChecked();
+		const Board*operator*();
+		BoardConcurencyLock(const BoardConcurencyLock &toCopy);
 
 	};
 }

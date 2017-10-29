@@ -1696,6 +1696,5 @@ namespace ChessBoard
 	{
 		return coveredByWhite != right.coveredByWhite || coveredByBlack != right.coveredByBlack || rank != right.rank;
 	}
-
 }
 	
