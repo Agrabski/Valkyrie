@@ -47,12 +47,11 @@ namespace ChessBoard
 
 	bool Board::addBoard()
 	{
-		PrevBoardElement::hashType tmphash = PrevBoardElement::CreateHash(fields);
-		auto tmp = prevBoard.equal_range(tmphash);
+		auto tmp = prevBoard.equal_range(currentHash);
 
 		if (tmp.first == prevBoard.end())
 		{
-			prevBoard.insert(std::pair<PrevBoardElement::hashType, PrevBoardElement>(tmphash, PrevBoardElement(fields, 1)));
+			prevBoard.insert(std::pair<PrevBoardElement::hashType, PrevBoardElement>(currentHash, PrevBoardElement(fields, 1)));
 			return true;
 		}
 		else
@@ -67,7 +66,7 @@ namespace ChessBoard
 				tmp.first++;
 			}
 		}
-		prevBoard.insert(std::pair<PrevBoardElement::hashType, PrevBoardElement>(tmphash, PrevBoardElement(fields, 1)));
+		prevBoard.insert(std::pair<PrevBoardElement::hashType, PrevBoardElement>(currentHash, PrevBoardElement(fields, 1)));
 		return true;
 	}
 
@@ -290,6 +289,7 @@ namespace ChessBoard
 		rightWhite = tmp.rightWhite;
 		leftWhite = tmp.leftWhite;
 		MoveStack.pop();
+		currentHash = tmp.hash;
 		if (lastMove.movetype == Standard)
 		{
 			fields[lastMove.from.first][lastMove.from.second].rank = fields[lastMove.to.first][lastMove.to.second].rank;
@@ -370,8 +370,7 @@ namespace ChessBoard
 
 	void Board::removeBoard(Field board[8][8])
 	{
-		PrevBoardElement::hashType t = PrevBoardElement::CreateHash(board);
-		std::pair<std::unordered_multimap<PrevBoardElement::hashType, PrevBoardElement>::iterator, std::unordered_multimap<PrevBoardElement::hashType, PrevBoardElement>::iterator> tmp = prevBoard.equal_range(t);
+		std::pair<std::unordered_multimap<PrevBoardElement::hashType, PrevBoardElement>::iterator, std::unordered_multimap<PrevBoardElement::hashType, PrevBoardElement>::iterator> tmp = prevBoard.equal_range(currentHash);
 
 		if (tmp.first == prevBoard.end())
 		{
@@ -422,7 +421,7 @@ namespace ChessBoard
 	{
 		if (moveCounter == 0)
 			throw FIFTY_MOVES();
-		StackElement tmp(lastMove, { Empty,false }, moveCounter, leftWhite, rightWhite, leftBlack, rightBlack);
+		StackElement tmp(lastMove, { Empty,false }, moveCounter, leftWhite, rightWhite, leftBlack, rightBlack,currentHash);
 		Rank currentlyMoved = { Empty,false };
 		std::pair<short, short> relativeMove;
 		if (lastMove.from != std::pair<short, short>(-1, -1))
@@ -766,6 +765,7 @@ namespace ChessBoard
 			break;
 		}
 
+
 		if (currentlyMoved.type == Pawn || tmp.pieceType.type != Empty)
 		{
 			moveCounter = 100;
@@ -773,6 +773,7 @@ namespace ChessBoard
 		else
 			moveCounter--;
 		MoveStack.push(tmp);
+		currentHash = PrevBoardElement::ReHash(currentHash, lastMove, currentlyMoved.isWhite);
 		if (!addBoard())
 		{
 			throw THREEFOLD_REPETITON();
@@ -794,6 +795,7 @@ namespace ChessBoard
 				whiteCheck = err.isWhite;
 			}
 		}
+
 	}
 
 	void Board::ChangeState(InternalMove lastMove, int)
