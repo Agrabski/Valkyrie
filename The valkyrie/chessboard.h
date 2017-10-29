@@ -45,7 +45,7 @@ namespace ChessBoard
 		}
 		Rank()
 		{
-			
+
 		}
 		Type type;
 		bool isWhite;
@@ -90,6 +90,7 @@ namespace ChessBoard
 			fields[4][7].rank = { King,false };
 			MoveStack = std::stack<StackElement>();
 			prevBoard.reserve(50);
+			currentHash = PrevBoardElement::CreateHash(fields);
 		}
 		~Board();
 		Board(const Board*toCopy);
@@ -125,9 +126,26 @@ namespace ChessBoard
 		bool IsWhiteChecked() const;
 
 	private:
+		struct PrevBoardElement
+		{
+		public:
+			typedef unsigned long long int hashType;
+			PrevBoardElement(const Field toCopy[8][8], short count);
+			PrevBoardElement();
+			Field map[8][8];
+			short count;
+			static hashType CreateHash(const Field toHash[8][8]);
+			static hashType ReHash(hashType old, InternalMove move, bool isWhite);
+			PrevBoardElement operator++();
+			PrevBoardElement operator--();
+			static hashType shift(short x, short y);
+			bool operator==(const Field right[8][8]) const;
+			bool operator==(const PrevBoardElement&right)const;
+		};
+
 		struct StackElement
 		{
-			StackElement(InternalMove move, Rank piece, int moves, bool lWhite, bool rWhite, bool lBlack, bool rBlack)
+			StackElement(InternalMove move, Rank piece, int moves, bool lWhite, bool rWhite, bool lBlack, bool rBlack, unsigned long long int hash)
 			{
 				this->move = move;
 				pieceType = piece;
@@ -136,7 +154,9 @@ namespace ChessBoard
 				rightWhite = rWhite;
 				leftBlack = lBlack;
 				rightBlack = rBlack;
+				this->hash = hash;
 			}
+			unsigned long long int hash;
 			InternalMove move;
 			Rank pieceType;
 			int movesCounter;
@@ -161,26 +181,11 @@ namespace ChessBoard
 		bool blackCheck = false;
 		bool whiteCheck = false;
 		void ClearStack();
-		struct PrevBoardElement
-		{
-		public:
-			typedef unsigned long long int hashType;
-			PrevBoardElement(const Field toCopy[8][8], short count);
-			PrevBoardElement();
-			Field map[8][8];
-			short count;
-			static hashType CreateHash(const Field toHash[8][8]);
-			static hashType ReHash(hashType old, InternalMove move, bool isWhite);
-			PrevBoardElement operator++();
-			PrevBoardElement operator--();
-			static hashType shift(short x, short y);
-			bool operator==( const Field right[8][8]) const;
-			bool operator==(const PrevBoardElement&right)const;
-		};
-		std::unordered_multimap<PrevBoardElement::hashType,PrevBoardElement>  prevBoard;
+		std::unordered_multimap<PrevBoardElement::hashType, PrevBoardElement>  prevBoard;
 		std::stack<StackElement> MoveStack;
 		static const std::pair<short, short> QueenMovementArray[8];
 		static const std::pair<short, short> KnightMovementArray[8];
+		PrevBoardElement::hashType currentHash;
 
 	};
 
@@ -213,7 +218,7 @@ namespace ChessBoard
 
 	class WRONG_COLOR : INVALID_MOVE
 	{
-		
+
 	};
 
 	class FIFTY_MOVES : INVALID_MOVE
@@ -221,19 +226,4 @@ namespace ChessBoard
 
 	};
 
-	class BoardConcurencyLock
-	{
-		Board data;
-		std::recursive_mutex lock;
-	public:
-		BoardConcurencyLock(const Board &data);
-		void ChangeState(InternalMove lastMove);
-		void ChangeState(InternalMove lastmove, int);
-		void Revert();
-		bool isWhiteChecked();
-		bool isBlackChecked();
-		const Board*operator*();
-		BoardConcurencyLock(const BoardConcurencyLock &toCopy);
-
-	};
 }

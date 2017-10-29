@@ -19,7 +19,7 @@
 
 class JudgeDredd::Valkyrie
 {
-    int x;
+	int x;
 
 public:
 	Valkyrie(bool amIWhite);
@@ -40,66 +40,65 @@ public:
 			ChessEvaluator::ChessEvaluation tmpEval;
 			while (toEvaluate->pop(buffer))
 			{
+
 				try
 				{
 #ifdef REVERSION
-							if (board != ref->currBoardState)
-								throw std::runtime_error("Map reversion fail");
+					if (board != ref->currBoardState)
+						throw std::runtime_error("Map reversion fail");
 #endif // REVERSION
 					tmpEval.isNull = true;
 					board->ChangeState(buffer);
-							tmpEval.isNull = true;
-							board->ChangeState(buffer);
 #ifdef REVERSION
 
-							ChessBoard::Board tmp = ChessBoard::Board(ref->currBoardState);
-							tmp.ChangeState(buffer);
-							if (board != tmp)
-								throw std::runtime_error("Map reversion fail");
+					ChessBoard::Board tmp = ChessBoard::Board(ref->currBoardState);
+					tmp.ChangeState(buffer);
+					if (board != tmp)
+						throw std::runtime_error("Map reversion fail");
 
 #endif
 					ref->Play(*board, currentRecursion, maxRecursion, &tmpEval, !isWhite, alpha, beta, *alpha, *beta);
 #ifdef REVERSION
 
-							if (board !=tmp)
-								throw std::runtime_error("Map reversion fail");
+					if (board != tmp)
+						throw std::runtime_error("Map reversion fail");
 #endif
-							ref->boardVector[boardIndex].Revert();
+					board->Revert();
 #ifdef REVERSION
-							if (board != ref->currBoardState)
-								throw std::runtime_error("Map reversion fail");
+					if (board != ref->currBoardState)
+						throw std::runtime_error("Map reversion fail");
 #endif // REVERSION
-						}
-						catch (ChessBoard::FIFTY_MOVES)
-						{
-							tmpEval.gameHasEnded = true;
-							tmpEval.isNull = false;
-							tmpEval.endState = 0;
-						}
-						catch (ChessBoard::THREEFOLD_REPETITON)
-						{
-							tmpEval.gameHasEnded = true;
-							tmpEval.isNull = false;
-							tmpEval.endState = 0;
-							ref->boardVector[boardIndex].Revert();
-						}
-						catch (ChessBoard::MOVE_BLOCKED)
-						{
-						}
+				}
+				catch (ChessBoard::FIFTY_MOVES)
+				{
+					tmpEval.gameHasEnded = true;
+					tmpEval.isNull = false;
+					tmpEval.endState = 0;
+				}
+				catch (ChessBoard::THREEFOLD_REPETITON)
+				{
+					tmpEval.gameHasEnded = true;
+					tmpEval.isNull = false;
+					tmpEval.endState = 0;
+					board->Revert();
+				}
+				catch (ChessBoard::MOVE_BLOCKED)
+				{
+				}
 
-						catch (ChessBoard::KING_IN_DANGER)
-						{
+				catch (ChessBoard::KING_IN_DANGER)
+				{
 
-						}
-						catch (ChessBoard::INVALID_MOVE)
-						{
+				}
+				catch (ChessBoard::INVALID_MOVE)
+				{
 
-						}
-						if (!tmpEval.isNull)
-							evaluated->push(std::pair<ChessBoard::InternalMove, ChessEvaluator::ChessEvaluation>(buffer, tmpEval));
+				}
+				if (!tmpEval.isNull)
+					evaluated->push(std::pair<ChessBoard::InternalMove, ChessEvaluator::ChessEvaluation>(buffer, tmpEval));
 #ifdef REVERSION
-						if (board != ref->currBoardState)
-							throw std::runtime_error("Map reversion fail");
+				if (board != ref->currBoardState)
+					throw std::runtime_error("Map reversion fail");
 #endif // REVERSION
 				*counter -= 1;
 			}
@@ -107,7 +106,7 @@ public:
 	};
 private:
 	std::vector<std::thread> threadVector;
-	std::vector<ChessBoard::Board> boardVector;
+	ChessBoard::Board *boardVector;
 	ConcurrentQueue<ChessBoard::InternalMove> toEvaluate;
 	Concurrency::concurrent_queue<std::pair<ChessBoard::InternalMove, ChessEvaluator::ChessEvaluation>> evaluated;
 	ChessEvaluator::ChessEvaluation alpha, beta;
