@@ -107,7 +107,7 @@ class JudgeDredd::Valkyrie
 		};
 	private:
 		std::vector<std::thread> threadVector;
-		std::vector<ChessBoard::BoardConcurencyLock> boardVector;
+		std::vector<ChessBoard::Board> boardVector;
 		ConcurrentQueue<ChessBoard::InternalMove> toEvaluate;
 		Concurrency::concurrent_queue<std::pair<ChessBoard::InternalMove, ChessEvaluator::ChessEvaluation>> evaluated;
 		ChessEvaluator::ChessEvaluation alpha, beta;
@@ -118,7 +118,7 @@ class JudgeDredd::Valkyrie
 		bool firstMove;
 		ChessBoard::Board *currBoardState=new ChessBoard::Board();
 		bool amIWhite;
-		void Play(ChessBoard::BoardConcurencyLock &board, short int currentRecursion, short int maxRecursion, ChessEvaluator::ChessEvaluation *value, bool isWhite,ChessEvaluator::ChessEvaluation alpha, ChessEvaluator::ChessEvaluation beta) const;
+		void Play(ChessBoard::Board &board, short int currentRecursion, short int maxRecursion, ChessEvaluator::ChessEvaluation *value, bool isWhite,ChessEvaluator::ChessEvaluation alpha, ChessEvaluator::ChessEvaluation beta) const;
 		ChessEvaluator::ChessEvaluator evaluator;
 
 };

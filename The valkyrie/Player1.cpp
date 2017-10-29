@@ -145,7 +145,7 @@ Move JudgeDredd::Valkyrie::makeMove(Move lastMove)
 	return tmp;
 }
 
-void JudgeDredd::Valkyrie::Play(ChessBoard::BoardConcurencyLock &board, short int currentRecursion, short int maxRecursion, ChessEvaluator::ChessEvaluation *value, bool isWhite, ChessEvaluator::ChessEvaluation alpha, ChessEvaluator::ChessEvaluation beta) const
+void JudgeDredd::Valkyrie::Play(ChessBoard::Board &board, short int currentRecursion, short int maxRecursion, ChessEvaluator::ChessEvaluation *value, bool isWhite, ChessEvaluator::ChessEvaluation alpha, ChessEvaluator::ChessEvaluation beta) const
 {
 #ifdef DEBUG
 	std::cout << currentRecursion<<(currentRecursion!=maxRecursion?"----":"");
@@ -156,7 +156,7 @@ void JudgeDredd::Valkyrie::Play(ChessBoard::BoardConcurencyLock &board, short in
 		std::cout << std::endl;
 #endif // DEBUG
 		if(value!=nullptr)
-			*value= evaluator.evaluate(*board);
+			*value= evaluator.evaluate(board);
 		return;
 
 	}
@@ -166,7 +166,7 @@ void JudgeDredd::Valkyrie::Play(ChessBoard::BoardConcurencyLock &board, short in
 	ChessBoard::InternalMove bestMove;
 	ChessBoard::InternalMove newbestMove;
 	bool StealmateFlag = true;
-	ChessBoard::Board::Moves moveIterator(*board);
+	ChessBoard::Board::Moves moveIterator(&board);
 
 	moveIterator.Reset(isWhite);
 	++(moveIterator);
@@ -328,7 +328,7 @@ void JudgeDredd::Valkyrie::Play(ChessBoard::BoardConcurencyLock &board, short in
 	{
 		Best.isNull = false;
 		Best.gameHasEnded = true;
-		Best.endState = (board.isWhiteChecked() ? -1 : (board.isBlackChecked() ? 1 : 0));
+		Best.endState = (board.IsWhiteChecked() ? -1 : (board.IsBlackChecked() ? 1 : 0));
 		if (value != nullptr)
 			*value = Best;
 	}
