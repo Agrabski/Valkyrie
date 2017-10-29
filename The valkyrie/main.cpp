@@ -329,16 +329,16 @@ void tester4(int times, char* name)
 				for (buffer = player1->makeMove(move); true;)
 				{
 					buffer = player2->makeMove(buffer);
-					moveCount[i-2]++;
+					moveCount[i - 2]++;
 					buffer = player1->makeMove(buffer);
-					moveCount[i-2]++;
+					moveCount[i - 2]++;
 				}
 			}
 			catch (GAME_ENDED err)
 			{
 			}
 			timeElapsed[i - 2] += (time(0) - t1);
-			std::cout << "RECURSION DEPTH:" << i << "-" << (double)timeElapsed[i - 2] / (double)moveCount[i-2] << std::endl;
+			std::cout << "RECURSION DEPTH:" << i << "-" << (double)timeElapsed[i - 2] / (double)moveCount[i - 2] << std::endl;
 			delete player1;
 			delete player2;
 		}
