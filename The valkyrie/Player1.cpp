@@ -10,6 +10,8 @@
 //#define REVERSION
 //#define MAPDEBUG
 
+
+
 JudgeDredd::Valkyrie::Valkyrie(bool amIWhite)
 {
 	maxThreadCount = std::thread::hardware_concurrency();
@@ -17,7 +19,7 @@ JudgeDredd::Valkyrie::Valkyrie(bool amIWhite)
 	threadVector.reserve(maxThreadCount);
 	this->amIWhite = amIWhite;
 	firstMove = amIWhite;
-	maxThreadCount =  std::thread::hardware_concurrency();
+	maxThreadCount = std::thread::hardware_concurrency();
 	for (int i = 0; i < maxThreadCount; i++)
 	{
 		boardVector.emplace_back((*currBoardState));
@@ -27,8 +29,9 @@ JudgeDredd::Valkyrie::Valkyrie(bool amIWhite)
 
 JudgeDredd::Valkyrie::Valkyrie(bool amIwhite, ChessEvaluator::ChessEvaluator evaluator, int recursion)
 {
-	maxThreadCount =  std::thread::hardware_concurrency();
-	threadVector=std::vector<std::thread>();
+	maxThreadCount = std::thread::hardware_concurrency();
+	boardVector = new ChessBoard::Board[maxThreadCount]();
+	threadVector = std::vector<std::thread>();
 	threadVector.reserve(maxThreadCount);
 	amIWhite = amIwhite;
 	firstMove = amIWhite;
@@ -36,8 +39,8 @@ JudgeDredd::Valkyrie::Valkyrie(bool amIwhite, ChessEvaluator::ChessEvaluator eva
 	this->evaluator = evaluator;
 	for (int i = 0; i < maxThreadCount; i++)
 	{
-		boardVector.emplace_back((*currBoardState));
-		threadVector.push_back(std::thread( Player(), this, i, 0, recursionDepth, amIWhite, amIWhite ? &best : &alpha, amIWhite ? &beta : &best, &evaluationCount, &toEvaluate, &evaluated));
+		boardVector[i] = *currBoardState;
+		threadVector.push_back(std::thread(Player(), this, &boardVector[i], 0, recursionDepth, amIWhite, amIWhite ? &best : &alpha, amIWhite ? &beta : &best, &evaluationCount, &toEvaluate, &evaluated));
 	}
 }
 
@@ -57,7 +60,6 @@ Move JudgeDredd::Valkyrie::makeMove(Move lastMove)
 	{
 		ChessBoard::InternalMove tmp(lastMove);
 		currBoardState->ChangeState(tmp, 0);
-
 		for (int i = 0; i < maxThreadCount; i++)
 		{
 			boardVector[i].ChangeState(tmp, 0);
@@ -109,7 +111,7 @@ Move JudgeDredd::Valkyrie::makeMove(Move lastMove)
 	if (best.isNull)
 		throw GAME_ENDED((!currBoardState->IsWhiteChecked()) && (!currBoardState->IsBlackChecked()), currBoardState->IsWhiteChecked(), currBoardState->IsBlackChecked());
 
-		
+
 	try
 	{
 		currBoardState->ChangeState(bestMove, 0);
@@ -139,18 +141,18 @@ Move JudgeDredd::Valkyrie::makeMove(Move lastMove)
 	return tmp;
 }
 
-void JudgeDredd::Valkyrie::Play(ChessBoard::Board &board, short int currentRecursion, short int maxRecursion, ChessEvaluator::ChessEvaluation *value, bool isWhite, ChessEvaluator::ChessEvaluation alpha, ChessEvaluator::ChessEvaluation beta) const
+void JudgeDredd::Valkyrie::Play(ChessBoard::Board &board, short int currentRecursion, short int maxRecursion, ChessEvaluator::ChessEvaluation *value, bool isWhite, ChessEvaluator::ChessEvaluation * alphaPointer, ChessEvaluator::ChessEvaluation * betaPointer, ChessEvaluator::ChessEvaluation alpha, ChessEvaluator::ChessEvaluation beta) const
 {
 #ifdef DEBUG
-	std::cout << currentRecursion<<(currentRecursion!=maxRecursion?"----":"");
+	std::cout << currentRecursion << (currentRecursion != maxRecursion ? "----" : "");
 #endif // DEBUG
-	if (currentRecursion == maxRecursion) 
+	if (currentRecursion == maxRecursion)
 	{
 #ifdef DEBUG
 		std::cout << std::endl;
 #endif // DEBUG
-		if(value!=nullptr)
-			*value= evaluator.evaluate(board);
+		if (value != nullptr)
+			*value = evaluator.evaluate(board);
 		return;
 
 	}
@@ -175,14 +177,14 @@ void JudgeDredd::Valkyrie::Play(ChessBoard::Board &board, short int currentRecur
 			try
 			{
 				newBest.isNull = true;
-				newbestMove =ChessBoard::InternalMove( *moveIterator);
+				newbestMove = ChessBoard::InternalMove(*moveIterator);
 #ifdef REVERSION
 				if (tmp != board)
 					throw std::runtime_error("reversion fail");
 #endif
 				board.ChangeState(*moveIterator);
 
-				Play(board, currentRecursion + 1, maxRecursion, &newBest, !isWhite, alpha, beta);
+				Play(board, currentRecursion + 1, maxRecursion, &newBest, !isWhite, alphaPointer, betaPointer, alpha, beta);
 
 
 				board.Revert();
@@ -210,29 +212,30 @@ void JudgeDredd::Valkyrie::Play(ChessBoard::Board &board, short int currentRecur
 				newBest.endState = 0;
 				board.Revert();
 			}
-			catch(ChessBoard::MOVE_BLOCKED)
-			{ }
+			catch (ChessBoard::MOVE_BLOCKED)
+			{
+			}
 			catch (ChessBoard::INVALID_MOVE)
 			{
 
 			}
 
 
-			if (newbestMove.from!= std::pair<short, short>(8, 0) &&!newBest.isNull&&(newBest > alpha))
+			if (alpha < *alphaPointer)
+				alpha = *alphaPointer;
+			if (!betaPointer->isNull && (beta.isNull || beta.gameHasEnded || !betaPointer->gameHasEnded) && (beta.isNull || ((beta.gameHasEnded && !betaPointer->gameHasEnded) || *betaPointer < beta)))
+				beta = *betaPointer;
+
+			if (newbestMove.from != std::pair<short, short>(8, 0) && !newBest.isNull && (newBest > alpha))
 			{
 				alpha = (Best = newBest);
 				bestMove = newbestMove;
 			}
 
-#ifdef MAPDEBUG
-			if ((*boardVector)[currentRecursion + 1] != (*boardVector)[currentRecursion])
-				throw std::runtime_error("MAP REVERSION FAILED!");
-#endif
-
 			if (!beta.isNull && !alpha.isNull&&beta <= alpha)
 			{
 #ifdef DEBUG
-				std::cout << "!!!TREE CUT!!!("<<currentRecursion<<")\n";
+				std::cout << "!!!TREE CUT!!!(" << currentRecursion << ")\n";
 #endif // DEBUG
 				break;
 			}
@@ -254,7 +257,7 @@ void JudgeDredd::Valkyrie::Play(ChessBoard::Board &board, short int currentRecur
 					throw std::runtime_error("reversion fail");
 #endif
 				board.ChangeState(*moveIterator);
-				Play(board, currentRecursion + 1, maxRecursion, &newBest, !isWhite, alpha, beta);
+				Play(board, currentRecursion + 1, maxRecursion, &newBest, !isWhite, alphaPointer, betaPointer, alpha, beta);
 				StealmateFlag = false;
 
 				board.Revert();
@@ -263,9 +266,9 @@ void JudgeDredd::Valkyrie::Play(ChessBoard::Board &board, short int currentRecur
 					throw std::runtime_error("reversion fail");
 #endif
 			}
-			catch (ChessBoard::KING_IN_DANGER err) 
+			catch (ChessBoard::KING_IN_DANGER err)
 			{
-				
+
 			}
 			catch (ChessBoard::FIFTY_MOVES)
 			{
@@ -293,19 +296,18 @@ void JudgeDredd::Valkyrie::Play(ChessBoard::Board &board, short int currentRecur
 				throw std::runtime_error("reversion fail");
 #endif
 
+			if (alpha < *alphaPointer)
+				alpha = *alphaPointer;
+			if (!betaPointer->isNull && (beta.isNull || beta.gameHasEnded || !betaPointer->gameHasEnded) && (beta.isNull || ((beta.gameHasEnded && !betaPointer->gameHasEnded) || *betaPointer < beta)))
+				beta = *betaPointer;
 
 
-			if (newbestMove.from != std::pair<short, short>(8, 0) && !newBest.isNull&&(beta.isNull||beta.gameHasEnded||!newBest.gameHasEnded)&&(beta.isNull||((beta.gameHasEnded&&!newBest.gameHasEnded)||newBest < beta)))
+			if (newbestMove.from != std::pair<short, short>(8, 0) && !newBest.isNull && (beta.isNull || beta.gameHasEnded || !newBest.gameHasEnded) && (beta.isNull || ((beta.gameHasEnded && !newBest.gameHasEnded) || newBest < beta)))
 			{
 
 				beta = (Best = newBest);
 				bestMove = newbestMove;
 			}
-#ifdef MAPDEBUG
-			if ( (*boardVector)[currentRecursion + 1] != (*boardVector)[currentRecursion])
-				throw std::runtime_error("MAP REVERSION FAILED!");
-#endif
-
 			if (!beta.isNull && !alpha.isNull&&beta <= alpha)
 			{
 #ifdef DEBUG
@@ -326,7 +328,7 @@ void JudgeDredd::Valkyrie::Play(ChessBoard::Board &board, short int currentRecur
 		if (value != nullptr)
 			*value = Best;
 	}
-	if(value!=nullptr)
+	if (value != nullptr)
 		*value = isWhite ? alpha : beta;
 
 }
