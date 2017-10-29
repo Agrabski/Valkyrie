@@ -43,7 +43,6 @@ JudgeDredd::JudgeDredd(bool isWhite, int givenTime)
     enPassan={-1, -1};
     score={0, 0};
     time={0, 0};
-    maxTime=givenTime;
 
     lastMove.special=false;
     lastMove.from={-1, -1};

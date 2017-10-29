@@ -27,8 +27,9 @@ namespace ChessEvaluator
 		float enemyValue=0.1f;
 		float friendlyCheck=0.1f;
 		float enemyCheck=0.1f;
+		double pawnConstant = 0.1;
 		ChessEvaluator();
-		ChessEvaluator(float a,float b,float c, float d);
+		ChessEvaluator(float a,float b,float c, float d, double e);
 		ChessEvaluation evaluate(const ChessBoard::Board &board) const;
 	};
 }
