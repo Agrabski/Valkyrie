@@ -53,17 +53,11 @@ JudgeDredd::Valkyrie::~Valkyrie()
 Move JudgeDredd::Valkyrie::makeMove(Move lastMove)
 {
 	best.isNull = true;
-	if (evaluationCount.load() != 0)
-		throw std::runtime_error("too many threads");
 	if (!firstMove)
 	{
 		ChessBoard::InternalMove tmp(lastMove);
 		currBoardState->ChangeState(tmp, 0);
-		if (evaluationCount != 0)
-		{
-			std::cout << "error";
-			throw std::runtime_error("threads running!");
-		}
+
 		for (int i = 0; i < maxThreadCount; i++)
 		{
 			boardVector[i].ChangeState(tmp, 0);
