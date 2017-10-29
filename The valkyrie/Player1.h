@@ -48,9 +48,8 @@ public:
 #endif // REVERSION
 					tmpEval.isNull = true;
 					board->ChangeState(buffer);
-=======
 							tmpEval.isNull = true;
-							ref->boardVector[boardIndex].ChangeState(buffer);
+							board->ChangeState(buffer);
 #ifdef REVERSION
 
 					ChessBoard::Board tmp = ChessBoard::Board(ref->currBoardState);
@@ -60,7 +59,6 @@ public:
 
 #endif
 					ref->Play(*board, currentRecursion, maxRecursion, &tmpEval, !isWhite, alpha, beta, *alpha, *beta);
-=======
 #ifdef REVERSION
 
 					if (board != tmp)
@@ -109,7 +107,7 @@ public:
 	};
 private:
 	std::vector<std::thread> threadVector;
-	ChessBoard::Board *boardVector;
+	std::vector<ChessBoard::Board> boardVector;
 	ConcurrentQueue<ChessBoard::InternalMove> toEvaluate;
 	Concurrency::concurrent_queue<std::pair<ChessBoard::InternalMove, ChessEvaluator::ChessEvaluation>> evaluated;
 	ChessEvaluator::ChessEvaluation alpha, beta;

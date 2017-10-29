@@ -15,6 +15,7 @@
 JudgeDredd::Valkyrie::Valkyrie(bool amIWhite)
 {
 	maxThreadCount = std::thread::hardware_concurrency();
+	boardVector.reserve(maxThreadCount);
 	threadVector = std::vector<std::thread>();
 	threadVector.reserve(maxThreadCount);
 	this->amIWhite = amIWhite;
@@ -22,15 +23,15 @@ JudgeDredd::Valkyrie::Valkyrie(bool amIWhite)
 	maxThreadCount = std::thread::hardware_concurrency();
 	for (int i = 0; i < maxThreadCount; i++)
 	{
-		boardVector.emplace_back((*currBoardState));
-		threadVector.push_back(std::thread(Player(), this, i, 0, recursionDepth, amIWhite, amIWhite ? &best : &alpha, amIWhite ? &beta : &best, &evaluationCount, &toEvaluate, &evaluated));
+		boardVector.emplace_back( *currBoardState);
+		threadVector.push_back(std::thread(Player(), this, &boardVector[i], 0, recursionDepth, amIWhite, amIWhite ? &best : &alpha, amIWhite ? &beta : &best, &evaluationCount, &toEvaluate, &evaluated));
 	}
 }
 
 JudgeDredd::Valkyrie::Valkyrie(bool amIwhite, ChessEvaluator::ChessEvaluator evaluator, int recursion)
 {
 	maxThreadCount = std::thread::hardware_concurrency();
-	boardVector = new ChessBoard::Board[maxThreadCount]();
+	boardVector.reserve(maxThreadCount);
 	threadVector = std::vector<std::thread>();
 	threadVector.reserve(maxThreadCount);
 	amIWhite = amIwhite;
@@ -39,7 +40,7 @@ JudgeDredd::Valkyrie::Valkyrie(bool amIwhite, ChessEvaluator::ChessEvaluator eva
 	this->evaluator = evaluator;
 	for (int i = 0; i < maxThreadCount; i++)
 	{
-		boardVector[i] = *currBoardState;
+		boardVector.emplace_back(*currBoardState);
 		threadVector.push_back(std::thread(Player(), this, &boardVector[i], 0, recursionDepth, amIWhite, amIWhite ? &best : &alpha, amIWhite ? &beta : &best, &evaluationCount, &toEvaluate, &evaluated));
 	}
 }
@@ -63,7 +64,6 @@ Move JudgeDredd::Valkyrie::makeMove(Move lastMove)
 		for (int i = 0; i < maxThreadCount; i++)
 		{
 			boardVector[i].ChangeState(tmp, 0);
-
 		}
 	}
 	evaluationCount = 0;
@@ -324,7 +324,7 @@ void JudgeDredd::Valkyrie::Play(ChessBoard::Board &board, short int currentRecur
 	{
 		Best.isNull = false;
 		Best.gameHasEnded = true;
-		Best.endState = (board.IsWhiteChecked() ? -1 : (board.IsBlackChecked() ? 1 : 0));
+		Best.endState = board.IsWhiteChecked() ? -1 : board.IsBlackChecked() ? 1 : 0;
 		if (value != nullptr)
 			*value = Best;
 	}
@@ -332,4 +332,3 @@ void JudgeDredd::Valkyrie::Play(ChessBoard::Board &board, short int currentRecur
 		*value = isWhite ? alpha : beta;
 
 }
-
