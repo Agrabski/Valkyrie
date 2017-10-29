@@ -30,7 +30,7 @@ namespace ChessBoard
 
 	const InternalMove Board::Moves::endState = InternalMove(std::pair<short, short>(0, 8), std::pair<short, short>(0, 8), Standard);
 
-	const std::pair<short, short> Board::KnightMovementArray[8] = { { -2,-1 },{ -2,1 },{ -1,2 },{ 1,2 },{ 2,1 },{ 2,-1 },{1,-2 },{ -1,-2 } };
+	const std::pair<short, short> Board::KnightMovementArray[8] = { { -2,-1 },{ -2,1 },{ -1,2 },{ 1,2 },{ 2,1 },{ 2,-1 },{ 1,-2 },{ -1,-2 } };
 
 	const std::pair<short, short> Board::QueenMovementArray[8] = { std::pair<short, short>(-1,0),std::pair<short, short>(-1,1),std::pair<short, short>(0,1),std::pair<short, short>(1,1),std::pair<short, short>(1,0),std::pair<short, short>(1,-1),std::pair<short, short>(0,-1),std::pair<short, short>(-1,-1) };
 
@@ -117,7 +117,7 @@ namespace ChessBoard
 	{
 		bool blackCheck = false;
 		bool whiteCheck = false;
-		for(int x=0;x<8;x++)
+		for (int x = 0; x<8; x++)
 			for (int y = 0; y < 8; y++)
 			{
 				fields[x][y].coveredByBlack = 0;
@@ -170,7 +170,7 @@ namespace ChessBoard
 				{
 					for (int direction = 0; direction < 8; ++direction)
 					{
-						for (int i = 1; i < 8 && x + QueenMovementArray[direction].first*i>=0 && x + QueenMovementArray[direction].first*i < 8 && y + QueenMovementArray[direction].second*i>=0 && y + QueenMovementArray[direction].second*i < 8; ++i)
+						for (int i = 1; i < 8 && x + QueenMovementArray[direction].first*i >= 0 && x + QueenMovementArray[direction].first*i < 8 && y + QueenMovementArray[direction].second*i >= 0 && y + QueenMovementArray[direction].second*i < 8; ++i)
 						{
 							if (isWhite)
 							{
@@ -198,7 +198,7 @@ namespace ChessBoard
 				{
 					for (int direction = 0; direction < 8; ++direction)
 					{
-						if (x + KnightMovementArray[direction].first >= 0 && x + KnightMovementArray[direction].first < 8 && y + KnightMovementArray[direction].second>=0 && y + KnightMovementArray[direction].second < 8)
+						if (x + KnightMovementArray[direction].first >= 0 && x + KnightMovementArray[direction].first < 8 && y + KnightMovementArray[direction].second >= 0 && y + KnightMovementArray[direction].second < 8)
 						{
 							if (isWhite)
 							{
@@ -221,7 +221,7 @@ namespace ChessBoard
 				{
 					for (int direction = 0; direction < 8; direction += 2)
 					{
-						for (int i = 1; i < 8 && x + QueenMovementArray[direction].first*i>=0 && x + QueenMovementArray[direction].first*i < 8 && y + QueenMovementArray[direction].second*i>=0 && y + QueenMovementArray[direction].second*i < 8; ++i)
+						for (int i = 1; i < 8 && x + QueenMovementArray[direction].first*i >= 0 && x + QueenMovementArray[direction].first*i < 8 && y + QueenMovementArray[direction].second*i >= 0 && y + QueenMovementArray[direction].second*i < 8; ++i)
 						{
 							if (isWhite)
 							{
@@ -248,7 +248,7 @@ namespace ChessBoard
 				{
 					for (int direction = 1; direction < 8; direction += 2)
 					{
-						for (int i = 1; i < 8 && x + QueenMovementArray[direction].first*i>=0 && x + QueenMovementArray[direction].first*i < 8 && y + QueenMovementArray[direction].second*i>=0 && y + QueenMovementArray[direction].second*i < 8; ++i)
+						for (int i = 1; i < 8 && x + QueenMovementArray[direction].first*i >= 0 && x + QueenMovementArray[direction].first*i < 8 && y + QueenMovementArray[direction].second*i >= 0 && y + QueenMovementArray[direction].second*i < 8; ++i)
 						{
 							if (isWhite)
 							{
@@ -283,7 +283,7 @@ namespace ChessBoard
 		removeBoard(fields);
 		StackElement tmp = MoveStack.top();
 		moveCounter = tmp.movesCounter;
-		InternalMove lastMove =tmp.move;
+		InternalMove lastMove = tmp.move;
 		Rank beaten = tmp.pieceType;
 		rightBlack = tmp.rightBlack;
 		leftBlack = tmp.leftBlack;
@@ -375,15 +375,9 @@ namespace ChessBoard
 
 		if (tmp.first == prevBoard.end())
 		{
-			for(std::unordered_multimap<PrevBoardElement::hashType, PrevBoardElement>::iterator i=prevBoard.begin();i!=prevBoard.end();++i)
-				if (i->second == board)
-				{
-					std::cout << "map not found correctly 1";
-					throw std::runtime_error("map not found correctly");
-				}
 			throw std::runtime_error("map not found");
 		}
-			
+
 		else
 		{
 			while (tmp.first != tmp.second)
@@ -400,12 +394,6 @@ namespace ChessBoard
 				tmp.first++;
 			}
 		}
-		for (std::unordered_multimap<PrevBoardElement::hashType, PrevBoardElement>::iterator i = prevBoard.begin(); i != prevBoard.end(); ++i)
-			if (i->second == board)
-			{
-				std::cout << "map not found correctly 2";
-				throw std::runtime_error("map not found correctly");
-			}
 		throw std::runtime_error("map not found");
 	}
 
@@ -420,7 +408,7 @@ namespace ChessBoard
 			for (int y = 0; y < 8; y++)
 				fields[x][y] = toCopy->fields[x][y];
 
-		prevBoard =toCopy->prevBoard;
+		prevBoard = toCopy->prevBoard;
 		MoveStack = std::stack<StackElement>(toCopy->MoveStack);
 		nextMoveIsWhite = toCopy->nextMoveIsWhite;
 		leftWhite = toCopy->leftWhite;
@@ -434,7 +422,7 @@ namespace ChessBoard
 	{
 		if (moveCounter == 0)
 			throw FIFTY_MOVES();
-		StackElement tmp(lastMove, { Empty,false }, moveCounter,leftWhite,rightWhite,leftBlack,rightBlack);
+		StackElement tmp(lastMove, { Empty,false }, moveCounter, leftWhite, rightWhite, leftBlack, rightBlack);
 		Rank currentlyMoved = { Empty,false };
 		std::pair<short, short> relativeMove;
 		if (lastMove.from != std::pair<short, short>(-1, -1))
@@ -446,13 +434,13 @@ namespace ChessBoard
 				throw WRONG_COLOR();
 			}
 			relativeMove = { lastMove.to.first - lastMove.from.first,lastMove.to.second - lastMove.from.second };
-			tmp.pieceType= fields[lastMove.to.first][lastMove.to.second].rank;
+			tmp.pieceType = fields[lastMove.to.first][lastMove.to.second].rank;
 		}
 		else
 		{
 			currentlyMoved = { Tower,nextMoveIsWhite };
 		}
-		
+
 
 		//TODO:check move legitimacy
 		switch (lastMove.movetype)
@@ -478,7 +466,7 @@ namespace ChessBoard
 						{
 							if (lastMove.from.second != 1)
 								throw INVALID_MOVE();
-							if (fields[lastMove.to.first][lastMove.from.second + 1].rank.type != ChessBoard::Empty|| fields[lastMove.to.first][lastMove.from.second + 2].rank.type != ChessBoard::Empty)
+							if (fields[lastMove.to.first][lastMove.from.second + 1].rank.type != ChessBoard::Empty || fields[lastMove.to.first][lastMove.from.second + 2].rank.type != ChessBoard::Empty)
 								throw MOVE_BLOCKED();
 						}
 					}
@@ -503,14 +491,14 @@ namespace ChessBoard
 						{
 							if (lastMove.from.second != 6)
 								throw INVALID_MOVE();
-							if (fields[lastMove.from.first][lastMove.from.second - 1].rank.type != ChessBoard::Empty|| fields[lastMove.from.first][lastMove.from.second - 2].rank.type != ChessBoard::Empty)
+							if (fields[lastMove.from.first][lastMove.from.second - 1].rank.type != ChessBoard::Empty || fields[lastMove.from.first][lastMove.from.second - 2].rank.type != ChessBoard::Empty)
 								throw MOVE_BLOCKED();
 						}
 					}
 					//Beating
 					else
 					{
-						if (fields[lastMove.to.first][lastMove.to.second].rank.type == Empty || (fields[lastMove.to.first][lastMove.to.second].rank.type != Empty&&!fields[lastMove.to.first][lastMove.to.second].rank.isWhite))
+						if (fields[lastMove.to.first][lastMove.to.second].rank.type == Empty || (fields[lastMove.to.first][lastMove.to.second].rank.type != Empty && !fields[lastMove.to.first][lastMove.to.second].rank.isWhite))
 							throw INVALID_MOVE();
 					}
 				}
@@ -601,7 +589,7 @@ namespace ChessBoard
 		{
 			if (relativeMove.first == 0 && fields[lastMove.to.first][lastMove.to.second].rank.type != Empty)
 				throw MOVE_BLOCKED();
-			if(relativeMove.first!=0&& fields[lastMove.to.first][lastMove.to.second].rank.type!=Empty&&fields[lastMove.to.first][lastMove.to.second].rank.isWhite==currentlyMoved.isWhite)
+			if (relativeMove.first != 0 && fields[lastMove.to.first][lastMove.to.second].rank.type != Empty&&fields[lastMove.to.first][lastMove.to.second].rank.isWhite == currentlyMoved.isWhite)
 				throw MOVE_BLOCKED();
 			if ((currentlyMoved.isWhite && lastMove.to.second != 7) || (!currentlyMoved.isWhite && lastMove.to.second != 0) || currentlyMoved.type != Pawn)
 				throw INVALID_MOVE();
@@ -661,28 +649,34 @@ namespace ChessBoard
 			if (nextMoveIsWhite)
 			{
 				if (rightWhite && fields[3][0].coveredByBlack == 0 && fields[3][0].rank.type == Empty && fields[2][0].coveredByBlack == 0 && fields[2][0].rank.type == Empty)
-				{
-					fields[4][0].rank.type = Empty;
-					fields[0][0].rank.type = Empty;
-					fields[2][0].rank = { King, true };
-					fields[3][0].rank = { Tower,true };
-					rightWhite = false;
-					leftWhite = false;
-				}
+					if (fields[4][0].rank == Rank(King, true) && fields[0][0].rank == Rank(Tower, true))
+					{
+						fields[4][0].rank.type = Empty;
+						fields[0][0].rank.type = Empty;
+						fields[2][0].rank = { King, true };
+						fields[3][0].rank = { Tower,true };
+						rightWhite = false;
+						leftWhite = false;
+					}
+					else
+						throw INVALID_MOVE();
 				else
 					throw INVALID_MOVE();
 			}
 			else
 			{
 				if (rightBlack && fields[3][7].coveredByWhite == 0 && fields[3][7].rank.type == Empty && fields[2][7].coveredByWhite == 0 && fields[2][7].rank.type == Empty)
-				{
-					fields[4][7].rank.type = Empty;
-					fields[0][7].rank.type = Empty;
-					fields[2][7].rank = { King, false };
-					fields[3][7].rank = { Tower,false };
-					rightBlack = false;
-					leftBlack = false;
-				}
+					if (fields[4][7].rank == Rank(King, false) && fields[0][7].rank == Rank(Tower, false))
+					{
+						fields[4][7].rank.type = Empty;
+						fields[0][7].rank.type = Empty;
+						fields[2][7].rank = { King, false };
+						fields[3][7].rank = { Tower,false };
+						rightBlack = false;
+						leftBlack = false;
+					}
+					else
+						throw INVALID_MOVE();
 				else
 					throw INVALID_MOVE();
 			}
@@ -692,28 +686,35 @@ namespace ChessBoard
 			if (nextMoveIsWhite)
 			{
 				if (rightWhite && fields[5][0].coveredByBlack == 0 && fields[5][0].rank.type == Empty && fields[6][0].coveredByBlack == 0 && fields[6][0].rank.type == Empty)
-				{
-					fields[4][0].rank.type = Empty;
-					fields[7][0].rank.type = Empty;
-					fields[6][0].rank = { King, true };
-					fields[5][0].rank = { Tower,true };
-					rightWhite = false;
-					leftWhite = false;
-				}
+					if (fields[4][0].rank == Rank(King, true) && fields[7][0].rank == Rank(Tower, true))
+					{
+						fields[4][0].rank.type = Empty;
+						fields[7][0].rank.type = Empty;
+						fields[6][0].rank = { King, true };
+						fields[5][0].rank = { Tower,true };
+						rightWhite = false;
+						leftWhite = false;
+					}
+					else
+						throw INVALID_MOVE();
 				else
 					throw INVALID_MOVE();
 			}
 			else
 			{
 				if (rightBlack && fields[5][7].coveredByWhite == 0 && fields[5][7].rank.type == Empty && fields[6][7].coveredByWhite == 0 && fields[6][7].rank.type == Empty)
-				{
-					fields[4][7].rank.type = Empty;
-					fields[7][7].rank.type = Empty;
-					fields[6][7].rank = { King, false };
-					fields[5][7].rank = { Tower,false };
-					rightBlack = false;
-					leftBlack = false;
-				}
+					if (fields[4][7].rank == Rank(King, false) && fields[7][7].rank == Rank(Tower, false))
+
+					{
+						fields[4][7].rank.type = Empty;
+						fields[7][7].rank.type = Empty;
+						fields[6][7].rank = { King, false };
+						fields[5][7].rank = { Tower,false };
+						rightBlack = false;
+						leftBlack = false;
+					}
+					else
+						throw INVALID_MOVE();
 				else
 					throw INVALID_MOVE();
 			}
@@ -728,35 +729,39 @@ namespace ChessBoard
 			throw std::runtime_error("King Beaten");
 #endif // DEBUG
 
-		switch (int n=lastMove.from.first)
+		switch (int n = lastMove.from.first)
 		{
 		case 0:
-			if (n == 0)
+			if (lastMove.from.second == 0)
 				leftWhite = false;
-			else if (lastMove.from.second == 7)
-				leftBlack = false;
+			else
+				if (lastMove.from.second == 7)
+					leftBlack = false;
 			break;
 		case 7:
-			if (n == 0)
+			if (lastMove.from.second == 0)
 				rightWhite = false;
-			else if (n == 7)
-				rightBlack = false;
+			else
+				if (lastMove.from.second == 7)
+					rightBlack = false;
 		default:
 			break;
 		}
 		switch (int n = lastMove.to.first)
 		{
 		case 0:
-			if (n == 0)
+			if (lastMove.to.second == 0)
 				leftWhite = false;
-			else if (lastMove.from.second == 7)
-				leftBlack = false;
+			else
+				if (lastMove.to.second == 7)
+					leftBlack = false;
 			break;
 		case 7:
-			if (n == 0)
+			if (lastMove.to.second == 0)
 				rightWhite = false;
-			else if (n == 7)
-				rightBlack = false;
+			else
+				if (lastMove.to.second == 7)
+					rightBlack = false;
 		default:
 			break;
 		}
@@ -793,7 +798,7 @@ namespace ChessBoard
 
 	void Board::ChangeState(InternalMove lastMove, int)
 	{
-		if(lastMove.from!=std::pair<short,short>(-1,-1))
+		if (lastMove.from != std::pair<short, short>(-1, -1))
 			if (fields[lastMove.from.first][lastMove.from.second].rank.type == Pawn || fields[lastMove.to.first][lastMove.to.second].rank.type != Empty)
 			{
 				ClearStack();
@@ -808,25 +813,25 @@ namespace ChessBoard
 			for (int y = 0; y < 8; y++)
 				if (fields[x][y].rank != rightOne.fields[x][y].rank)
 					return false;
-		if (MoveStack.size() != rightOne.MoveStack.size() || moveCounter != rightOne.moveCounter)
+		if (MoveStack.size() != rightOne.MoveStack.size() || moveCounter != rightOne.moveCounter || prevBoard.size() != rightOne.prevBoard.size())
 			return false;
 		return true;
 	}
 
 	bool Board::operator!=(const Board & right) const
 	{
-		return !(*this==right);
+		return !(*this == right);
 	}
 
 	//TODO:paint the map
 	void Board::PaintTheMap(InternalMove lastMove, Rank currentlyMoved)
 	{
 		bool isWhite = fields[lastMove.from.first][lastMove.from.second].rank.isWhite;
-		if(fields[lastMove.from.first][lastMove.from.second].coveredByWhite|| fields[lastMove.from.first][lastMove.from.second].coveredByBlack)
+		if (fields[lastMove.from.first][lastMove.from.second].coveredByWhite || fields[lastMove.from.first][lastMove.from.second].coveredByBlack)
 		{
 			for (short i = 0; i < 8; i++)
 			{
-				if(IN_RANGE(lastMove.from.first + QueenMovementArray[i].first)&&IN_RANGE(lastMove.from.second + QueenMovementArray[i].second))
+				if (IN_RANGE(lastMove.from.first + QueenMovementArray[i].first) && IN_RANGE(lastMove.from.second + QueenMovementArray[i].second))
 				{
 					switch (currentlyMoved.type)
 					{
@@ -838,7 +843,7 @@ namespace ChessBoard
 					default:
 						break;
 					}
-					if (fields[lastMove.from.first + QueenMovementArray[i].first][lastMove.from.second + QueenMovementArray[i].second].coveredByWhite|| fields[lastMove.from.first + QueenMovementArray[i].first][lastMove.from.second + QueenMovementArray[i].second].coveredByBlack)
+					if (fields[lastMove.from.first + QueenMovementArray[i].first][lastMove.from.second + QueenMovementArray[i].second].coveredByWhite || fields[lastMove.from.first + QueenMovementArray[i].first][lastMove.from.second + QueenMovementArray[i].second].coveredByBlack)
 					{
 						for (short k = 0; IN_RANGE(lastMove.from.first + QueenMovementArray[i].first*k) && IN_RANGE(lastMove.from.second + QueenMovementArray[i].second*k); k++)
 							if (!fields[lastMove.from.first + QueenMovementArray[i].first*k][lastMove.from.second + QueenMovementArray[i].second*k].coveredByWhite && !fields[lastMove.from.first + QueenMovementArray[i].first*k][lastMove.from.second + QueenMovementArray[i].second*k].coveredByBlack)
@@ -982,7 +987,7 @@ namespace ChessBoard
 			{
 				while (currentRank.first < 8 && (parent->fields[currentRank.first][currentRank.second].rank.type == Empty || parent->fields[currentRank.first][currentRank.second].rank.isWhite != this->isWhite))
 				{
-				currentRank.first++;
+					currentRank.first++;
 				}
 				if (currentRank.first == 8)
 				{
@@ -1010,7 +1015,7 @@ namespace ChessBoard
 				if (this->isWhite)
 				{
 					//check if this move is possible
-					if (currentRank.first - 1 > 0&&IN_RANGE(currentRank.second + 1) && (!parent->fields[currentRank.first - 1][currentRank.second + 1].rank.isWhite || parent->fields[currentRank.first - 1][currentRank.second + 1].rank.type == Empty))
+					if (currentRank.first - 1 > 0 && IN_RANGE(currentRank.second + 1) && (!parent->fields[currentRank.first - 1][currentRank.second + 1].rank.isWhite || parent->fields[currentRank.first - 1][currentRank.second + 1].rank.type == Empty))
 						if (currentRank.second == 6)
 						{
 							//this pawn will be promoted, check the promotions
@@ -1052,7 +1057,7 @@ namespace ChessBoard
 				}
 				else
 				{
-					if (currentRank.first - 1 > 0 &&IN_RANGE(currentRank.second - 1)&& (parent->fields[currentRank.first - 1][currentRank.second - 1].rank.isWhite || parent->fields[currentRank.first - 1][currentRank.second - 1].rank.type == Empty))
+					if (currentRank.first - 1 > 0 && IN_RANGE(currentRank.second - 1) && (parent->fields[currentRank.first - 1][currentRank.second - 1].rank.isWhite || parent->fields[currentRank.first - 1][currentRank.second - 1].rank.type == Empty))
 						if (currentRank.second == 0)
 						{
 							//this pawn will be promoted, check the promotions
@@ -1117,18 +1122,18 @@ namespace ChessBoard
 								return ++(*this);
 							}
 						case(1):
-								if (IN_RANGE(currentRank.second + 2) && parent->fields[currentRank.first][currentRank.second + 2].rank.type == Empty&&parent->fields[currentRank.first][currentRank.second + 1].rank.type == Empty)
-								{
-									state = InternalMove(currentRank, std::pair<short, short>(currentRank.first, currentRank.second + 2), Standard);
-									moveIterator++;
-									return *this;
-								}
-								else
-								{
-									direction++;
-									moveIterator = 0;
-									return ++(*this);
-								}
+							if (IN_RANGE(currentRank.second + 2) && parent->fields[currentRank.first][currentRank.second + 2].rank.type == Empty&&parent->fields[currentRank.first][currentRank.second + 1].rank.type == Empty)
+							{
+								state = InternalMove(currentRank, std::pair<short, short>(currentRank.first, currentRank.second + 2), Standard);
+								moveIterator++;
+								return *this;
+							}
+							else
+							{
+								direction++;
+								moveIterator = 0;
+								return ++(*this);
+							}
 						default:
 							direction++;
 							moveIterator = 0;
@@ -1255,7 +1260,7 @@ namespace ChessBoard
 				if (this->isWhite)
 				{
 					//check if this move is possible
-					if (IN_RANGE( currentRank.first + 1)&& IN_RANGE(currentRank.second + 1) && (!parent->fields[currentRank.first + 1][currentRank.second + 1].rank.isWhite || parent->fields[currentRank.first + 1][currentRank.second + 1].rank.type == Empty))
+					if (IN_RANGE(currentRank.first + 1) && IN_RANGE(currentRank.second + 1) && (!parent->fields[currentRank.first + 1][currentRank.second + 1].rank.isWhite || parent->fields[currentRank.first + 1][currentRank.second + 1].rank.type == Empty))
 						if (currentRank.second == 6)
 						{
 							//this pawn will be promoted, check the promotions
@@ -1297,7 +1302,7 @@ namespace ChessBoard
 				}
 				else
 				{
-					if (IN_RANGE(currentRank.first + 1)&&IN_RANGE(currentRank.second - 1) && (parent->fields[currentRank.first + 1][currentRank.second - 1].rank.isWhite || parent->fields[currentRank.first + 1][currentRank.second - 1].rank.type == Empty))
+					if (IN_RANGE(currentRank.first + 1) && IN_RANGE(currentRank.second - 1) && (parent->fields[currentRank.first + 1][currentRank.second - 1].rank.isWhite || parent->fields[currentRank.first + 1][currentRank.second - 1].rank.type == Empty))
 						if (currentRank.second == 6)
 						{
 							//this pawn will be promoted, check the promotions
@@ -1595,13 +1600,13 @@ namespace ChessBoard
 		count = 0;
 	}
 
-	unsigned long long int Board::PrevBoardElement::CreateHash(const Field toHash[8][8]) 
+	unsigned long long int Board::PrevBoardElement::CreateHash(const Field toHash[8][8])
 	{
-		hashType hash=0;
+		hashType hash = 0;
 		for (short x = 0; x < 8; ++x)
 			for (short y = 0; y < 8; ++y)
 				if (toHash[x][y].rank.type != Empty)
-					hash =hash | shift(x ,y);
+					hash = hash | shift(x, y);
 		return hash;
 	}
 
@@ -1691,3 +1696,4 @@ namespace ChessBoard
 	}
 
 }
+	
