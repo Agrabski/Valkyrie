@@ -773,7 +773,7 @@ namespace ChessBoard
 		else
 			moveCounter--;
 		MoveStack.push(tmp);
-		currentHash = PrevBoardElement::ReHash(currentHash, lastMove, currentlyMoved.isWhite);
+		PrevBoardElement::ReHash(currentHash, lastMove, currentlyMoved.isWhite);
 		if (!addBoard())
 		{
 			throw THREEFOLD_REPETITON();
@@ -1612,7 +1612,7 @@ namespace ChessBoard
 		return hash;
 	}
 
-	Board::PrevBoardElement::hashType Board::PrevBoardElement::ReHash(hashType &old,const InternalMove& move, bool isWhite)
+	void Board::PrevBoardElement::ReHash(hashType &old,const InternalMove& move, bool isWhite)
 	{
 		switch (move.movetype)
 		{
