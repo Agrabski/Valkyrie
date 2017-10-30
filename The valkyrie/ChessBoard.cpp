@@ -1616,14 +1616,6 @@ namespace ChessBoard
 	{
 		switch (move.movetype)
 		{
-		case Standard:
-		case PromotionBishop:
-		case PromotionKnight:
-		case PromotionQueen:
-		case PromotionTower:
-			old ^= shift(move.from.first, move.from.second);
-			old |= shift(move.to.first, move.to.second);
-			break;
 		case RochadeLeft:
 			if (isWhite)
 			{
@@ -1647,6 +1639,10 @@ namespace ChessBoard
 				old ^= 0b1001000000000000000000000000000000000000000000000000000000000000ull;
 				old |= 0b110000000000000000000000000000000000000000000000000000000000000ull;
 			}
+			break;
+		default:
+			old ^= shift(move.from.first, move.from.second);
+			old |= shift(move.to.first, move.to.second);
 		}
 	}
 
