@@ -1648,7 +1648,6 @@ namespace ChessBoard
 				old |= 0b110000000000000000000000000000000000000000000000000000000000000ull;
 			}
 		}
-		return old;
 	}
 
 	Board::PrevBoardElement Board::PrevBoardElement::operator++()
