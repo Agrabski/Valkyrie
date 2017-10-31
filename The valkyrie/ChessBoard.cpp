@@ -1612,7 +1612,7 @@ namespace ChessBoard
 		return hash;
 	}
 
-	void Board::PrevBoardElement::ReHash(hashType &old,const InternalMove& move, bool isWhite)
+	void inline Board::PrevBoardElement::ReHash(hashType &old,const InternalMove& move, bool isWhite)
 	{
 		switch (move.movetype)
 		{
