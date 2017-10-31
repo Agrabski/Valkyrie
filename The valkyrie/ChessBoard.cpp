@@ -112,7 +112,7 @@ namespace ChessBoard
 		}
 	}
 
-	void ChessBoard::Board::PaintTheMap()
+	ChessBoard::KING_IN_DANGER ChessBoard::Board::PaintTheMap()
 	{
 		bool blackCheck = false;
 		bool whiteCheck = false;
@@ -271,8 +271,7 @@ namespace ChessBoard
 				}
 			}
 		}
-		if (blackCheck || whiteCheck)
-			throw KING_IN_DANGER(blackCheck, whiteCheck);
+		return KING_IN_DANGER(blackCheck, whiteCheck);
 	}
 
 	void ChessBoard::Board::revert()
@@ -826,7 +825,7 @@ namespace ChessBoard
 	}
 
 	//TODO:paint the map
-	void Board::PaintTheMap(InternalMove lastMove, Rank currentlyMoved)
+	ChessBoard::KING_IN_DANGER Board::PaintTheMap(InternalMove lastMove, Rank currentlyMoved)
 	{
 		bool isWhite = fields[lastMove.from.first][lastMove.from.second].rank.isWhite;
 		if (fields[lastMove.from.first][lastMove.from.second].coveredByWhite || fields[lastMove.from.first][lastMove.from.second].coveredByBlack)
@@ -858,6 +857,7 @@ namespace ChessBoard
 				}
 			}
 		}
+		return KING_IN_DANGER(true, true);
 	}
 
 	ChessBoard::InternalMove::InternalMove(Move toConvert)

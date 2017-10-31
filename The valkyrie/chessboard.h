@@ -64,6 +64,7 @@ namespace ChessBoard
 		bool operator!=(const Field &right) const;
 	};
 
+	class KING_IN_DANGER;
 
 	class Board
 	{
@@ -173,8 +174,8 @@ namespace ChessBoard
 		bool addBoard();
 		void ClearData();
 		void removeBoard(Field board[8][8]);
-		void Board::PaintTheMap(InternalMove lastMove, Rank currentlyMoved);
-		void PaintTheMap();
+		KING_IN_DANGER Board::PaintTheMap(InternalMove lastMove, Rank currentlyMoved);
+		KING_IN_DANGER PaintTheMap();
 		bool nextMoveIsWhite = true;
 		bool leftWhite = true;
 		bool rightWhite = true;
@@ -196,7 +197,7 @@ namespace ChessBoard
 
 	};
 
-	class KING_IN_DANGER :INVALID_MOVE
+	class KING_IN_DANGER
 	{
 	public:
 		bool isBlack;
