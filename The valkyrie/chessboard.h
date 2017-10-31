@@ -135,7 +135,7 @@ namespace ChessBoard
 			Field map[8][8];
 			short count;
 			static hashType CreateHash(const Field toHash[8][8]);
-			static void ReHash(hashType& old,const InternalMove& move, bool isWhite);
+			static inline void ReHash(hashType& old,const InternalMove& move, bool isWhite);
 			PrevBoardElement operator++();
 			PrevBoardElement operator--();
 			static hashType shift(short x, short y);
