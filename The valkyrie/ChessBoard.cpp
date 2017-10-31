@@ -293,15 +293,11 @@ namespace ChessBoard
 		{
 			fields[lastMove.from.first][lastMove.from.second].rank = fields[lastMove.to.first][lastMove.to.second].rank;
 			fields[lastMove.to.first][lastMove.to.second].rank = beaten;
-			try
-			{
-				PaintTheMap();
-			}
-			catch (KING_IN_DANGER& err)
-			{
-				blackCheck = err.isBlack;
-				whiteCheck = err.isWhite;
-			}
+
+			KING_IN_DANGER err = PaintTheMap();
+
+			blackCheck = err.isBlack;
+			whiteCheck = err.isWhite;
 			return;
 		}
 		switch (lastMove.movetype)
@@ -350,15 +346,10 @@ namespace ChessBoard
 		}
 		blackCheck = false;
 		whiteCheck = false;
-		try
-		{
-			PaintTheMap();
-		}
-		catch (KING_IN_DANGER& err)
-		{
-			blackCheck = err.isBlack;
-			whiteCheck = err.isWhite;
-		}
+
+		KING_IN_DANGER err = PaintTheMap();
+		blackCheck = err.isBlack;
+		whiteCheck = err.isWhite;
 	}
 
 	void Board::ClearData()
@@ -777,22 +768,16 @@ namespace ChessBoard
 		{
 			return Revert;
 		}
-		try
+		KING_IN_DANGER err = PaintTheMap();
+		if ((err.isWhite && currentlyMoved.isWhite) || (err.isBlack && !currentlyMoved.isWhite))
 		{
-			PaintTheMap();
+			this->revert();
+			return NoAction;
 		}
-		catch (KING_IN_DANGER err)
+		else
 		{
-			if ((err.isWhite && currentlyMoved.isWhite) || (err.isBlack && !currentlyMoved.isWhite))
-			{
-				this->revert();
-				return NoAction;
-			}
-			else
-			{
-				blackCheck = err.isBlack;
-				whiteCheck = err.isWhite;
-			}
+			blackCheck = err.isBlack;
+			whiteCheck = err.isWhite;
 		}
 		return Success;
 	}
