@@ -164,7 +164,7 @@ namespace Valkyrietests
 				{
 					board.ChangeState(*iterator);
 					count++;
-					board.Revert();
+					board.revert();
 				}
 				catch(ChessBoard::INVALID_MOVE)
 				{ }
@@ -197,7 +197,7 @@ namespace Valkyrietests
 				try
 				{
 					board.ChangeState(*iterator);
-					board.Revert();
+					board.revert();
 				}
 				catch(ChessBoard::KING_IN_DANGER)
 				{ }

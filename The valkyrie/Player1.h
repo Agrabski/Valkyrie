@@ -41,66 +41,29 @@ public:
 			while (toEvaluate->pop(buffer))
 			{
 
-				try
+
+				tmpEval.isNull = true;
+				switch (board->ChangeState(buffer))
 				{
-#ifdef REVERSION
-					if (board != ref->currBoardState)
-						throw std::runtime_error("Map reversion fail");
-#endif // REVERSION
-					tmpEval.isNull = true;
-					board->ChangeState(buffer);
-#ifdef REVERSION
-
-					ChessBoard::Board tmp = ChessBoard::Board(ref->currBoardState);
-					tmp.ChangeState(buffer);
-					if (board != tmp)
-						throw std::runtime_error("Map reversion fail");
-
-#endif
+				case ChessBoard::Success:
 					ref->Play(*board, currentRecursion, maxRecursion, &tmpEval, !isWhite, alpha, beta, *alpha, *beta);
-#ifdef REVERSION
-
-					if (board != tmp)
-						throw std::runtime_error("Map reversion fail");
-#endif
-					board->Revert();
-#ifdef REVERSION
-					if (board != ref->currBoardState)
-						throw std::runtime_error("Map reversion fail");
-#endif // REVERSION
-				}
-				catch (ChessBoard::FIFTY_MOVES)
-				{
+					board->revert();
+					break;
+				case ChessBoard::Revert:
 					tmpEval.gameHasEnded = true;
 					tmpEval.isNull = false;
 					tmpEval.endState = 0;
-				}
-				catch (ChessBoard::THREEFOLD_REPETITON)
-				{
-					tmpEval.gameHasEnded = true;
-					tmpEval.isNull = false;
-					tmpEval.endState = 0;
-					board->Revert();
-				}
-				catch (ChessBoard::MOVE_BLOCKED)
-				{
-				}
+					board->revert();
+					break;
+				case ChessBoard::NoAction:
+					break;
+				case ChessBoard::WrongColor:
+					throw std::runtime_error("Wrong Color!");
 
-				catch (ChessBoard::KING_IN_DANGER)
-				{
-
+					if (!tmpEval.isNull)
+						evaluated->push(std::pair<ChessBoard::InternalMove, ChessEvaluator::ChessEvaluation>(buffer, tmpEval));
+					*counter -= 1;
 				}
-				catch (ChessBoard::INVALID_MOVE)
-				{
-
-				}
-				if (!tmpEval.isNull)
-					evaluated->push(std::pair<ChessBoard::InternalMove, ChessEvaluator::ChessEvaluation>(buffer, tmpEval));
-#ifdef REVERSION
-				if (board != ref->currBoardState)
-					throw std::runtime_error("Map reversion fail");
-#endif // REVERSION
-				*counter -= 1;
 			}
 		}
 	};

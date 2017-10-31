@@ -17,6 +17,8 @@ namespace ChessBoard
 	enum Type { Pawn = 2, Knight = 4, Bishop = 5, Tower = 10, Queen = 15, King = 1, Empty = 0 };
 
 	enum MoveTypes { Standard, EnPassan, PromotionQueen, PromotionTower, PromotionKnight, PromotionBishop, RochadeLeft, RochadeRight };
+	enum ErrorTypes {Success, NoAction, Revert,WrongColor};
+
 	struct InternalMove
 	{
 		InternalMove(Move toConvert);
@@ -94,11 +96,11 @@ namespace ChessBoard
 		}
 		~Board();
 		Board(const Board*toCopy);
-		void ChangeState(InternalMove lastMove);
-		void ChangeState(InternalMove lastMove, int);
+		int ChangeState(InternalMove lastMove);
+		int ChangeState(InternalMove lastMove, int);
 		bool operator==(const Board& right) const;
 		bool operator!=(const Board& right) const;
-		void Revert();
+		void revert();
 		Field fields[8][8];
 		struct Moves
 		{
