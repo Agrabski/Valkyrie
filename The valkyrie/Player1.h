@@ -59,11 +59,10 @@ public:
 					break;
 				case ChessBoard::WrongColor:
 					throw std::runtime_error("Wrong Color!");
-
+				}
 					if (!tmpEval.isNull)
 						evaluated->push(std::pair<ChessBoard::InternalMove, ChessEvaluator::ChessEvaluation>(buffer, tmpEval));
 					*counter -= 1;
-				}
 			}
 		}
 	};
