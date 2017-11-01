@@ -74,7 +74,6 @@ private:
 	public:
 		KillerInstinct(short depth);
 		KillerInstinct operator++();
-		static unsigned short int hashMove(ChessBoard::InternalMove&);
 		bool contains(short depth, ChessBoard::InternalMove&move);
 		void add(short depth, ChessBoard::InternalMove&move);
 	};
