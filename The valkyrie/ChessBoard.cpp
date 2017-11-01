@@ -377,8 +377,8 @@ namespace ChessBoard
 		currentHash = tmp.hash;
 		if ((lastMove&TypeMask) == Standard)
 		{
-			fields[lastMove&fromXMask][lastMove&fromYMask].rank = fields[lastMove&toXMask][lastMove&toYMask].rank;
-			fields[lastMove&toXMask][lastMove&toYMask].rank = beaten;
+			fields[(lastMove&fromXMask) >> fromXShift][(lastMove&fromYMask) >> fromYShift].rank = fields[(lastMove&toXMask) >> fromXShift][(lastMove&toYMask) >> fromYShift].rank;
+			fields[(lastMove&toXMask) >> fromXShift][(lastMove&toYMask) >> fromYShift].rank = beaten;
 
 			KING_IN_DANGER err = PaintTheMap();
 
@@ -392,8 +392,8 @@ namespace ChessBoard
 		case(PromotionBishop):
 		case(PromotionTower):
 		case(PromotionQueen):
-			fields[lastMove&fromXMask][lastMove&fromYMask].rank.type = Pawn;
-			fields[lastMove&toXMask][lastMove&toYMask].rank = beaten;
+			fields[(lastMove&fromXMask)>>fromXShift][(lastMove&fromYMask)>>fromYShift].rank.type = Pawn;
+			fields[(lastMove&toXMask)>>toXShift][(lastMove&toYMask)>>toYShift].rank = beaten;
 			break;
 		case(RochadeLeft):
 			if (nextMoveIsWhite)
@@ -502,20 +502,23 @@ namespace ChessBoard
 		std::pair<short, short> relativeMove;
 		if ((lastMove&TypeMask) != RochadeLeft && (lastMove&TypeMask) != RochadeRight)
 		{
-			currentlyMoved = fields[lastMove&fromXMask][lastMove&fromYMask].rank;
+			currentlyMoved = fields[(lastMove&fromXMask)>>fromXShift][(lastMove&fromYMask)>>fromXShift].rank;
 			if (currentlyMoved.isWhite != nextMoveIsWhite)
 			{
 				std::cerr << "Wrong color!";
 				return WrongColor;
 			}
-			relativeMove = { lastMove&toXMask - lastMove&fromXMask,lastMove&toYMask - lastMove&fromYMask };
-			tmp.pieceType = fields[lastMove&toXMask][lastMove&toYMask].rank;
+			relativeMove = { ((lastMove&toXMask)>>toXShift) - ((lastMove&fromXMask)>>fromXShift),((lastMove&toYMask)>>toYShift) - ((lastMove&fromYMask)>>fromYShift) };
+			tmp.pieceType = fields[(lastMove&toXMask)>>toXShift][(lastMove&toYMask)>>toYShift].rank;
 		}
 		else
 		{
 			currentlyMoved = { Tower,nextMoveIsWhite };
 		}
-
+		int fromX = (lastMove&fromXMask) >> fromXShift;
+		int fromY = (lastMove&fromYMask) >> fromYShift;
+		int toX = (lastMove&toXMask) >> toXShift;
+		int toY = (lastMove&toYMask) >> toYShift;
 
 		//TODO:check move legitimacy
 		switch (lastMove&TypeMask)
@@ -529,51 +532,51 @@ namespace ChessBoard
 					return NoAction;
 				if (currentlyMoved.isWhite)
 				{
-					if ((lastMove&toYMask) == 7)
+					if (toY == 7)
 						return NoAction;
 					//No beating
 					if (relativeMove.first == 0)
 					{
-						if (fields[lastMove&toXMask][lastMove&toYMask].rank.type != Empty)
+						if (fields[toX][toY].rank.type != Empty)
 							return NoAction;
 						//Double move
 						if (relativeMove.second == 2)
 						{
-							if ((lastMove&fromYMask) != 1)
+							if ((fromY)>>fromYShift != 1)
 								return NoAction;
-							if (fields[lastMove&toXMask][lastMove&fromYMask + 1].rank.type != ChessBoard::Empty || fields[lastMove&toXMask][lastMove&fromYMask + 2].rank.type != ChessBoard::Empty)
+							if (fields[toX][fromY + 1].rank.type != ChessBoard::Empty || fields[toX][fromY + 2].rank.type != ChessBoard::Empty)
 								return NoAction;
 						}
 					}
 					//Beating
 					else
 					{
-						if (fields[lastMove&toXMask][lastMove&toYMask].rank.type == Empty || (fields[lastMove&toXMask][lastMove&toYMask].rank.type != Empty&&fields[lastMove&toXMask][lastMove&toYMask].rank.isWhite))
+						if (fields[toX][toY].rank.type == Empty || (fields[toX][toY].rank.type != Empty&&fields[toX][toY].rank.isWhite))
 							return NoAction;
 					}
 				}
 				else
 				{
-					if ((lastMove&toYMask) == 0)
+					if (toY == 0)
 						return NoAction;
 					//No beating
 					if (relativeMove.first == 0)
 					{
-						if (fields[lastMove&toXMask][lastMove&toYMask].rank.type != Empty)
+						if (fields[toX][toY].rank.type != Empty)
 							return NoAction;
 						//Double move
 						if (relativeMove.second == -2)
 						{
-							if ((lastMove&fromYMask) != 6)
+							if ((fromY)>>fromYShift != 6)
 								return NoAction;
-							if (fields[lastMove&fromXMask][lastMove&fromYMask - 1].rank.type != ChessBoard::Empty || fields[lastMove&fromXMask][lastMove&fromYMask - 2].rank.type != ChessBoard::Empty)
+							if (fields[fromX][fromY - 1].rank.type != ChessBoard::Empty || fields[fromX][fromY - 2].rank.type != ChessBoard::Empty)
 								return NoAction;
 						}
 					}
 					//Beating
 					else
 					{
-						if (fields[lastMove&toXMask][lastMove&toYMask].rank.type == Empty || (fields[lastMove&toXMask][lastMove&toYMask].rank.type != Empty && !fields[lastMove&toXMask][lastMove&toYMask].rank.isWhite))
+						if (fields[toX][toY].rank.type == Empty || (fields[toX][toY].rank.type != Empty && !fields[toX][toY].rank.isWhite))
 							return NoAction;
 					}
 				}
@@ -585,16 +588,16 @@ namespace ChessBoard
 			{
 				if (relativeMove.first == 0)
 				{
-					for (int i = 1; abs(lastMove&fromYMask + i*sign(relativeMove.second)) < abs(lastMove&toYMask); i++)
-						if (fields[lastMove&fromXMask][lastMove&fromYMask + i*sign(relativeMove.second)].rank.type != Empty)
+					for (int i = 1; abs(fromY + i*sign(relativeMove.second)) < toY; i++)
+						if (fields[fromX][fromY + i*sign(relativeMove.second)].rank.type != Empty)
 							return NoAction;
 				}
 				else
 				{
 					if (relativeMove.second == 0)
 					{
-						for (int i = 1; abs(lastMove&fromXMask + i*sign(relativeMove.first)) < abs(lastMove&toXMask); i++)
-							if (fields[lastMove&fromXMask + i*sign(relativeMove.first)][lastMove&fromYMask].rank.type != Empty)
+						for (int i = 1; abs(fromX + i*sign(relativeMove.first)) < abs(fromX); i++)
+							if (fields[fromX + i*sign(relativeMove.first)][fromY].rank.type != Empty)
 								return NoAction;
 					}
 					else
@@ -604,23 +607,23 @@ namespace ChessBoard
 			break;
 			case(ChessBoard::Bishop):
 			{
-				if ((fields[lastMove&toXMask][lastMove&toYMask].rank.type != Empty&&fields[lastMove&toXMask][lastMove&toYMask].rank.isWhite == currentlyMoved.isWhite))
+				if ((fields[toX][toY].rank.type != Empty&&fields[toX][toY].rank.isWhite == currentlyMoved.isWhite))
 					return NoAction;
 				if (abs(relativeMove.first) != abs(relativeMove.second))
 					return NoAction;
-				for (int i = 1; (lastMove&fromYMask + i*sign(relativeMove.second)) < (lastMove&toYMask) && ((lastMove&fromYMask) + i*sign(relativeMove.second)) > 0; i++)
-					if (fields[lastMove&fromXMask + i*sign(relativeMove.first)][lastMove&fromYMask + i*sign(relativeMove.second)].rank.type != Empty)
+				for (int i = 1; (fromY + i*sign(relativeMove.second)) < toY && (((fromY)>>fromYShift) + i*sign(relativeMove.second)) > 0; i++)
+					if (fields[fromX + i*sign(relativeMove.first)][fromY + i*sign(relativeMove.second)].rank.type != Empty)
 						return NoAction;
 			}
 			break;
 			case(ChessBoard::Queen):
 			{
-				if ((fields[lastMove&toXMask][lastMove&toYMask].rank.type != Empty&&fields[lastMove&toXMask][lastMove&toYMask].rank.isWhite == currentlyMoved.isWhite))
+				if ((fields[toX][toY].rank.type != Empty&&fields[toX][toY].rank.isWhite == currentlyMoved.isWhite))
 					return NoAction;
 				if (abs(relativeMove.first) != abs(relativeMove.second) && relativeMove.first != 0 && relativeMove.second != 0)
 					return NoAction;
-				for (int i = 1; (lastMove&fromXMask) + sign(relativeMove.first)*i != (lastMove&toXMask) && (lastMove&fromYMask) + sign(relativeMove.second)*i != (lastMove&toYMask); i++)
-					if (fields[lastMove&fromXMask + sign(relativeMove.first)*i][lastMove&fromYMask + sign(relativeMove.second)*i].rank.type != Empty)
+				for (int i = 1; ((fromX)>>fromXShift) + sign(relativeMove.first)*i != ((fromX)>>fromXShift) && ((fromY)>>fromYShift) + sign(relativeMove.second)*i != (toY); i++)
+					if (fields[fromX + sign(relativeMove.first)*i][fromY + sign(relativeMove.second)*i].rank.type != Empty)
 						return NoAction;
 			}
 			break;
@@ -634,7 +637,7 @@ namespace ChessBoard
 				}
 				if (KnightMovementArray[direction] != relativeMove)
 					return NoAction;
-				if (fields[lastMove&toXMask][lastMove&toYMask].rank.type != Empty&&fields[lastMove&toXMask][lastMove&toYMask].rank.isWhite == currentlyMoved.isWhite)
+				if (fields[toX][toY].rank.type != Empty&&fields[toX][toY].rank.isWhite == currentlyMoved.isWhite)
 					return NoAction;
 			}
 			break;
@@ -657,68 +660,68 @@ namespace ChessBoard
 
 			break;
 			}
-			fields[lastMove&fromXMask][lastMove&fromYMask].rank.type = Empty;
-			fields[lastMove&toXMask][lastMove&toYMask].rank = currentlyMoved;
+			fields[fromX][fromY].rank.type = Empty;
+			fields[toX][toY].rank = currentlyMoved;
 			break;
 		case(PromotionQueen):
 		{
-			if (relativeMove.first == 0 && fields[lastMove&toXMask][lastMove&toYMask].rank.type != Empty)
+			if (relativeMove.first == 0 && fields[toX][toY].rank.type != Empty)
 				return NoAction;
-			if (relativeMove.first != 0 && fields[lastMove&toXMask][lastMove&toYMask].rank.type != Empty&&fields[lastMove&toXMask][lastMove&toYMask].rank.isWhite == currentlyMoved.isWhite)
+			if (relativeMove.first != 0 && fields[toX][toY].rank.type != Empty&&fields[toX][toY].rank.isWhite == currentlyMoved.isWhite)
 				return NoAction;
-			if ((currentlyMoved.isWhite && (lastMove&toYMask) != 7) || (!currentlyMoved.isWhite && (lastMove&toYMask) != 0) || currentlyMoved.type != Pawn)
+			if ((currentlyMoved.isWhite && toY != 7) || (!currentlyMoved.isWhite && toY != 0) || currentlyMoved.type != Pawn)
 				return NoAction;
 			if (relativeMove.first == 1 || relativeMove.first == -1)
-				if (fields[lastMove&toXMask][lastMove&toYMask].rank.type == Empty || (fields[lastMove&toXMask][lastMove&toYMask].rank.type != Empty&&fields[lastMove&toXMask][lastMove&toYMask].rank.isWhite == currentlyMoved.isWhite))
+				if (fields[toX][toY].rank.type == Empty || (fields[toX][toY].rank.type != Empty&&fields[toX][toY].rank.isWhite == currentlyMoved.isWhite))
 					return NoAction;
 		}
-		fields[lastMove&toXMask][lastMove&toYMask].rank = { Queen,currentlyMoved.isWhite };
-		fields[lastMove&fromXMask][lastMove&fromYMask].rank.type = Empty;
+		fields[toX][toY].rank = { Queen,currentlyMoved.isWhite };
+		fields[fromX][fromY].rank.type = Empty;
 		break;
 		case(PromotionBishop):
 		{
-			if (relativeMove.first == 0 && fields[lastMove&toXMask][lastMove&toYMask].rank.type != Empty)
+			if (relativeMove.first == 0 && fields[toX][toY].rank.type != Empty)
 				return NoAction;
-			if (relativeMove.first != 0 && fields[lastMove&toXMask][lastMove&toYMask].rank.type != Empty&&fields[lastMove&toXMask][lastMove&toYMask].rank.isWhite == currentlyMoved.isWhite)
+			if (relativeMove.first != 0 && fields[toX][toY].rank.type != Empty&&fields[toX][toY].rank.isWhite == currentlyMoved.isWhite)
 				return NoAction;
-			if ((currentlyMoved.isWhite && (lastMove&toYMask) != 7) || (!currentlyMoved.isWhite && (lastMove&toYMask) != 0) || currentlyMoved.type != Pawn)
+			if ((currentlyMoved.isWhite && toY != 7) || (!currentlyMoved.isWhite && toY != 0) || currentlyMoved.type != Pawn)
 				return NoAction;
 			if (relativeMove.first == 1 || relativeMove.first == -1)
-				if (fields[lastMove&toXMask][lastMove&toYMask].rank.type == Empty || (fields[lastMove&toXMask][lastMove&toYMask].rank.type != Empty&&fields[lastMove&toXMask][lastMove&toYMask].rank.isWhite == currentlyMoved.isWhite))
+				if (fields[toX][toY].rank.type == Empty || (fields[toX][toY].rank.type != Empty&&fields[toX][toY].rank.isWhite == currentlyMoved.isWhite))
 					return NoAction;
 		}
-		fields[lastMove&toXMask][lastMove&toYMask].rank = { Bishop,currentlyMoved.isWhite };
-		fields[lastMove&fromXMask][lastMove&fromYMask].rank.type = Empty;
+		fields[toX][toY].rank = { Bishop,currentlyMoved.isWhite };
+		fields[fromX][fromY].rank.type = Empty;
 		break;
 		case(PromotionKnight):
 		{
-			if (relativeMove.first == 0 && fields[lastMove&toXMask][lastMove&toYMask].rank.type != Empty)
+			if (relativeMove.first == 0 && fields[toX][toY].rank.type != Empty)
 				return NoAction;
-			if (relativeMove.first != 0 && fields[lastMove&toXMask][lastMove&toYMask].rank.type != Empty&&fields[lastMove&toXMask][lastMove&toYMask].rank.isWhite == currentlyMoved.isWhite)
+			if (relativeMove.first != 0 && fields[toX][toY].rank.type != Empty&&fields[toX][toY].rank.isWhite == currentlyMoved.isWhite)
 				return NoAction;
-			if ((currentlyMoved.isWhite && (lastMove&toYMask) != 7) || (!currentlyMoved.isWhite && (lastMove&toYMask) != 0) || currentlyMoved.type != Pawn)
+			if ((currentlyMoved.isWhite && toY != 7) || (!currentlyMoved.isWhite && toY != 0) || currentlyMoved.type != Pawn)
 				return NoAction;
 			if (relativeMove.first == 1 || relativeMove.first == -1)
-				if (fields[lastMove&toXMask][lastMove&toYMask].rank.type == Empty || (fields[lastMove&toXMask][lastMove&toYMask].rank.type != Empty&&fields[lastMove&toXMask][lastMove&toYMask].rank.isWhite == currentlyMoved.isWhite))
+				if (fields[toX][toY].rank.type == Empty || (fields[toX][toY].rank.type != Empty&&fields[toX][toY].rank.isWhite == currentlyMoved.isWhite))
 					return NoAction;
 		}
-		fields[lastMove&toXMask][lastMove&toYMask].rank = { Knight,currentlyMoved.isWhite };
-		fields[lastMove&fromXMask][lastMove&fromYMask].rank.type = Empty;
+		fields[toX][toY].rank = { Knight,currentlyMoved.isWhite };
+		fields[fromX][fromY].rank.type = Empty;
 		break;
 		case(PromotionTower):
 		{
-			if (relativeMove.first == 0 && fields[lastMove&toXMask][lastMove&toYMask].rank.type != Empty)
+			if (relativeMove.first == 0 && fields[toX][toY].rank.type != Empty)
 				return NoAction;
-			if (relativeMove.first != 0 && fields[lastMove&toXMask][lastMove&toYMask].rank.type != Empty&&fields[lastMove&toXMask][lastMove&toYMask].rank.isWhite == currentlyMoved.isWhite)
+			if (relativeMove.first != 0 && fields[toX][toY].rank.type != Empty&&fields[toX][toY].rank.isWhite == currentlyMoved.isWhite)
 				return NoAction;
-			if ((currentlyMoved.isWhite && (lastMove&toYMask) != 7) || (!currentlyMoved.isWhite && (lastMove&toYMask) != 0) || currentlyMoved.type != Pawn)
+			if ((currentlyMoved.isWhite && toY != 7) || (!currentlyMoved.isWhite && toY != 0) || currentlyMoved.type != Pawn)
 				return NoAction;
 			if (relativeMove.first == 1 || relativeMove.first == -1)
-				if (fields[lastMove&toXMask][lastMove&toYMask].rank.type == Empty || (fields[lastMove&toXMask][lastMove&toYMask].rank.type != Empty&&fields[lastMove&toXMask][lastMove&toYMask].rank.isWhite == currentlyMoved.isWhite))
+				if (fields[toX][toY].rank.type == Empty || (fields[toX][toY].rank.type != Empty&&fields[toX][toY].rank.isWhite == currentlyMoved.isWhite))
 					return NoAction;
 		}
-		fields[lastMove&toXMask][lastMove&toYMask].rank = { Tower,currentlyMoved.isWhite };
-		fields[lastMove&fromXMask][lastMove&fromYMask].rank.type = Empty;
+		fields[toX][toY].rank = { Tower,currentlyMoved.isWhite };
+		fields[fromX][fromY].rank.type = Empty;
 		break;
 		case(RochadeLeft):
 			if (nextMoveIsWhite)
@@ -804,38 +807,38 @@ namespace ChessBoard
 			throw std::runtime_error("King Beaten");
 #endif // DEBUG
 
-		switch (int n = lastMove&fromXMask)
+		switch (int n = (fromX)>>fromXShift)
 		{
 		case 0:
-			if ((lastMove&fromYMask) == 0)
+			if ((fromY)>>fromYShift == 0)
 				leftWhite = false;
 			else
-				if ((lastMove&fromYMask) == 7)
+				if ((fromY)>>fromYShift == 7)
 					leftBlack = false;
 			break;
 		case 7:
-			if ((lastMove&fromYMask) == 0)
+			if ((fromY)>>fromYShift == 0)
 				rightWhite = false;
 			else
-				if ((lastMove&fromYMask) == 7)
+				if ((fromY)>>fromYShift == 7)
 					rightBlack = false;
 		default:
 			break;
 		}
-		switch (int n = (lastMove&toXMask))
+		switch (int n = (fromX)>>fromXShift)
 		{
 		case 0:
-			if ((lastMove&toYMask) == 0)
+			if (toY == 0)
 				leftWhite = false;
 			else
-				if ((lastMove&toYMask) == 7)
+				if (toY == 7)
 					leftBlack = false;
 			break;
 		case 7:
-			if ((lastMove&toYMask) == 0)
+			if (toY == 0)
 				rightWhite = false;
 			else
-				if ((lastMove&toYMask) == 7)
+				if (toY == 7)
 					rightBlack = false;
 		default:
 			break;
@@ -871,7 +874,7 @@ namespace ChessBoard
 	int Board::ChangeState(InternalMove lastMove, int)
 	{
 		if ((lastMove&TypeMask) != RochadeLeft&&(lastMove&TypeMask) != RochadeRight)
-			if (fields[lastMove&fromXMask][lastMove&fromYMask].rank.type == Pawn || fields[lastMove&toXMask][lastMove&toYMask].rank.type != Empty)
+			if (fields[(lastMove&fromXMask)>>fromXShift][(lastMove&fromYMask)>>fromYShift].rank.type == Pawn || fields[(lastMove&toXMask)>>toXShift][(lastMove&toYMask)>>toYShift].rank.type != Empty)
 			{
 				ClearStack();
 				prevBoard.clear();
@@ -898,12 +901,12 @@ namespace ChessBoard
 	//TODO:paint the map
 	ChessBoard::KING_IN_DANGER Board::PaintTheMap(InternalMove lastMove, Rank currentlyMoved)
 	{
-		bool isWhite = fields[lastMove&fromXMask][lastMove&fromYMask].rank.isWhite;
-		if (fields[lastMove&fromXMask][lastMove&fromYMask].coveredByWhite || fields[lastMove&fromXMask][lastMove&fromYMask].coveredByBlack)
+		bool isWhite = fields[lastMove&fromXMask>>fromXShift][lastMove&fromYMask>>fromYShift].rank.isWhite;
+		if (fields[lastMove&fromXMask>>fromXShift][lastMove&fromYMask>>fromYShift].coveredByWhite || fields[lastMove&fromXMask>>fromXShift][lastMove&fromYMask>>fromYShift].coveredByBlack)
 		{
 			for (short i = 0; i < 8; i++)
 			{
-				if (IN_RANGE((lastMove&fromXMask) + QueenMovementArray[i].first) && IN_RANGE((lastMove&fromYMask) + QueenMovementArray[i].second))
+				if (IN_RANGE(((lastMove&fromXMask)>>fromXShift) + QueenMovementArray[i].first) && IN_RANGE(((lastMove&fromYMask)>>fromYShift) + QueenMovementArray[i].second))
 				{
 					switch (currentlyMoved.type)
 					{
@@ -917,8 +920,8 @@ namespace ChessBoard
 					}
 					if (fields[lastMove&fromXMask + QueenMovementArray[i].first][lastMove&fromYMask + QueenMovementArray[i].second].coveredByWhite || fields[lastMove&fromXMask + QueenMovementArray[i].first][lastMove&fromYMask + QueenMovementArray[i].second].coveredByBlack)
 					{
-						for (short k = 0; IN_RANGE((lastMove&fromXMask) + QueenMovementArray[i].first*k) && IN_RANGE((lastMove&fromYMask) + QueenMovementArray[i].second*k); k++)
-							if (!fields[(lastMove&fromXMask) + QueenMovementArray[i].first*k][(lastMove&fromYMask) + QueenMovementArray[i].second*k].coveredByWhite && !fields[(lastMove&fromXMask) + QueenMovementArray[i].first*k][lastMove&fromYMask + QueenMovementArray[i].second*k].coveredByBlack)
+						for (short k = 0; IN_RANGE(((lastMove&fromXMask)>>fromXShift) + QueenMovementArray[i].first*k) && IN_RANGE(((lastMove&fromYMask)>>fromYShift) + QueenMovementArray[i].second*k); k++)
+							if (!fields[((lastMove&fromXMask)>>fromXShift) + QueenMovementArray[i].first*k][((lastMove&fromYMask)>>fromYShift) + QueenMovementArray[i].second*k].coveredByWhite && !fields[((lastMove&fromXMask)>>fromXShift) + QueenMovementArray[i].first*k][((lastMove&fromYMask)>>fromYShift) + QueenMovementArray[i].second*k].coveredByBlack)
 								break;
 							else
 							{
@@ -1681,8 +1684,8 @@ namespace ChessBoard
 	{
 		if((move&TypeMask)<RochadeLeft)
 		{
-			old ^= shift(move&fromXMask, move&fromYMask);
-			old |= shift(move&toXMask, move&toYMask);
+			old ^= shift(move&fromXMask, move&fromYMask)>>fromYShift;
+			old |= shift(move&toXMask, move&toYMask)>>toYShift;
 		}
 		else
 			switch (move&TypeMask)

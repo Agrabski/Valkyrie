@@ -27,6 +27,10 @@ namespace ChessBoard
 	const InternalMove toXMask = 7 << 7;
 	const InternalMove toYMask = 7 << 4;
 	const InternalMove TypeMask = 7;
+	const int fromXShift=13;
+	const int fromYShift=10;
+	const int toXShift=7;
+	const int toYShift=4;
 	InternalMove MakeMove(std::pair<short, short>, std::pair<short, short>, short);
 	Move convertToExternal(InternalMove,bool);
 	InternalMove ConvertFromExternal(Move);
