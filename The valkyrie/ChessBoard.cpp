@@ -45,6 +45,81 @@ namespace ChessBoard
 		return result;
 	}
 
+	Move convertToExternal(InternalMove move, bool amIWhite)
+	{
+			Move returnValue;
+			returnValue.whiteMove = amIWhite;
+			//TODO: hnadle conversion to external
+			if (returnValue.special = (move&TypeMask) != Standard)
+				switch (move&TypeMask)
+				{
+				case(PromotionBishop):
+					returnValue.type = 'B';
+					break;
+				case(PromotionKnight):
+					returnValue.type = 'K';
+					break;
+				case(PromotionQueen):
+					returnValue.type = 'Q';
+					break;
+				case(PromotionTower):
+					returnValue.type = 'T';
+					break;
+				case(RochadeLeft):
+					returnValue.type = 'L';
+					return returnValue;
+				case(RochadeRight):
+					returnValue.type = 'R';
+					return returnValue;
+				default:
+					throw std::runtime_error(PROGRAM_NAME + std::string(" ERROR:Generated move was corrupted (invalid internal move type)"));
+					break;
+				}
+			returnValue.from.first = move&fromXMask;
+			returnValue.from.second = move&fromYMask;
+			returnValue.to.first = move&toXMask;
+			returnValue.to.second = move&toYMask;
+			return returnValue;
+
+	}
+
+	InternalMove ConvertFromExternal(Move toConvert)
+	{
+		InternalMove result = 0;
+		result |= ((InternalMove)toConvert.from.first) << 13;
+		result |= ((InternalMove)toConvert.from.second) << 10;
+		result |= ((InternalMove)toConvert.to.first) << 7;
+		result |= ((InternalMove)toConvert.to.second) << 4;
+		if (toConvert.special)
+			switch (toConvert.type)
+			{
+			case('L'):
+				result |= RochadeLeft;
+				break;
+			case('R'):
+				result |= RochadeRight;
+				break;
+			case('B'):
+				result |= PromotionBishop;
+				break;
+			case('K'):
+				result |= PromotionKnight;
+				break;
+			case('Q'):
+				result |= PromotionQueen;
+				break;
+			case('T'):
+				result |= PromotionTower;
+				break;
+			default:
+				throw std::runtime_error(PROGRAM_NAME + std::string(" ERROR:Recieved move was corrupted (external move type was invalid)"));
+				break;
+			}
+		else
+			result |= Standard;
+		return result;
+	}
+
 	int sign(int x)
 	{
 		if (x > 0)

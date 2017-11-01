@@ -284,19 +284,6 @@ JudgeDredd::Valkyrie::KillerInstinct JudgeDredd::Valkyrie::KillerInstinct::opera
 	}
 	vector[vector.size() - 2] = new std::unordered_multimap<unsigned short int, ChessBoard::InternalMove>();
 	vector[vector.size() - 1] = new std::unordered_multimap<unsigned short int, ChessBoard::InternalMove>();
-
+	return *this;
 }
 
-bool JudgeDredd::Valkyrie::KillerInstinct::contains(short depth, ChessBoard::InternalMove & move)
-{
-	auto tmp = vector[depth]->equal_range(hashMove(move));
-	while (tmp.first != tmp.second)
-		if (tmp.first->second == move)
-			return true;
-	return false;
-}
-
-void JudgeDredd::Valkyrie::KillerInstinct::add(short depth, ChessBoard::InternalMove & move)
-{
-	vector[depth]->emplace(hashMove(move), move);
-}
