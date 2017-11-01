@@ -269,3 +269,45 @@ void JudgeDredd::Valkyrie::Play(ChessBoard::Board &board, short int currentRecur
 
 }
 
+JudgeDredd::Valkyrie::KillerInstinct::KillerInstinct(short depth)
+{
+	vector.resize(depth);
+}
+
+JudgeDredd::Valkyrie::KillerInstinct JudgeDredd::Valkyrie::KillerInstinct::operator++()
+{
+	delete vector[0];
+	delete vector[1];
+	for (int i = 0; i < vector.size() - 2; i++)
+	{
+		vector[i] = vector[i + 2];
+	}
+	vector[vector.size() - 2] = new std::unordered_multimap<unsigned short int, ChessBoard::InternalMove>();
+	vector[vector.size() - 1] = new std::unordered_multimap<unsigned short int, ChessBoard::InternalMove>();
+
+}
+
+unsigned short int JudgeDredd::Valkyrie::KillerInstinct::hashMove(ChessBoard::InternalMove &move)
+{
+	unsigned short int result = 0;
+	result ^= move.from.first << 13;
+	result ^= move.from.first << 10;
+	result ^= move.to.first << 7;
+	result ^= move.to.second << 4;
+	result ^= move.movetype;
+	return result;
+}
+
+bool JudgeDredd::Valkyrie::KillerInstinct::contains(short depth, ChessBoard::InternalMove & move)
+{
+	auto tmp = vector[depth]->equal_range(hashMove(move));
+	while (tmp.first != tmp.second)
+		if (tmp.first->second == move)
+			return true;
+	return false;
+}
+
+void JudgeDredd::Valkyrie::KillerInstinct::add(short depth, ChessBoard::InternalMove & move)
+{
+	vector[depth]->emplace(hashMove(move), move);
+}

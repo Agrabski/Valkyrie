@@ -67,6 +67,18 @@ public:
 		}
 	};
 private:
+	class KillerInstinct
+	{
+	private:
+		std::vector<std::unordered_multimap<unsigned short int, ChessBoard::InternalMove>*> vector;
+	public:
+		KillerInstinct(short depth);
+		KillerInstinct operator++();
+		static unsigned short int hashMove(ChessBoard::InternalMove&);
+		bool contains(short depth, ChessBoard::InternalMove&move);
+		void add(short depth, ChessBoard::InternalMove&move);
+	};
+
 	std::vector<std::thread> threadVector;
 	ChessBoard::Board *boardVector;
 	ConcurrentQueue<ChessBoard::InternalMove> toEvaluate;

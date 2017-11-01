@@ -925,6 +925,11 @@ namespace ChessBoard
 		return from != other.from || to != other.to || movetype != other.movetype;
 	}
 
+	bool InternalMove::operator==(const InternalMove & other) const
+	{
+		return !(*this != other);
+	}
+
 
 	Board::Moves::~Moves()
 	{

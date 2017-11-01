@@ -34,6 +34,7 @@ namespace ChessBoard
 		MoveTypes movetype;
 		Move ConvertToExternal(bool amIWhite);
 		bool operator!=(const InternalMove& other) const;
+		bool operator==(const InternalMove& other) const;
 	};
 
 	int sign(int x);
