@@ -669,7 +669,7 @@ namespace ChessBoard
 		{
 			if (relativeMove.first == 0 && fields[toX][toY].rank.type != Empty)
 				return NoAction;
-			if (relativeMove.first != 0 && fields[toX][toY].rank.type != Empty&&fields[toX][toY].rank.isWhite == currentlyMoved.isWhite)
+			if (relativeMove.first != 0 && (fields[toX][toY].rank.type != Empty || fields[toX][toY].rank.isWhite == currentlyMoved.isWhite))
 				return NoAction;
 			if ((currentlyMoved.isWhite && toY != 7) || (!currentlyMoved.isWhite && toY != 0) || currentlyMoved.type != Pawn)
 				return NoAction;
@@ -684,7 +684,7 @@ namespace ChessBoard
 		{
 			if (relativeMove.first == 0 && fields[toX][toY].rank.type != Empty)
 				return NoAction;
-			if (relativeMove.first != 0 && fields[toX][toY].rank.type != Empty&&fields[toX][toY].rank.isWhite == currentlyMoved.isWhite)
+			if (relativeMove.first != 0 && (fields[toX][toY].rank.type != Empty || fields[toX][toY].rank.isWhite == currentlyMoved.isWhite))
 				return NoAction;
 			if ((currentlyMoved.isWhite && toY != 7) || (!currentlyMoved.isWhite && toY != 0) || currentlyMoved.type != Pawn)
 				return NoAction;
@@ -714,7 +714,7 @@ namespace ChessBoard
 		{
 			if (relativeMove.first == 0 && fields[toX][toY].rank.type != Empty)
 				return NoAction;
-			if (relativeMove.first != 0 && fields[toX][toY].rank.type != Empty&&fields[toX][toY].rank.isWhite == currentlyMoved.isWhite)
+			if (relativeMove.first != 0 && (fields[toX][toY].rank.type != Empty || fields[toX][toY].rank.isWhite == currentlyMoved.isWhite))
 				return NoAction;
 			if ((currentlyMoved.isWhite && toY != 7) || (!currentlyMoved.isWhite && toY != 0) || currentlyMoved.type != Pawn)
 				return NoAction;
