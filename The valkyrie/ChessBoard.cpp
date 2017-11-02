@@ -421,7 +421,7 @@ namespace ChessBoard
 			}
 			else
 			{
-				fields[0][7].rank = { Tower, false };
+				fields[7][7].rank = { Tower, false };
 				fields[4][7].rank = { King,false };
 				fields[6][7].rank = { Empty,false };
 				fields[5][7].rank = { Empty,false };
