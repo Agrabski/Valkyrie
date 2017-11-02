@@ -809,43 +809,15 @@ namespace ChessBoard
 			throw std::runtime_error("King Beaten");
 #endif // DEBUG
 
-		switch (int n = fromX)
-		{
-		case 0:
-			if (fromY == 0)
-				leftWhite = false;
-			else
-				if (fromY == 7)
-					leftBlack = false;
-			break;
-		case 7:
-			if (fromY == 0)
-				rightWhite = false;
-			else
-				if (fromY == 7)
-					rightBlack = false;
-		default:
-			break;
-		}
-		switch (int n = toX)
-		{
-		case 0:
-			if (toY == 0)
-				leftWhite = false;
-			else
-				if (toY == 7)
-					leftBlack = false;
-			break;
-		case 7:
-			if (toY == 0)
-				rightWhite = false;
-			else
-				if (toY == 7)
-					rightBlack = false;
-		default:
-			break;
-		}
 
+		if (fields[0][0].rank != Rank(Tower, true))
+			leftWhite = false;
+		if (fields[7][0].rank != Rank(Tower, true))
+			rightWhite = false;
+		if (fields[0][7].rank != Rank(Tower, false))
+			leftWhite = false;
+		if (fields[7][7].rank != Rank(Tower, false))
+			rightWhite = false;
 
 		if (currentlyMoved.type == Pawn || tmp.pieceType.type != Empty)
 		{
