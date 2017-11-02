@@ -36,23 +36,6 @@ namespace ChessBoard
 	Move convertToExternal(InternalMove,bool);
 	InternalMove ConvertFromExternal(Move);
 
-	//struct InternalMove
-	//{
-	//	InternalMove(Move toConvert);
-	//	InternalMove();
-	//	InternalMove(std::pair<short, short> from, std::pair<short, short> to, MoveTypes type)
-	//	{
-	//		this->from = from;
-	//		this->to = to;
-	//		this->movetype = type;
-	//	}
-	//	std::pair<short, short> from;
-	//	std::pair<short, short> to;
-	//	MoveTypes movetype;
-	//	Move ConvertToExternal(bool amIWhite);
-	//	bool operator!=(const InternalMove& other) const;
-	//	bool operator==(const InternalMove& other) const;
-	//};
 
 	int sign(int x);
 

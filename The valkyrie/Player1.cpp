@@ -287,3 +287,8 @@ JudgeDredd::Valkyrie::KillerInstinct JudgeDredd::Valkyrie::KillerInstinct::opera
 	return *this;
 }
 
+void JudgeDredd::Valkyrie::KillerInstinct::add(short depth, ChessBoard::InternalMove & move)
+{
+	std::hash<ChessBoard::InternalMove>
+}
+
