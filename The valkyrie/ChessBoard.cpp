@@ -728,7 +728,7 @@ namespace ChessBoard
 		case(RochadeLeft):
 			if (nextMoveIsWhite)
 			{
-				if (rightWhite && fields[3][0].coveredByBlack == 0 && fields[3][0].rank.type == Empty && fields[2][0].coveredByBlack == 0 && fields[2][0].rank.type == Empty)
+				if (leftWhite && fields[3][0].coveredByBlack == 0 && fields[3][0].rank.type == Empty && fields[2][0].coveredByBlack == 0 && fields[2][0].rank.type == Empty)
 					if (fields[4][0].rank == Rank(King, true) && fields[0][0].rank == Rank(Tower, true))
 					{
 						fields[4][0].rank.type = Empty;
@@ -745,7 +745,7 @@ namespace ChessBoard
 			}
 			else
 			{
-				if (rightBlack && fields[3][7].coveredByWhite == 0 && fields[3][7].rank.type == Empty && fields[2][7].coveredByWhite == 0 && fields[2][7].rank.type == Empty)
+				if (leftBlack && fields[3][7].coveredByWhite == 0 && fields[3][7].rank.type == Empty && fields[2][7].coveredByWhite == 0 && fields[2][7].rank.type == Empty)
 					if (fields[4][7].rank == Rank(King, false) && fields[0][7].rank == Rank(Tower, false))
 					{
 						fields[4][7].rank.type = Empty;
