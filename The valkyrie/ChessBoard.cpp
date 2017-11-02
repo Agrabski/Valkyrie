@@ -337,8 +337,8 @@ namespace ChessBoard
 			{
 				fields[0][7].rank = { Tower, false };
 				fields[4][7].rank = { King,false };
-				fields[2][7].rank = { Empty,false };
-				fields[3][7].rank = { Empty,false };
+				fields[6][7].rank = { Empty,false };
+				fields[5][7].rank = { Empty,false };
 			}
 			break;
 		default:
