@@ -37,49 +37,49 @@ namespace ChessBoard
 	InternalMove MakeMove(std::pair<short, short>from, std::pair<short, short>to, short type)
 	{
 		InternalMove result = 0;
-		result |= from.first << 13;
-		result |= from.second << 10;
-		result |= to.first << 7;
-		result |= to.second << 4;
+		result |= from.first << fromXShift;
+		result |= from.second << fromYShift;
+		result |= to.first << toXShift;
+		result |= to.second << toYShift;
 		result |= type;
 		return result;
 	}
 
 	Move convertToExternal(InternalMove move, bool amIWhite)
 	{
-			Move returnValue;
-			returnValue.whiteMove = amIWhite;
-			//TODO: hnadle conversion to external
-			if (returnValue.special = (move&TypeMask) != Standard)
-				switch (move&TypeMask)
-				{
-				case(PromotionBishop):
-					returnValue.type = 'B';
-					break;
-				case(PromotionKnight):
-					returnValue.type = 'K';
-					break;
-				case(PromotionQueen):
-					returnValue.type = 'Q';
-					break;
-				case(PromotionTower):
-					returnValue.type = 'T';
-					break;
-				case(RochadeLeft):
-					returnValue.type = 'L';
-					return returnValue;
-				case(RochadeRight):
-					returnValue.type = 'R';
-					return returnValue;
-				default:
-					throw std::runtime_error(PROGRAM_NAME + std::string(" ERROR:Generated move was corrupted (invalid internal move type)"));
-					break;
-				}
-			returnValue.from.first = move&fromXMask;
-			returnValue.from.second = move&fromYMask;
-			returnValue.to.first = move&toXMask;
-			returnValue.to.second = move&toYMask;
-			return returnValue;
+		Move returnValue;
+		returnValue.whiteMove = amIWhite;
+		//TODO: hnadle conversion to external
+		if (returnValue.special = (move&TypeMask) != Standard)
+			switch (move&TypeMask)
+			{
+			case(PromotionBishop):
+				returnValue.type = 'B';
+				break;
+			case(PromotionKnight):
+				returnValue.type = 'K';
+				break;
+			case(PromotionQueen):
+				returnValue.type = 'Q';
+				break;
+			case(PromotionTower):
+				returnValue.type = 'T';
+				break;
+			case(RochadeLeft):
+				returnValue.type = 'L';
+				return returnValue;
+			case(RochadeRight):
+				returnValue.type = 'R';
+				return returnValue;
+			default:
+				throw std::runtime_error(PROGRAM_NAME + std::string(" ERROR:Generated move was corrupted (invalid internal move type)"));
+				break;
+			}
+		returnValue.from.first = (move&fromXMask) >> fromXShift;
+		returnValue.from.second = (move&fromYMask)>>fromYShift;
+		returnValue.to.first = (move&toXMask) >> toXShift;
+		returnValue.to.second = (move&toYMask) >> toYShift;
+		return returnValue;
 
 	}
 
@@ -377,8 +377,8 @@ namespace ChessBoard
 		currentHash = tmp.hash;
 		if ((lastMove&TypeMask) == Standard)
 		{
-			fields[(lastMove&fromXMask) >> fromXShift][(lastMove&fromYMask) >> fromYShift].rank = fields[(lastMove&toXMask) >> fromXShift][(lastMove&toYMask) >> fromYShift].rank;
-			fields[(lastMove&toXMask) >> fromXShift][(lastMove&toYMask) >> fromYShift].rank = beaten;
+			fields[(lastMove&fromXMask) >> fromXShift][(lastMove&fromYMask) >> fromYShift].rank = fields[(lastMove&toXMask) >> toXShift][(lastMove&toYMask) >> toYShift].rank;
+			fields[(lastMove&toXMask) >> toXShift][(lastMove&toYMask) >> toYShift].rank = beaten;
 
 			KING_IN_DANGER err = PaintTheMap();
 
@@ -502,13 +502,15 @@ namespace ChessBoard
 		std::pair<short, short> relativeMove;
 		if ((lastMove&TypeMask) != RochadeLeft && (lastMove&TypeMask) != RochadeRight)
 		{
-			currentlyMoved = fields[(lastMove&fromXMask)>>fromXShift][(lastMove&fromYMask)>>fromXShift].rank;
+			currentlyMoved = fields[(lastMove&fromXMask)>>fromXShift][(lastMove&fromYMask)>>fromYShift].rank;
 			if (currentlyMoved.isWhite != nextMoveIsWhite)
 			{
 				std::cerr << "Wrong color!";
 				return WrongColor;
 			}
 			relativeMove = { ((lastMove&toXMask)>>toXShift) - ((lastMove&fromXMask)>>fromXShift),((lastMove&toYMask)>>toYShift) - ((lastMove&fromYMask)>>fromYShift) };
+			if (relativeMove == std::pair<short, short>(0, 0))
+				throw std::runtime_error("zero move!");
 			tmp.pieceType = fields[(lastMove&toXMask)>>toXShift][(lastMove&toYMask)>>toYShift].rank;
 		}
 		else
@@ -542,9 +544,9 @@ namespace ChessBoard
 						//Double move
 						if (relativeMove.second == 2)
 						{
-							if ((fromY)>>fromYShift != 1)
+							if (fromY != 1)
 								return NoAction;
-							if (fields[toX][fromY + 1].rank.type != ChessBoard::Empty || fields[toX][fromY + 2].rank.type != ChessBoard::Empty)
+							if (fields[fromX][fromY + 1].rank.type != ChessBoard::Empty || fields[fromX][fromY + 2].rank.type != ChessBoard::Empty)
 								return NoAction;
 						}
 					}
@@ -567,7 +569,7 @@ namespace ChessBoard
 						//Double move
 						if (relativeMove.second == -2)
 						{
-							if ((fromY)>>fromYShift != 6)
+							if ((fromY) != 6)
 								return NoAction;
 							if (fields[fromX][fromY - 1].rank.type != ChessBoard::Empty || fields[fromX][fromY - 2].rank.type != ChessBoard::Empty)
 								return NoAction;
@@ -611,7 +613,7 @@ namespace ChessBoard
 					return NoAction;
 				if (abs(relativeMove.first) != abs(relativeMove.second))
 					return NoAction;
-				for (int i = 1; (fromY + i*sign(relativeMove.second)) < toY && (((fromY)>>fromYShift) + i*sign(relativeMove.second)) > 0; i++)
+				for (int i = 1; (fromY + i*sign(relativeMove.second)) < toY && (((fromY)) + i*sign(relativeMove.second)) > 0; i++)
 					if (fields[fromX + i*sign(relativeMove.first)][fromY + i*sign(relativeMove.second)].rank.type != Empty)
 						return NoAction;
 			}
@@ -622,7 +624,7 @@ namespace ChessBoard
 					return NoAction;
 				if (abs(relativeMove.first) != abs(relativeMove.second) && relativeMove.first != 0 && relativeMove.second != 0)
 					return NoAction;
-				for (int i = 1; ((fromX)>>fromXShift) + sign(relativeMove.first)*i != ((fromX)>>fromXShift) && ((fromY)>>fromYShift) + sign(relativeMove.second)*i != (toY); i++)
+				for (int i = 1; ((fromX)) + sign(relativeMove.first)*i != ((fromX)) && ((fromY)) + sign(relativeMove.second)*i != (toY); i++)
 					if (fields[fromX + sign(relativeMove.first)*i][fromY + sign(relativeMove.second)*i].rank.type != Empty)
 						return NoAction;
 			}
@@ -697,7 +699,7 @@ namespace ChessBoard
 		{
 			if (relativeMove.first == 0 && fields[toX][toY].rank.type != Empty)
 				return NoAction;
-			if (relativeMove.first != 0 && fields[toX][toY].rank.type != Empty&&fields[toX][toY].rank.isWhite == currentlyMoved.isWhite)
+			if (relativeMove.first != 0 && (fields[toX][toY].rank.type != Empty||fields[toX][toY].rank.isWhite == currentlyMoved.isWhite))
 				return NoAction;
 			if ((currentlyMoved.isWhite && toY != 7) || (!currentlyMoved.isWhite && toY != 0) || currentlyMoved.type != Pawn)
 				return NoAction;
@@ -807,25 +809,25 @@ namespace ChessBoard
 			throw std::runtime_error("King Beaten");
 #endif // DEBUG
 
-		switch (int n = (fromX)>>fromXShift)
+		switch (int n = (fromX))
 		{
 		case 0:
-			if ((fromY)>>fromYShift == 0)
+			if ((fromY) == 0)
 				leftWhite = false;
 			else
-				if ((fromY)>>fromYShift == 7)
+				if ((fromY) == 7)
 					leftBlack = false;
 			break;
 		case 7:
-			if ((fromY)>>fromYShift == 0)
+			if ((fromY) == 0)
 				rightWhite = false;
 			else
-				if ((fromY)>>fromYShift == 7)
+				if ((fromY) == 7)
 					rightBlack = false;
 		default:
 			break;
 		}
-		switch (int n = (fromX)>>fromXShift)
+		switch (int n = (fromX))
 		{
 		case 0:
 			if (toY == 0)
@@ -852,7 +854,7 @@ namespace ChessBoard
 		else
 			moveCounter--;
 		MoveStack.push(tmp);
-		PrevBoardElement::ReHash(currentHash, lastMove, currentlyMoved.isWhite);
+		currentHash = PrevBoardElement::CreateHash(fields);
 		if (!addBoard())
 		{
 			return Revert;
@@ -1684,8 +1686,8 @@ namespace ChessBoard
 	{
 		if((move&TypeMask)<RochadeLeft)
 		{
-			old ^= shift(move&fromXMask, move&fromYMask)>>fromYShift;
-			old |= shift(move&toXMask, move&toYMask)>>toYShift;
+			old ^= shift((move&fromXMask)>>fromXShift, (move&fromYMask)>>fromYShift);
+			old |= shift((move&toXMask)>>toXShift, (move&toYMask)>>toYShift);
 		}
 		else
 			switch (move&TypeMask)

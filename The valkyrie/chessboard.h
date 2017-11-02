@@ -21,16 +21,17 @@ namespace ChessBoard
 
 
 
-	typedef unsigned short int InternalMove;
-	const InternalMove fromXMask = 7 << 13;
-	const InternalMove fromYMask = 7 << 10;
-	const InternalMove toXMask = 7 << 7;
-	const InternalMove toYMask = 7 << 4;
+	typedef unsigned int InternalMove;
 	const InternalMove TypeMask = 7;
 	const int fromXShift=13;
 	const int fromYShift=10;
 	const int toXShift=7;
 	const int toYShift=4;
+
+	const InternalMove fromXMask = 7 << fromXShift;
+	const InternalMove fromYMask = 7 << fromYShift;
+	const InternalMove toXMask = 7 << toXShift;
+	const InternalMove toYMask = 7 << toYShift;
 	InternalMove MakeMove(std::pair<short, short>, std::pair<short, short>, short);
 	Move convertToExternal(InternalMove,bool);
 	InternalMove ConvertFromExternal(Move);

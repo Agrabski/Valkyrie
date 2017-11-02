@@ -15,7 +15,7 @@
 
 JudgeDredd::Valkyrie::Valkyrie(bool amIWhite)
 {
-	maxThreadCount = std::thread::hardware_concurrency();
+	maxThreadCount =  std::thread::hardware_concurrency();
 	boardVector = new ChessBoard::Board[maxThreadCount];
 	threadVector = std::vector<std::thread>();
 	threadVector.reserve(maxThreadCount);
