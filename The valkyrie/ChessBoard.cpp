@@ -493,6 +493,7 @@ namespace ChessBoard
 		this->nextMoveIsWhite = toCopy->nextMoveIsWhite;
 	}
 
+
 	int ChessBoard::Board::ChangeState(ChessBoard::InternalMove lastMove)
 	{
 		if (moveCounter == 0)
@@ -500,27 +501,26 @@ namespace ChessBoard
 		StackElement tmp(lastMove, { Empty,false }, moveCounter, leftWhite, rightWhite, leftBlack, rightBlack, currentHash);
 		Rank currentlyMoved = { Empty,false };
 		std::pair<short, short> relativeMove;
+		int fromX = (lastMove&fromXMask) >> fromXShift;
+		int fromY = (lastMove&fromYMask) >> fromYShift;
+		int toX = (lastMove&toXMask) >> toXShift;
+		int toY = (lastMove&toYMask) >> toYShift;
 		if ((lastMove&TypeMask) != RochadeLeft && (lastMove&TypeMask) != RochadeRight)
 		{
-			currentlyMoved = fields[(lastMove&fromXMask)>>fromXShift][(lastMove&fromYMask)>>fromYShift].rank;
+			currentlyMoved = fields[fromX][fromY].rank;
 			if (currentlyMoved.isWhite != nextMoveIsWhite)
 			{
 				std::cerr << "Wrong color!";
 				return WrongColor;
 			}
-			relativeMove = { ((lastMove&toXMask)>>toXShift) - ((lastMove&fromXMask)>>fromXShift),((lastMove&toYMask)>>toYShift) - ((lastMove&fromYMask)>>fromYShift) };
-			if (relativeMove == std::pair<short, short>(0, 0))
-				throw std::runtime_error("zero move!");
-			tmp.pieceType = fields[(lastMove&toXMask)>>toXShift][(lastMove&toYMask)>>toYShift].rank;
+			relativeMove = { toX - fromX,toY - fromY };
+			tmp.pieceType = fields[toX][toY].rank;
 		}
 		else
 		{
 			currentlyMoved = { Tower,nextMoveIsWhite };
 		}
-		int fromX = (lastMove&fromXMask) >> fromXShift;
-		int fromY = (lastMove&fromYMask) >> fromYShift;
-		int toX = (lastMove&toXMask) >> toXShift;
-		int toY = (lastMove&toYMask) >> toYShift;
+
 
 		//TODO:check move legitimacy
 		switch (lastMove&TypeMask)
@@ -546,7 +546,7 @@ namespace ChessBoard
 						{
 							if (fromY != 1)
 								return NoAction;
-							if (fields[fromX][fromY + 1].rank.type != ChessBoard::Empty || fields[fromX][fromY + 2].rank.type != ChessBoard::Empty)
+							if (fields[toX][fromY + 1].rank.type != ChessBoard::Empty || fields[toX][fromY + 2].rank.type != ChessBoard::Empty)
 								return NoAction;
 						}
 					}
@@ -569,7 +569,7 @@ namespace ChessBoard
 						//Double move
 						if (relativeMove.second == -2)
 						{
-							if ((fromY) != 6)
+							if (fromY != 6)
 								return NoAction;
 							if (fields[fromX][fromY - 1].rank.type != ChessBoard::Empty || fields[fromX][fromY - 2].rank.type != ChessBoard::Empty)
 								return NoAction;
@@ -590,7 +590,7 @@ namespace ChessBoard
 			{
 				if (relativeMove.first == 0)
 				{
-					for (int i = 1; abs(fromY + i*sign(relativeMove.second)) < toY; i++)
+					for (int i = 1; abs(fromY + i*sign(relativeMove.second)) < abs(toY); i++)
 						if (fields[fromX][fromY + i*sign(relativeMove.second)].rank.type != Empty)
 							return NoAction;
 				}
@@ -598,7 +598,7 @@ namespace ChessBoard
 				{
 					if (relativeMove.second == 0)
 					{
-						for (int i = 1; abs(fromX + i*sign(relativeMove.first)) < abs(fromX); i++)
+						for (int i = 1; abs(fromX + i*sign(relativeMove.first)) < abs(toX); i++)
 							if (fields[fromX + i*sign(relativeMove.first)][fromY].rank.type != Empty)
 								return NoAction;
 					}
@@ -613,7 +613,7 @@ namespace ChessBoard
 					return NoAction;
 				if (abs(relativeMove.first) != abs(relativeMove.second))
 					return NoAction;
-				for (int i = 1; (fromY + i*sign(relativeMove.second)) < toY && (((fromY)) + i*sign(relativeMove.second)) > 0; i++)
+				for (int i = 1; (fromY + i*sign(relativeMove.second)) < (toY) && (fromY + i*sign(relativeMove.second)) > 0; i++)
 					if (fields[fromX + i*sign(relativeMove.first)][fromY + i*sign(relativeMove.second)].rank.type != Empty)
 						return NoAction;
 			}
@@ -624,7 +624,7 @@ namespace ChessBoard
 					return NoAction;
 				if (abs(relativeMove.first) != abs(relativeMove.second) && relativeMove.first != 0 && relativeMove.second != 0)
 					return NoAction;
-				for (int i = 1; ((fromX)) + sign(relativeMove.first)*i != ((fromX)) && ((fromY)) + sign(relativeMove.second)*i != (toY); i++)
+				for (int i = 1; fromX + sign(relativeMove.first)*i != toX&&fromY + sign(relativeMove.second)*i != toY; i++)
 					if (fields[fromX + sign(relativeMove.first)*i][fromY + sign(relativeMove.second)*i].rank.type != Empty)
 						return NoAction;
 			}
@@ -669,7 +669,7 @@ namespace ChessBoard
 		{
 			if (relativeMove.first == 0 && fields[toX][toY].rank.type != Empty)
 				return NoAction;
-			if (relativeMove.first != 0 && (fields[toX][toY].rank.type != Empty || fields[toX][toY].rank.isWhite == currentlyMoved.isWhite))
+			if (relativeMove.first != 0 && (fields[toX][toY].rank.type != Empty||fields[toX][toY].rank.isWhite == currentlyMoved.isWhite))
 				return NoAction;
 			if ((currentlyMoved.isWhite && toY != 7) || (!currentlyMoved.isWhite && toY != 0) || currentlyMoved.type != Pawn)
 				return NoAction;
@@ -699,7 +699,7 @@ namespace ChessBoard
 		{
 			if (relativeMove.first == 0 && fields[toX][toY].rank.type != Empty)
 				return NoAction;
-			if (relativeMove.first != 0 && (fields[toX][toY].rank.type != Empty||fields[toX][toY].rank.isWhite == currentlyMoved.isWhite))
+			if (relativeMove.first != 0 && (fields[toX][toY].rank.type != Empty || fields[toX][toY].rank.isWhite == currentlyMoved.isWhite))
 				return NoAction;
 			if ((currentlyMoved.isWhite && toY != 7) || (!currentlyMoved.isWhite && toY != 0) || currentlyMoved.type != Pawn)
 				return NoAction;
@@ -809,25 +809,25 @@ namespace ChessBoard
 			throw std::runtime_error("King Beaten");
 #endif // DEBUG
 
-		switch (int n = (fromX))
+		switch (int n = fromX)
 		{
 		case 0:
-			if ((fromY) == 0)
+			if (fromY == 0)
 				leftWhite = false;
 			else
-				if ((fromY) == 7)
+				if (fromY == 7)
 					leftBlack = false;
 			break;
 		case 7:
-			if ((fromY) == 0)
+			if (fromY == 0)
 				rightWhite = false;
 			else
-				if ((fromY) == 7)
+				if (fromY == 7)
 					rightBlack = false;
 		default:
 			break;
 		}
-		switch (int n = (fromX))
+		switch (int n = toX)
 		{
 		case 0:
 			if (toY == 0)
@@ -854,7 +854,7 @@ namespace ChessBoard
 		else
 			moveCounter--;
 		MoveStack.push(tmp);
-		currentHash = PrevBoardElement::CreateHash(fields);
+		PrevBoardElement::ReHash(currentHash, lastMove, currentlyMoved.isWhite);
 		if (!addBoard())
 		{
 			return Revert;
