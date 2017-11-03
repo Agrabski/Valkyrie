@@ -6,6 +6,7 @@
 #include <thread>
 #include <atomic>
 #include <concurrent_queue.h>
+#include <set>
 #define CUT
 //#define REVERSION
 //#define MAPDEBUG
@@ -282,13 +283,18 @@ JudgeDredd::Valkyrie::KillerInstinct JudgeDredd::Valkyrie::KillerInstinct::opera
 	{
 		vector[i] = vector[i + 2];
 	}
-	vector[vector.size() - 2] = new std::unordered_multimap<unsigned short int, ChessBoard::InternalMove>();
-	vector[vector.size() - 1] = new std::unordered_multimap<unsigned short int, ChessBoard::InternalMove>();
+	vector[vector.size() - 2] = new std::set<ChessBoard::InternalMove>();
+	vector[vector.size() - 1] = new std::set<ChessBoard::InternalMove>();
 	return *this;
+}
+
+bool JudgeDredd::Valkyrie::KillerInstinct::contains(short depth, ChessBoard::InternalMove & move)
+{
+	return vector[depth]->find(move) != vector[depth]->end();
 }
 
 void JudgeDredd::Valkyrie::KillerInstinct::add(short depth, ChessBoard::InternalMove & move)
 {
-	//std::hash<ChessBoard::InternalMove>
+	vector[depth]->insert(move);
 }
 

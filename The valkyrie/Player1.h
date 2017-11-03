@@ -11,6 +11,7 @@
 #include <queue>
 #include <atomic>
 #include <condition_variable>
+#include <set>
 #include "ConcurentQueue.h"
 #define PROGRAM_NAME "valkyrie"
 //#define REVERSION
@@ -70,7 +71,7 @@ private:
 	class KillerInstinct
 	{
 	private:
-		std::vector<std::unordered_multimap<unsigned short int, ChessBoard::InternalMove>*> vector;
+		std::vector<std::set<ChessBoard::InternalMove>*> vector;
 	public:
 		KillerInstinct(short depth);
 		KillerInstinct operator++();
