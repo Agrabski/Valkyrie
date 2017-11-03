@@ -11,6 +11,10 @@
 //#define REVERSION
 //#define MAPDEBUG
 
+#ifdef DEBUG
+extern int cuts = 0;
+#endif // DEBUG
+
 
 
 
@@ -62,6 +66,9 @@ Move JudgeDredd::Valkyrie::makeMove(Move lastMove)
 	best.isNull = true;
 	if (!firstMove)
 	{
+#ifdef KILLER
+		++killer;
+#endif // KILLER
 		ChessBoard::InternalMove tmp=ChessBoard::ConvertFromExternal(lastMove);
 		currBoardState->ChangeState(tmp, 0);
 		for (int i = 0; i < maxThreadCount; i++)
@@ -125,16 +132,10 @@ Move JudgeDredd::Valkyrie::makeMove(Move lastMove)
 	}
 	catch (ChessBoard::THREEFOLD_REPETITON)
 	{
-#ifdef MAPDEBUG
-		std::cout << "Threefold repetition!" << std::endl;
-#endif // MAPDEBUG
 		throw GAME_ENDED(true, false, false);
 	}
 	catch (ChessBoard::FIFTY_MOVES)
 	{
-#ifdef MAPDEBUG
-		std::cout << "Fifty moves!" << std::endl;
-#endif // MAPDEBUG
 		throw GAME_ENDED(true, false, false);
 	}
 
@@ -146,14 +147,8 @@ Move JudgeDredd::Valkyrie::makeMove(Move lastMove)
 
 void JudgeDredd::Valkyrie::Play(ChessBoard::Board &board, short int currentRecursion, short int maxRecursion, ChessEvaluator::ChessEvaluation *value, bool isWhite, ChessEvaluator::ChessEvaluation * alphaPointer, ChessEvaluator::ChessEvaluation * betaPointer, ChessEvaluator::ChessEvaluation alpha, ChessEvaluator::ChessEvaluation beta) const
 {
-#ifdef DEBUG
-	std::cout << currentRecursion << (currentRecursion != maxRecursion ? "----" : "");
-#endif // DEBUG
 	if (currentRecursion == maxRecursion)
 	{
-#ifdef DEBUG
-		std::cout << std::endl;
-#endif // DEBUG
 		if (value != nullptr)
 			*value = evaluator.evaluate(board);
 		return;
@@ -167,6 +162,110 @@ void JudgeDredd::Valkyrie::Play(ChessBoard::Board &board, short int currentRecur
 	bool StealmateFlag = true;
 	ChessBoard::Board::Moves moveIterator(&board);
 
+#ifdef KILLER
+
+
+
+	std::vector<ChessBoard::InternalMove> buffer;
+	if (currentRecursion < 2)
+	{
+		auto iterator = killer.begin(currentRecursion);
+
+		while (killer.fillBuffer(currentRecursion, buffer, iterator))
+		{
+			while (buffer.size() != 0)
+			{
+				if (isWhite)
+				{
+					newbestMove = buffer.back();
+					switch (board.ChangeState(buffer.back()))
+					{
+					case ChessBoard::Success:
+						Play(board, currentRecursion + 1, maxRecursion, &newBest, !isWhite, alphaPointer, betaPointer, alpha, beta);
+						board.revert();
+						StealmateFlag = false;
+						break;
+					case ChessBoard::Revert:
+						newBest.gameHasEnded = true;
+						newBest.isNull = false;
+						newBest.endState = 0;
+						board.revert();
+						break;
+					case ChessBoard::NoAction:
+						break;
+					case ChessBoard::WrongColor:
+						break;
+					}
+					buffer.pop_back();
+					if (alpha < *alphaPointer)
+						alpha = *alphaPointer;
+					if (!betaPointer->isNull && (beta.isNull || beta.gameHasEnded || !betaPointer->gameHasEnded) && (beta.isNull || ((beta.gameHasEnded && !betaPointer->gameHasEnded) || *betaPointer < beta)))
+						beta = *betaPointer;
+
+					if (newbestMove != moveIterator.cend() && !newBest.isNull && (newBest > alpha))
+					{
+						alpha = (Best = newBest);
+						bestMove = newbestMove;
+					}
+
+					if (!beta.isNull && !alpha.isNull&&beta <= alpha)
+					{
+#ifdef DEBUG
+						cuts += 1;
+#endif
+						return;
+					}
+				}
+				else
+				{
+					newbestMove = buffer.back();
+					switch (board.ChangeState(buffer.back()))
+					{
+					case ChessBoard::Success:
+						Play(board, currentRecursion + 1, maxRecursion, &newBest, !isWhite, alphaPointer, betaPointer, alpha, beta);
+						board.revert();
+						StealmateFlag = false;
+						break;
+					case ChessBoard::Revert:
+						newBest.gameHasEnded = true;
+						newBest.isNull = false;
+						newBest.endState = 0;
+						board.revert();
+						break;
+					case ChessBoard::NoAction:
+						break;
+					case ChessBoard::WrongColor:
+						break;
+					}
+					buffer.pop_back();
+
+
+					if (alpha < *alphaPointer)
+						alpha = *alphaPointer;
+					if (!betaPointer->isNull && (beta.isNull || beta.gameHasEnded || !betaPointer->gameHasEnded) && (beta.isNull || ((beta.gameHasEnded && !betaPointer->gameHasEnded) || *betaPointer < beta)))
+						beta = *betaPointer;
+
+
+					if (newbestMove != moveIterator.cend() && !newBest.isNull && (beta.isNull || beta.gameHasEnded || !newBest.gameHasEnded) && (beta.isNull || ((beta.gameHasEnded && !newBest.gameHasEnded) || newBest < beta)))
+					{
+
+						beta = (Best = newBest);
+						bestMove = newbestMove;
+					}
+					if (!beta.isNull && !alpha.isNull&&beta <= alpha)
+					{
+#ifdef DEBUG
+						cuts += 1;
+#endif
+						return;
+					}
+				}
+			}
+		}
+	}
+
+#endif // 
+
 	moveIterator.Reset(isWhite);
 	++(moveIterator);
 #ifdef REVERSION
@@ -178,40 +277,53 @@ void JudgeDredd::Valkyrie::Play(ChessBoard::Board &board, short int currentRecur
 		for (; *moveIterator != moveIterator.cend(); ++moveIterator)
 		{
 			newBest.isNull = true;
-			newbestMove = ChessBoard::InternalMove(*moveIterator);
-			switch (board.ChangeState(*moveIterator))
+#ifdef KILLER
+			if(!killer.contains(currentRecursion,*moveIterator))
+#endif // KILLER			
 			{
-			case ChessBoard::Success:
-				Play(board, currentRecursion + 1, maxRecursion, &newBest, !isWhite, alphaPointer, betaPointer, alpha, beta);
-				board.revert();
-				StealmateFlag = false;
-				break;
-			case ChessBoard::Revert:
-				newBest.gameHasEnded = true;
-				newBest.isNull = false;
-				newBest.endState = 0;
-				board.revert();
-				break;
-			case ChessBoard::NoAction:
-				break;
-			case ChessBoard::WrongColor:
-				throw std::runtime_error("Wrong Color!");
+				newbestMove = ChessBoard::InternalMove(*moveIterator);
+				switch (board.ChangeState(*moveIterator))
+				{
+				case ChessBoard::Success:
+					Play(board, currentRecursion + 1, maxRecursion, &newBest, !isWhite, alphaPointer, betaPointer, alpha, beta);
+					board.revert();
+					StealmateFlag = false;
+					break;
+				case ChessBoard::Revert:
+					newBest.gameHasEnded = true;
+					newBest.isNull = false;
+					newBest.endState = 0;
+					board.revert();
+					break;
+				case ChessBoard::NoAction:
+					break;
+				case ChessBoard::WrongColor:
+					throw std::runtime_error("Wrong Color!");
+				}
+
+				if (alpha < *alphaPointer)
+					alpha = *alphaPointer;
+				if (!betaPointer->isNull && (beta.isNull || beta.gameHasEnded || !betaPointer->gameHasEnded) && (beta.isNull || ((beta.gameHasEnded && !betaPointer->gameHasEnded) || *betaPointer < beta)))
+					beta = *betaPointer;
+
+				if (newbestMove != moveIterator.cend() && !newBest.isNull && (newBest > alpha))
+				{
+					alpha = (Best = newBest);
+					bestMove = newbestMove;
+#ifdef KILLER
+					if (!beta.isNull && !alpha.isNull&&beta <= alpha)
+						killer.add(currentRecursion, bestMove);
+#endif // KILLER
+				}
+
+				if (!beta.isNull && !alpha.isNull&&beta <= alpha)
+				{
+#ifdef DEBUG
+					cuts += 1;
+#endif
+					break;
+				}
 			}
-
-
-			if (alpha < *alphaPointer)
-				alpha = *alphaPointer;
-			if (!betaPointer->isNull && (beta.isNull || beta.gameHasEnded || !betaPointer->gameHasEnded) && (beta.isNull || ((beta.gameHasEnded && !betaPointer->gameHasEnded) || *betaPointer < beta)))
-				beta = *betaPointer;
-
-			if (newbestMove != moveIterator.cend() && !newBest.isNull && (newBest > alpha))
-			{
-				alpha = (Best = newBest);
-				bestMove = newbestMove;
-			}
-
-			if (!beta.isNull && !alpha.isNull&&beta <= alpha)
-				break;
 		}
 	}
 	else
@@ -220,43 +332,57 @@ void JudgeDredd::Valkyrie::Play(ChessBoard::Board &board, short int currentRecur
 		{
 
 			newBest.isNull = true;
-			newbestMove = *moveIterator;
-
-			switch (board.ChangeState(*moveIterator))
+#ifdef KILLER
+			if (!killer.contains(currentRecursion, *moveIterator))
+#endif // KILLER		
 			{
-			case ChessBoard::Success:
-				Play(board, currentRecursion + 1, maxRecursion, &newBest, !isWhite, alphaPointer, betaPointer, alpha, beta);
-				board.revert();
-				StealmateFlag = false;
-				break;
-			case ChessBoard::Revert:
-				newBest.gameHasEnded = true;
-				newBest.isNull = false;
-				newBest.endState = 0;
-				board.revert();
-				break;
-			case ChessBoard::NoAction:
-				break;
-			case ChessBoard::WrongColor:
-				throw std::runtime_error("Wrong Color!");
+				newbestMove = *moveIterator;
+				switch (board.ChangeState(*moveIterator))
+				{
+				case ChessBoard::Success:
+					Play(board, currentRecursion + 1, maxRecursion, &newBest, !isWhite, alphaPointer, betaPointer, alpha, beta);
+					board.revert();
+					StealmateFlag = false;
+					break;
+				case ChessBoard::Revert:
+					newBest.gameHasEnded = true;
+					newBest.isNull = false;
+					newBest.endState = 0;
+					board.revert();
+					break;
+				case ChessBoard::NoAction:
+					break;
+				case ChessBoard::WrongColor:
+					throw std::runtime_error("Wrong Color!");
+				}
+
+				if (alpha < *alphaPointer)
+					alpha = *alphaPointer;
+				if (!betaPointer->isNull && (beta.isNull || beta.gameHasEnded || !betaPointer->gameHasEnded) && (beta.isNull || ((beta.gameHasEnded && !betaPointer->gameHasEnded) || *betaPointer < beta)))
+					beta = *betaPointer;
+
+
+				if (newbestMove != moveIterator.cend() && !newBest.isNull && (beta.isNull || beta.gameHasEnded || !newBest.gameHasEnded) && (beta.isNull || ((beta.gameHasEnded && !newBest.gameHasEnded) || newBest < beta)))
+				{
+
+					beta = (Best = newBest);
+					bestMove = newbestMove;
+#ifdef KILLER
+					if (!beta.isNull && !alpha.isNull&&beta <= alpha)
+						killer.add(currentRecursion, bestMove);
+#endif // KILLER
+				}
+				if (!beta.isNull && !alpha.isNull&&beta <= alpha)
+				{
+#ifdef DEBUG
+					cuts += 1;
+#endif
+					break;
+				}
 			}
-
-			if (alpha < *alphaPointer)
-				alpha = *alphaPointer;
-			if (!betaPointer->isNull && (beta.isNull || beta.gameHasEnded || !betaPointer->gameHasEnded) && (beta.isNull || ((beta.gameHasEnded && !betaPointer->gameHasEnded) || *betaPointer < beta)))
-				beta = *betaPointer;
-
-
-			if (newbestMove != moveIterator.cend() && !newBest.isNull && (beta.isNull || beta.gameHasEnded || !newBest.gameHasEnded) && (beta.isNull || ((beta.gameHasEnded && !newBest.gameHasEnded) || newBest < beta)))
-			{
-
-				beta = (Best = newBest);
-				bestMove = newbestMove;
-			}
-			if (!beta.isNull && !alpha.isNull&&beta <= alpha)
-				break;
 		}
 	}
+
 	if (StealmateFlag)
 	{
 		Best.isNull = false;
@@ -273,6 +399,11 @@ void JudgeDredd::Valkyrie::Play(ChessBoard::Board &board, short int currentRecur
 JudgeDredd::Valkyrie::KillerInstinct::KillerInstinct(short depth)
 {
 	vector.resize(depth);
+	while (depth > 0)
+	{
+		depth--;
+		vector[depth] = new std::set<ChessBoard::InternalMove>();
+	}
 }
 
 void JudgeDredd::Valkyrie::KillerInstinct::operator++()
@@ -285,25 +416,37 @@ void JudgeDredd::Valkyrie::KillerInstinct::operator++()
 	}
 	vector[vector.size() - 2] = new std::set<ChessBoard::InternalMove>();
 	vector[vector.size() - 1] = new std::set<ChessBoard::InternalMove>();
-	return *this;
 }
 
-bool JudgeDredd::Valkyrie::KillerInstinct::contains(short depth, ChessBoard::InternalMove & move)
+bool JudgeDredd::Valkyrie::KillerInstinct::contains(short depth,const ChessBoard::InternalMove & move)
 {
-	return vector[depth]->find(move) != vector[depth]->end();
+	if(depth<vector.size())
+		return vector[depth]->find(move) != vector[depth]->end();
+	return false;
 }
 
 void JudgeDredd::Valkyrie::KillerInstinct::add(short depth, ChessBoard::InternalMove & move)
 {
-	vector[depth]->insert(move);
+	lock.lock();
+	if(depth<vector.size())
+		vector[depth]->insert(move);
+	lock.unlock();
 }
 
-void JudgeDredd::Valkyrie::KillerInstinct::fillBuffer(short depth, std::vector<ChessBoard::InternalMove>& buffer, std::set<ChessBoard::InternalMove>::iterator & from)
+bool JudgeDredd::Valkyrie::KillerInstinct::fillBuffer(short depth, std::vector<ChessBoard::InternalMove>& buffer, std::set<ChessBoard::InternalMove>::iterator & from)
 {
+	if (from == vector[depth]->end())
+		return false;
 	lock.lock();
 	for (int i = 0; i < 5 && from != vector[depth]->end(); i++, from++)
 		buffer.push_back(*from);
 	lock.unlock();
+	return true;
+}
+
+std::set<ChessBoard::InternalMove>::iterator JudgeDredd::Valkyrie::KillerInstinct::begin(short depth)
+{
+	return vector[depth]->begin();
 }
 
 

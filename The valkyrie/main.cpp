@@ -310,9 +310,10 @@ void tester3()
 void tester4(int times, char* name)
 {
 	Move move, buffer;
-	std::fstream stream;
+	std::fstream stream,cutsStream;
 	JudgeDredd::Valkyrie *player1, *player2;
 	stream.open("map.txt", 'w');
+	cutsStream.open("cuts.txt", 'w');
 	time_t timeElapsed[6] = { 0 ,0,0,0,0,0};
 	int moveCount[6] = {0,0,0,0,0,0};
 	while (times)
@@ -337,6 +338,11 @@ void tester4(int times, char* name)
 			catch (GAME_ENDED err)
 			{
 			}
+#ifdef DEBUG
+			cutsStream << i << std::endl << cuts << std::endl;
+			std::cout << cuts << std::endl;
+			cuts = 0;
+#endif
 			timeElapsed[i - 2] += (time(0) - t1);
 			std::cout << "RECURSION DEPTH:" << i << "-" << (double)timeElapsed[i - 2] / (double)moveCount[i - 2] << std::endl;
 			delete player1;

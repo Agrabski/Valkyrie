@@ -510,7 +510,6 @@ namespace ChessBoard
 			currentlyMoved = fields[fromX][fromY].rank;
 			if (currentlyMoved.isWhite != nextMoveIsWhite)
 			{
-				std::cerr << "Wrong color!";
 				return WrongColor;
 			}
 			relativeMove = { toX - fromX,toY - fromY };

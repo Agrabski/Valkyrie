@@ -14,8 +14,15 @@
 #include <set>
 #include "ConcurentQueue.h"
 #define PROGRAM_NAME "valkyrie"
+#define DEBUG
+//#define KILLER
 //#define REVERSION
 #pragma once
+
+#ifdef DEBUG
+	extern int cuts;
+#endif // DEBUG
+
 
 
 class JudgeDredd::Valkyrie
@@ -27,14 +34,29 @@ public:
 	Valkyrie(bool amIwhite, ChessEvaluator::ChessEvaluator evaluator = { .1f,.1f,.1f,.1f,.1f }, int recursion = 5);
 	~Valkyrie();
 	struct Move makeMove(struct Move lastMove);
+private:
+
+
+	class KillerInstinct
+	{
+	private:
+		std::mutex lock;
+		std::vector<std::set<ChessBoard::InternalMove>*> vector;
+	public:
+		KillerInstinct(short depth);
+		void operator++();
+		bool contains(short depth,const ChessBoard::InternalMove&move);
+		void add(short depth, ChessBoard::InternalMove&move);
+		bool fillBuffer(short depth, std::vector<ChessBoard::InternalMove>&buffer, std::set<ChessBoard::InternalMove>::iterator&from);
+		std::set<ChessBoard::InternalMove>::iterator begin(short depth);
+	};
+#ifdef KILLER
+	KillerInstinct &killer=KillerInstinct(2);
+#endif // KILLER
+
 	class Player
 	{
 	public:
-		//Valkyrie *ref;
-		//Player(Valkyrie * ref)
-		//{
-		//	this->ref = ref;
-		//}
 		void operator()(Valkyrie * ref, ChessBoard::Board *board, short int currentRecursion, short int maxRecursion, bool isWhite, ChessEvaluator::ChessEvaluation * alpha, ChessEvaluator::ChessEvaluation * beta, std::atomic<int>*counter, ConcurrentQueue<ChessBoard::InternalMove> *toEvaluate, Concurrency::concurrent_queue<std::pair<ChessBoard::InternalMove, ChessEvaluator::ChessEvaluation>> *evaluated)
 		{
 			ChessBoard::InternalMove buffer;
@@ -66,19 +88,6 @@ public:
 					*counter -= 1;
 			}
 		}
-	};
-private:
-	class KillerInstinct
-	{
-	private:
-		std::mutex lock;
-		std::vector<std::set<ChessBoard::InternalMove>*> vector;
-	public:
-		KillerInstinct(short depth);
-		void operator++();
-		bool contains(short depth, ChessBoard::InternalMove&move);
-		void add(short depth, ChessBoard::InternalMove&move);
-		void fillBuffer(short depth, std::vector<ChessBoard::InternalMove>&buffer, std::set<ChessBoard::InternalMove>::iterator&from);
 	};
 
 	std::vector<std::thread> threadVector;
