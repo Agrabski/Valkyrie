@@ -71,12 +71,14 @@ private:
 	class KillerInstinct
 	{
 	private:
+		std::mutex lock;
 		std::vector<std::set<ChessBoard::InternalMove>*> vector;
 	public:
 		KillerInstinct(short depth);
-		KillerInstinct operator++();
+		void operator++();
 		bool contains(short depth, ChessBoard::InternalMove&move);
 		void add(short depth, ChessBoard::InternalMove&move);
+		void fillBuffer(short depth, std::vector<ChessBoard::InternalMove>&buffer, std::set<ChessBoard::InternalMove>::iterator&from);
 	};
 
 	std::vector<std::thread> threadVector;

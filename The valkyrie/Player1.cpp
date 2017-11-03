@@ -275,7 +275,7 @@ JudgeDredd::Valkyrie::KillerInstinct::KillerInstinct(short depth)
 	vector.resize(depth);
 }
 
-JudgeDredd::Valkyrie::KillerInstinct JudgeDredd::Valkyrie::KillerInstinct::operator++()
+void JudgeDredd::Valkyrie::KillerInstinct::operator++()
 {
 	delete vector[0];
 	delete vector[1];
@@ -297,4 +297,13 @@ void JudgeDredd::Valkyrie::KillerInstinct::add(short depth, ChessBoard::Internal
 {
 	vector[depth]->insert(move);
 }
+
+void JudgeDredd::Valkyrie::KillerInstinct::fillBuffer(short depth, std::vector<ChessBoard::InternalMove>& buffer, std::set<ChessBoard::InternalMove>::iterator & from)
+{
+	lock.lock();
+	for (int i = 0; i < 5 && from != vector[depth]->end(); i++, from++)
+		buffer.push_back(*from);
+	lock.unlock();
+}
+
 
