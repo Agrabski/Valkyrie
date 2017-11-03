@@ -6,6 +6,7 @@
 #include <thread>
 #include <atomic>
 #include <concurrent_queue.h>
+#include <set>
 #define CUT
 //#define REVERSION
 //#define MAPDEBUG
@@ -15,7 +16,7 @@
 
 JudgeDredd::Valkyrie::Valkyrie(bool amIWhite)
 {
-	maxThreadCount = std::thread::hardware_concurrency();
+	maxThreadCount =  std::thread::hardware_concurrency();
 	boardVector = new ChessBoard::Board[maxThreadCount];
 	threadVector = std::vector<std::thread>();
 	threadVector.reserve(maxThreadCount);
@@ -61,7 +62,7 @@ Move JudgeDredd::Valkyrie::makeMove(Move lastMove)
 	best.isNull = true;
 	if (!firstMove)
 	{
-		ChessBoard::InternalMove tmp(lastMove);
+		ChessBoard::InternalMove tmp=ChessBoard::ConvertFromExternal(lastMove);
 		currBoardState->ChangeState(tmp, 0);
 		for (int i = 0; i < maxThreadCount; i++)
 		{
@@ -138,7 +139,7 @@ Move JudgeDredd::Valkyrie::makeMove(Move lastMove)
 	}
 
 
-	Move tmp = bestMove.ConvertToExternal(amIWhite);
+	Move tmp = ChessBoard::convertToExternal(bestMove, amIWhite);
 
 	return tmp;
 }
@@ -203,7 +204,7 @@ void JudgeDredd::Valkyrie::Play(ChessBoard::Board &board, short int currentRecur
 			if (!betaPointer->isNull && (beta.isNull || beta.gameHasEnded || !betaPointer->gameHasEnded) && (beta.isNull || ((beta.gameHasEnded && !betaPointer->gameHasEnded) || *betaPointer < beta)))
 				beta = *betaPointer;
 
-			if (newbestMove.from != std::pair<short, short>(8, 0) && !newBest.isNull && (newBest > alpha))
+			if (newbestMove != moveIterator.cend() && !newBest.isNull && (newBest > alpha))
 			{
 				alpha = (Best = newBest);
 				bestMove = newbestMove;
@@ -246,7 +247,7 @@ void JudgeDredd::Valkyrie::Play(ChessBoard::Board &board, short int currentRecur
 				beta = *betaPointer;
 
 
-			if (newbestMove.from != std::pair<short, short>(8, 0) && !newBest.isNull && (beta.isNull || beta.gameHasEnded || !newBest.gameHasEnded) && (beta.isNull || ((beta.gameHasEnded && !newBest.gameHasEnded) || newBest < beta)))
+			if (newbestMove != moveIterator.cend() && !newBest.isNull && (beta.isNull || beta.gameHasEnded || !newBest.gameHasEnded) && (beta.isNull || ((beta.gameHasEnded && !newBest.gameHasEnded) || newBest < beta)))
 			{
 
 				beta = (Best = newBest);
@@ -282,32 +283,18 @@ JudgeDredd::Valkyrie::KillerInstinct JudgeDredd::Valkyrie::KillerInstinct::opera
 	{
 		vector[i] = vector[i + 2];
 	}
-	vector[vector.size() - 2] = new std::unordered_multimap<unsigned short int, ChessBoard::InternalMove>();
-	vector[vector.size() - 1] = new std::unordered_multimap<unsigned short int, ChessBoard::InternalMove>();
-
-}
-
-unsigned short int JudgeDredd::Valkyrie::KillerInstinct::hashMove(ChessBoard::InternalMove &move)
-{
-	unsigned short int result = 0;
-	result ^= move.from.first << 13;
-	result ^= move.from.first << 10;
-	result ^= move.to.first << 7;
-	result ^= move.to.second << 4;
-	result ^= move.movetype;
-	return result;
+	vector[vector.size() - 2] = new std::set<ChessBoard::InternalMove>();
+	vector[vector.size() - 1] = new std::set<ChessBoard::InternalMove>();
+	return *this;
 }
 
 bool JudgeDredd::Valkyrie::KillerInstinct::contains(short depth, ChessBoard::InternalMove & move)
 {
-	auto tmp = vector[depth]->equal_range(hashMove(move));
-	while (tmp.first != tmp.second)
-		if (tmp.first->second == move)
-			return true;
-	return false;
+	return vector[depth]->find(move) != vector[depth]->end();
 }
 
 void JudgeDredd::Valkyrie::KillerInstinct::add(short depth, ChessBoard::InternalMove & move)
 {
-	vector[depth]->emplace(hashMove(move), move);
+	vector[depth]->insert(move);
 }
+

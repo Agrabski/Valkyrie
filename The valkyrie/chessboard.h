@@ -19,23 +19,23 @@ namespace ChessBoard
 	enum MoveTypes { Standard, EnPassan, PromotionQueen, PromotionTower, PromotionKnight, PromotionBishop, RochadeLeft, RochadeRight };
 	enum ErrorTypes {Success, NoAction, Revert,WrongColor};
 
-	struct InternalMove
-	{
-		InternalMove(Move toConvert);
-		InternalMove();
-		InternalMove(std::pair<short, short> from, std::pair<short, short> to, MoveTypes type)
-		{
-			this->from = from;
-			this->to = to;
-			this->movetype = type;
-		}
-		std::pair<short, short> from;
-		std::pair<short, short> to;
-		MoveTypes movetype;
-		Move ConvertToExternal(bool amIWhite);
-		bool operator!=(const InternalMove& other) const;
-		bool operator==(const InternalMove& other) const;
-	};
+
+
+	typedef unsigned int InternalMove;
+	const InternalMove TypeMask = 7;
+	const int fromXShift=13;
+	const int fromYShift=10;
+	const int toXShift=7;
+	const int toYShift=4;
+
+	const InternalMove fromXMask = 7 << fromXShift;
+	const InternalMove fromYMask = 7 << fromYShift;
+	const InternalMove toXMask = 7 << toXShift;
+	const InternalMove toYMask = 7 << toYShift;
+	InternalMove MakeMove(std::pair<short, short>, std::pair<short, short>, short);
+	Move convertToExternal(InternalMove,bool);
+	InternalMove ConvertFromExternal(Move);
+
 
 	int sign(int x);
 
