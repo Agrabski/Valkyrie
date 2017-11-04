@@ -17,6 +17,7 @@
 #define DEBUG
 //#define KILLER
 //#define REVERSION
+#define KILLER_DEPTH 2
 #pragma once
 
 #ifdef DEBUG
@@ -51,7 +52,7 @@ private:
 		std::set<ChessBoard::InternalMove>::iterator begin(short depth);
 	};
 #ifdef KILLER
-	KillerInstinct &killer=KillerInstinct(2);
+	KillerInstinct &killer=KillerInstinct(KILLER_DEPTH);
 #endif // KILLER
 
 	class Player

@@ -167,7 +167,7 @@ void JudgeDredd::Valkyrie::Play(ChessBoard::Board &board, short int currentRecur
 
 
 	std::vector<ChessBoard::InternalMove> buffer;
-	if (currentRecursion < 2)
+	if (currentRecursion < KILLER_DEPTH)
 	{
 		auto iterator = killer.begin(currentRecursion);
 
